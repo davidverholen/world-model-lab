@@ -11,7 +11,8 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [value-equivalent-planning](concepts/value-equivalent-planning.md) — MuZero/TD-MPC2: model only what decisions need (draft)
 - [environment-ladder](concepts/environment-ladder.md) — our staged env progression with exit criteria (current)
 - [latent-collapse](concepts/latent-collapse.md) — the JEPA failure mode, fixes table, measurement pitfalls (draft)
-- [compute-strategy](concepts/compute-strategy.md) — predicted local-vs-desktop-vs-rented GPU trade-offs per rung (draft, unvalidated)
+- [compute-strategy](concepts/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
+- [agent-architecture](concepts/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
 
 ## Papers
 

@@ -160,3 +160,12 @@ Log timestamps (12:04 launch -> 12:37-12:39 per-seed finish): 3 parallel seeds i
 35 min wall, contention nil. Estimate was 3.5x pessimistic (MPC collection per-step
 cost on the 5070 Ti overestimated). exp 0009 page + compute-strategy corrected;
 rung-2 sweeps are coffee-break scale.
+
+## [2026-06-12] curation + scout | agent-architecture page; plasticity-loss literature found
+
+New concept page: agent-architecture — our 4 optimization layers (CEM planning /
+belief-model / Adam joint training / data flywheel) as a mermaid diagram with a
+per-layer failure->experiment diagnosis table. Scout (Dave's prompt): our retention
+problem IS the literature's "plasticity loss / primacy bias / churn" — 6 sources
+queued (Nikishin resets = top exp-0011 candidate: reset last layers, keep replay).
+QUEUE gained a themed retention section.

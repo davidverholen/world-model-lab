@@ -6,6 +6,20 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 
 ## High priority (directly on our experiment path)
 
+### Retention / plasticity / interference (exp 0009–0011 thread; found 2026-06-12, ids from search results)
+
+- [ ] arxiv:2205.07802 The Primacy Bias in Deep RL (Nikishin et al.) — periodic
+      last-layer resets + keep replay; code github.com/evgenii-nikishin/rl_with_resets.
+      **Most directly applicable to our 60%→0% crashes.**
+- [ ] arxiv:2411.04832 Plasticity Loss in Deep RL: A Survey (2025) — map of the field
+- [ ] arxiv:2303.07507 Loss of Plasticity in Continual Deep RL (Abbas et al.)
+- [ ] arxiv:2506.00592 Mitigating Plasticity Loss by Reducing Churn (ICML 2025) —
+      NTK-rank view; churn reduction
+- [ ] arxiv:2306.13812 Loss of Plasticity in Deep Continual Learning (Sutton lab;
+      continual backprop / Nature 2024 version)
+- [ ] arxiv:2307.04887 Measuring and Mitigating Interference in RL — diagnosis metrics
+
+
 - [ ] arxiv:2301.08243 I-JEPA — read fully; foundation for our first latent predictor
 - [ ] arxiv:2301.04104 DreamerV3 — read fully; the reference baseline algorithm
 - [ ] arxiv:1803.10122 World Models (Ha & Schmidhuber) + https://worldmodels.github.io/
