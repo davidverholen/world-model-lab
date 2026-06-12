@@ -21,7 +21,7 @@ and YouTube corpora rot; retention is availability insurance (Dave, 2026-06-12).
 | Contractor data index JSONs (v6–v10 + 4 BASALT tasks) | T1 | retained → `vpt/indexes/` | maps of the full datasets |
 | Repo snapshot (code, MIT) | T1 | retained → `vpt/repo/` | NOTE: pinned torch 1.9 — porting needed, architecture docs in code |
 | Contractor demonstrations (videos+actions+checkpoints) | T2 | NOT retained (~150 GB per BASALT task; v6–v10 sets large) | curate early-game subsets at rung-5b entry; desktop has 1.28 TB free |
-| 70k h YouTube corpus | — | **never released** (recipe only) | the IDM + own scraping reproduces the approach if ever needed |
+| 70k h YouTube corpus | — | **never released** (recipe only) | re-scrape ruled out 2026-06-12: 7–14 TB, ~a year at single-IP rates, ToS breach — and unnecessary (we retain the weights it produced). If raw video ever needed: contractor data first, small curated sample second (conscious ToS-gray decision), generated video (arch 2b) as the scale path |
 
 ## Other (register + verify at rung-5b entry)
 
