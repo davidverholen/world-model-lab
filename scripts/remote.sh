@@ -2,6 +2,7 @@
 # Dispatch world-model runs to the GPU desktop over SSH (Tailscale).
 # Design: knowledge/decisions/0004-remote-dispatch.md. Windows-side setup: docs/REMOTE.md.
 #
+#   scripts/remote.sh doctor           show resolved config, connectivity, remote state
 #   scripts/remote.sh setup            one-time: bare repo + clone + uv sync on the desktop
 #   scripts/remote.sh gpu              nvidia-smi on the desktop
 #   scripts/remote.sh run <cmd...>     push HEAD, sync remote checkout, run command there
@@ -27,6 +28,21 @@ cmd="${1:-help}"
 shift || true
 
 case "$cmd" in
+doctor)
+  echo "config resolution (env > .env.remote > defaults):"
+  echo "  WM_REMOTE     = $REMOTE"
+  echo "  WM_REMOTE_DIR = $REMOTE_DIR"
+  echo "ssh resolves '$REMOTE' to:"
+  ssh -G "$REMOTE" 2>/dev/null | awk '/^(hostname|user|port|identityfile) /{print "  "$0}'
+  echo "connectivity:"
+  if out=$(ssh -o ConnectTimeout=5 -o BatchMode=yes "$REMOTE" \
+    "echo \"  shell: \$0 on \$(uname -s)\" && git -C $REMOTE_DIR rev-parse --short HEAD 2>/dev/null | sed 's/^/  remote checkout @ /' && nvidia-smi --query-gpu=name,memory.total,temperature.gpu --format=csv,noheader | sed 's/^/  gpu: /'" 2>&1); then
+    echo "$out"
+    echo "  local HEAD       @ $(git rev-parse --short HEAD)$([ -n "$(git status --porcelain)" ] && echo ' (dirty — run would refuse)')"
+  else
+    echo "  UNREACHABLE: $out"
+  fi
+  ;;
 setup)
   # Idempotent: the entire remote state (bare repo + checkout + venv) is a cache
   # owned by this script — delete it on the desktop anytime and re-run setup.

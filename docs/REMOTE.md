@@ -24,6 +24,20 @@ cp .env.remote.example .env.remote   # then edit
 Network: anything SSH-reachable works — same LAN, Tailscale/VPN, port forward.
 (Tailscale is convenient: stable hostname, works away from home.)
 
+### How connection resolution works (deliberately layered)
+
+```
+.env.remote        WM_REMOTE=wm-desktop          <- a NAME only (gitignored)
+~/.ssh/config      Host wm-desktop               <- the actual identity, personal,
+                     HostName <ip-or-hostname>      never inside any repo
+                     User <windows-username>
+```
+
+ssh, scp, and git all resolve the alias identically, so the SSH config is the
+single source of connection truth (host, user, key, port, jump hosts). Run
+`scripts/remote.sh doctor` anytime to see the resolved config, connectivity,
+remote checkout commit, and GPU state.
+
 ## One-time remote setup (Windows, PowerShell **as Administrator**)
 
 ```powershell
