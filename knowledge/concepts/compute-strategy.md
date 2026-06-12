@@ -76,7 +76,14 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   (autonomous-mode guardrail).
 - Single long runs: 5090 ≈ 2–2.5× the 5070 Ti (~$3/run) — nice, not strategic.
 - If the Python env loop becomes the wall: Craftax (JAX, env-on-GPU, ~100×)
-  is the radical option — would reopen ADR 0001 (Dave's call).
+  is the radical option — would reopen ADR 0001 (Dave's call). Decision shape
+  pre-agreed (2026-06-12): NO framework-abstraction layer (JAX's value — fused
+  jit/vmap/scan incl. the env — is exactly what abstractions can't express;
+  meta-framework maintenance would displace research). Instead: hybrid dlpack
+  spike first; if decisive, a one-way `craftax/` sub-project port of the rung-3
+  agent (baselines/ppo pattern), parity via golden tests against the PyTorch
+  reference, the KB agent-architecture page as the framework-neutral spec.
+  JEPA-side research stays PyTorch.
 
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
