@@ -63,6 +63,7 @@ def train(
     lam: float,
     device: str,
     success_frac: float = 0.0,
+    ema: tuple[list, list, float] | None = None,  # (online_modules, ema_modules, decay)
 ) -> None:
     no_act = dynamics.no_action
     for step in range(updates):
@@ -112,6 +113,12 @@ def train(
             [p for g in opt.param_groups for p in g["params"]], max_norm=10.0
         )
         opt.step()
+        if ema is not None:
+            online, shadow, decay = ema
+            with torch.no_grad():
+                for m_on, m_sh in zip(online, shadow, strict=True):
+                    for p_on, p_sh in zip(m_on.parameters(), m_sh.parameters(), strict=True):
+                        p_sh.mul_(decay).add_(p_on, alpha=1.0 - decay)
         if (step + 1) % 100 == 0:
             print(
                 f"  update {step + 1}: pred_loss={pred_loss.item():.5f} "
@@ -190,6 +197,21 @@ def main() -> None:
         help="round 0 keeps collecting (up to 2x round0-steps) until this many "
         "reward events exist — the value head can't ignite from one example",
     )
+    parser.add_argument(
+        "--later-lr-scale",
+        type=float,
+        default=1.0,
+        help="multiply lr by this after round 0 (exp 0010 retention: gentler updates "
+        "once competence exists); 1.0 disables",
+    )
+    parser.add_argument(
+        "--ema-decay",
+        type=float,
+        default=0.0,
+        help="EMA decay for a shadow copy of all modules; acting/eval use the EMA "
+        "(exp 0010 retention: the agent shouldn't act with freshly-perturbed "
+        "weights); 0 disables",
+    )
     parser.add_argument("--gamma", type=float, default=0.98, help="return discount")
     parser.add_argument("--eval-episodes", type=int, default=10, help="per-round eval")
     parser.add_argument("--seed", type=int, default=0)
@@ -209,6 +231,13 @@ def main() -> None:
     modules = [encoder, dynamics, reward_head, value_head]
     opt = torch.optim.Adam([p for m in modules for p in m.parameters()], lr=3e-4)
 
+    # retention (exp 0010): the ACTING agent (collection/eval/checkpoints) can use an
+    # EMA shadow of the weights so fresh gradient noise never drives behavior directly
+    ema_modules = None
+    if args.ema_decay > 0:
+        ema_modules = [copy.deepcopy(m) for m in modules]
+    act_enc, act_dyn, act_rew, act_val = ema_modules or modules
+
     # MPC rounds collect fewer steps (planning per env step is ~100x slower than
     # random) with a deliberately cheap planner — the data only needs goal bias.
     round0_steps = args.round0_steps or args.steps_per_round
@@ -225,12 +254,12 @@ def main() -> None:
             kind, steps = "random", round0_steps
         else:
             agent = RecurrentMPCAgent(
-                encoder,
-                dynamics,
-                reward_head,
+                act_enc,
+                act_dyn,
+                act_rew,
                 num_actions,
                 device,
-                value_head=value_head,
+                value_head=act_val,
                 epsilon=args.epsilon,
                 horizon=12,
                 candidates=128,
@@ -268,14 +297,19 @@ def main() -> None:
             args.sigreg_weight,
             device,
             success_frac=args.success_frac,
+            ema=(modules, ema_modules, args.ema_decay) if ema_modules else None,
         )
+        if rnd == 0 and args.later_lr_scale != 1.0:
+            for group in opt.param_groups:
+                group["lr"] *= args.later_lr_scale
+            print(f"  lr scaled to {opt.param_groups[0]['lr']:.1e} for later rounds")
         # lesson from exp 0005: evaluate and snapshot EVERY round — round N+1
         # training can degrade the model, and the best agent must not be lost
         rate = evaluate(
-            encoder,
-            dynamics,
-            reward_head,
-            value_head,
+            act_enc,
+            act_dyn,
+            act_rew,
+            act_val,
             args.env_id,
             args.eval_episodes,
             device,
@@ -287,10 +321,10 @@ def main() -> None:
                 "rate": rate,
                 "round": rnd,
                 "state": {
-                    "encoder": copy.deepcopy(encoder.state_dict()),
-                    "dynamics": copy.deepcopy(dynamics.state_dict()),
-                    "reward_head": copy.deepcopy(reward_head.state_dict()),
-                    "value_head": copy.deepcopy(value_head.state_dict()),
+                    "encoder": copy.deepcopy(act_enc.state_dict()),
+                    "dynamics": copy.deepcopy(act_dyn.state_dict()),
+                    "reward_head": copy.deepcopy(act_rew.state_dict()),
+                    "value_head": copy.deepcopy(act_val.state_dict()),
                 },
             }
 
