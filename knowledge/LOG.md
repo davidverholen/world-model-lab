@@ -348,3 +348,13 @@ Symmetry noted with the KB's own verified-flag epistemics.
 Text-installed beliefs -> imagination-generated beliefs -> active validation, all on
 the trust-gate substrate. Near-term echo: hypothesis-driven exploration as the
 principled ignition fix (exp 0008 thread); Plan2Explore queued.
+
+## [2026-06-12] scout | language/imagination design space swept (4 searches, 14 queued)
+
+Solved-vs-open verdict per thread: binding-by-conditioning substantially explored
+(2511.22904 reads dynamics descriptions — read before Messenger work); generated-
+video-as-experience active at platform level (survey 2603.28489); synthetic-
+transition reweighting mature BUT all generator-self-confidence based — Dave's
+reality-corroborated cross-source gate stays novel; uncertainty-driven exploration
+covered (Plan2Explore, DreamerV3-XP) — compositional hypothesis generation beyond
+state-novelty stays open. language-grounding page to absorb refs at ingest time.

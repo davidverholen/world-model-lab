@@ -125,3 +125,29 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] Plan2Explore (Sekar et al. 2020) — world-model-uncertainty-driven exploration;
       ancestor of the self-generated-hypotheses horizon + candidate ignition fix
       (id to verify)
+
+## Language/imagination design space (scouted 2026-06-12 after the grounding discussion; ids url-verified)
+
+### Binding/installation (text -> world model)
+- [ ] arxiv:2511.22904 Language-conditioned WM improves policy generalization by
+      reading ENVIRONMENTAL DESCRIPTIONS (Nov 2025) — closest to our binding goal
+      (dynamics text, not task instructions); read FIRST for the Messenger step
+- [ ] arxiv:2308.01399 Dynalang (id now confirmed) — language as predicted modality
+- [ ] arxiv:2407.13466 LIMT · arxiv:2509.21797 MoWM · arxiv:2604.02097 LatentUM —
+      conditioning variants
+### Generated video as experience (architecture 2b)
+- [ ] arxiv:2603.28489 Video Generation Models as World Models survey (2026) —
+      map of the area; + awesome-list github.com/ziqihuangg/Awesome-From-Video-Generation-to-World-Model
+- [ ] arxiv:2509.23958 RL with Inverse Rewards for WM post-training
+### Trust gate (synthetic-experience weighting)
+- [ ] arxiv:2104.04174 Learning to Reweight Imaginary Transitions — the ancestor
+- [ ] arxiv:2506.09270 Uncertainty Prioritized Experience Replay (RLC 2025)
+- [ ] arxiv:2410.18082 Prioritized Generative Replay · arxiv:2602.14351 WIMLE
+      — NOTE the gap that keeps 2b novel: all weight by the GENERATOR's
+      self-confidence; reality-corroborated cross-source priors (Dave's gate)
+      appear uncovered
+### Self-generated hypotheses / directed exploration
+- [ ] arxiv:2005.05960 Plan2Explore (id confirmed) — ensemble-disagreement
+      information gain; candidate ignition fix at rung-2 scale
+- [ ] arxiv:2510.21418 DreamerV3-XP — uncertainty-driven exploration + prioritized
+      replay in current Dreamer; nearest modern baseline
