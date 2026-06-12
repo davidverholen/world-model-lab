@@ -117,3 +117,14 @@ reviewer agent (opus, research-code charter — first pass verified 0006 paths
 correct + caught sweep-scrapability gap), /sweep skill + scripts/sweep.py,
 scripts/publish_check.sh wired into /milestone verify. Next: PPO baseline
 (closes rung 2), then Crafter prep.
+
+## [2026-06-12] curation | milestone: PPO baseline wins on DoorKey-5x5 — rung 2 stays open (exp 0007)
+
+Pre-registered counter-outcome occurred: sb3 PPO (CnnPolicy, 8 envs, no tricks)
+hits 100% on all 3 seeds by 80k steps, ahead of our agent at every budget; our
+agent burns 60k steps on random collection before the flywheel spins. Honest
+verdict recorded; rung-2 sample-efficiency criterion NOT met on this env.
+Escalation pre-registered in exp page: DoorKey-6x6/8x8 + earlier/smaller
+collection rounds (exp 0008); ladder-criterion split proposed for Dave's
+sign-off (owner: human). Infra: baselines/ppo as isolated uv project (sb3 caps
+gymnasium <1.3); first /sweep dogfood produced the results table directly.

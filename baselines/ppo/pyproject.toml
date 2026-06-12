@@ -1,0 +1,17 @@
+# Isolated baseline project: stable-baselines3 caps gymnasium <1.3 while the main
+# project needs >=1.3 — so PPO lives in its own resolution universe. Versions used
+# are recorded in the experiment page (knowledge/experiments/0007-*).
+[project]
+name = "wm-baseline-ppo"
+version = "0.1.0"
+description = "Model-free PPO baseline for world-model sample-efficiency comparisons"
+requires-python = ">=3.12"
+dependencies = [
+    "stable-baselines3>=2.7",
+    "minigrid>=2.3",
+    "gymnasium>=1.0,<1.3",
+    "torch>=2.10",
+]
+
+[tool.uv]
+package = false

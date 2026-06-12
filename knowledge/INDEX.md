@@ -44,6 +44,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0004-mpc-agent-empty8x8](experiments/0004-mpc-agent-empty8x8.md) — first acting agent: latent CEM-MPC 19/20 vs random 3/20; multi-step training + reward calibration lessons (done)
 - [0005-doorkey-memory](experiments/0005-doorkey-memory.md) — negative: belief-MPC 0/20 on DoorKey; but collection flywheel showed 8.5%→14.3%, and pure MPC's horizon limit identified → value head next (done)
 - [0006-value-head-doorkey](experiments/0006-value-head-doorkey.md) — DoorKey solved: value head + flywheel → 90%/75% vs 8% random; eval-hygiene incident (tile-size obs mismatch) resolved + guarded (done)
+- [0007-ppo-baseline](experiments/0007-ppo-baseline.md) — honest loss: PPO 100% @ 80k on DoorKey-5x5, ahead at every budget; rung 2 stays open → escalate env + faster flywheel (done)
 
 ## Wanted pages (linked but not yet written)
 

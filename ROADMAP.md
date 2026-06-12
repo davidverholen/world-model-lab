@@ -18,6 +18,8 @@ ADR [0003](knowledge/decisions/0003-environment-ladder.md)).
 - [x] Partial observability (DoorKey): GRU belief memory + value head solves
       DoorKey-5x5 at ~80% vs 8% random (exp 0006, trained on the remote GPU)
 - [ ] Beat a model-free baseline (PPO) on sample efficiency → closes rung 2
+      (exp 0007: PPO wins on DoorKey-5x5 @100k — escalate to DoorKey-6x6/8x8 and
+      spin the flywheel earlier; exp 0008)
 
 ## Phase 3 — Crafter, then Atari100k
 
