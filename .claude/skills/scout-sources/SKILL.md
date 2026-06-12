@@ -33,14 +33,16 @@ Goal: find and *verify existence of* new material; ingestion is a separate step
 When a blocking problem needs exhaustive prior-art search (the research-loop
 horizon check), layer these:
 1. WebSearch — recency + news (what we do by default).
-2. **Semantic Scholar API** — the semantic engine + citation traversal:
-   `api.semanticscholar.org/graph/v1/paper/search?query=...` and
-   `/paper/arXiv:<id>/citations` / `/references`. Anonymous tier is congested;
-   use the free API key (env `S2_API_KEY`, header `x-api-key`) — apply at
-   semanticscholar.org/product/api.
-3. **OpenAlex** — metadata + citation graph, generous anonymous limits
-   (`api.openalex.org/works?search=...&mailto=...`); weak semantic ranking,
-   great for walking cited-by chains programmatically.
+2. **OpenAlex** (primary programmatic; truly open, no key, no affiliation):
+   `api.openalex.org/works?search=...&mailto=...` for metadata;
+   `?filter=cites:W...` / `cited_by` for citation-graph walks. Weak semantic
+   ranking — compensate by walking citations of a known-good anchor paper
+   instead of keyword-searching cold.
+3. **Semantic Scholar API, anonymous best-effort** — better semantic ranking +
+   `/paper/arXiv:<id>/citations|references`; shared anonymous pool 429s under
+   load → retry off-peak with backoff, treat as bonus not dependency. (API key
+   requires institutional affiliation — gate rejected independent research,
+   2026-06-12; re-check occasionally, policies change.)
 4. Google Scholar — manual only (no API; ToS); best human tool for cited-by
    exploration of a key paper.
 

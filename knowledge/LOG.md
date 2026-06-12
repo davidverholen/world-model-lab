@@ -261,3 +261,11 @@ tier congested; free key recommended -> env S2_API_KEY); OpenAlex = instant but
 weak ranking, good citation graphs; Google Scholar = manual-only (no API/ToS).
 Local embeddings index DEFERRED with trigger: build it over OUR corpus (pages +
 PDF archive) at ~150 pages, not over external papers (duplicates S2).
+
+## [2026-06-12] curation | deep-search stack re-ranked: OpenAlex primary (S2 key gated)
+
+S2 API-key form requires institutional affiliation + rejected proton.me —
+independent research not in their concept. Re-ranked: OpenAlex (truly open) as
+programmatic primary with anchor-paper citation-walking to compensate ranking;
+S2 anonymous as best-effort bonus. Project principle reinforced: the KB/process
+depends on no gated service (arXiv, ar5iv, OpenAlex all open).
