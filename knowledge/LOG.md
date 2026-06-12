@@ -358,3 +358,10 @@ transition reweighting mature BUT all generator-self-confidence based — Dave's
 reality-corroborated cross-source gate stays novel; uncertainty-driven exploration
 covered (Plan2Explore, DreamerV3-XP) — compositional hypothesis generation beyond
 state-novelty stays open. language-grounding page to absorb refs at ingest time.
+
+## [2026-06-12] curation | paper-readiness check (Dave): provenance chain confirmed, venue column added
+
+Claim -> page -> source id -> verified registry row chain is manuscript-grade by
+construction; read-depth labels gate citability (only `read` sources citable in a
+manuscript). Gap closed: venue/peer-review status now recorded at ingest (backfill
+at pre-paper lint); BibTeX export planned (mechanical from arXiv ids).

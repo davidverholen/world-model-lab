@@ -7,6 +7,13 @@ Local reading copies: `scripts/fetch_sources.sh` downloads every arXiv source be
 to `knowledge/sources/files/arxiv-<id>.pdf` (gitignored; idempotent; re-run after
 new ingests). Non-arXiv sources (books, web docs) are not auto-fetched.
 
+Paper-readiness (2026-06-12): record the VENUE/peer-review status in the title
+column when known — e.g. "(ICML 2022)", "(Nature 2025)", "(preprint)" — captured
+at ingest time going forward; backfill at the pre-paper lint. BibTeX export is
+mechanical from arXiv ids (planned script, not needed until manuscript time).
+Citation rule: a manuscript may cite only sources whose page is at read depth
+`read` (read-depth labels in paper pages).
+
 | id | title | url | type | verified | added |
 |---|---|---|---|---|---|
 | arxiv:2506.09985 | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | https://arxiv.org/abs/2506.09985 | paper | yes (2026-06-12) | 2026-06-12 |

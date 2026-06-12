@@ -32,3 +32,6 @@ abstracts only). Pages below `read` stay `status: draft` at best.
 
 Authority reminders: claims cite source ids; this page may not cite stubs/stale pages;
 never edit `owner: human` pages without proposing.
+
+7. **Venue**: record peer-review status in the SOURCES title column
+   ("(ICML 2022)" / "(preprint)") — keeps the registry manuscript-ready.
