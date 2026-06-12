@@ -422,3 +422,15 @@ All other guardrails unchanged: desktop-only spend, current-rung scope, honesty
 rules, milestone discipline, PAID-RESOURCE flags recorded but not acted on,
 owner:human pages get proposals only. Reports: milestone commits as journal +
 state-of-the-night LOG entry.
+
+## [2026-06-13] curation | milestone: interference localized to the encoder (exp 0013) [autonomous]
+
+9 runs: encoder-freeze@r2 stops the crash phenomenon in all 6 frozen-arm seeds
+(fenc monotone-rising, peaks at final round, mean 47% unconverged; ftrunk stable
+but capped 40% — GRU plasticity needed; warm 43% — round-0 primacy dodged, crashes
+return with encoder free). The 5-experiment retention arc resolves: interference =
+ENCODER DRIFT. Literature gate: 2310.07418 (ICLR24) localizes to the critic in
+model-free visual RL — tension recorded, ingestion queued (augmentation lever
+noted). Exp 0014 pre-registered + launching: freeze-round sweep (fenc@3, fenc@4,
+3 seeds each, same budget) — if both bars clear, propose rung-2b closure to Dave
+and pivot to the actor thread.

@@ -36,7 +36,7 @@ smoothing: lr decay ×0.3 and EMA acting weights both failed (0010, 12 runs).
 | **UTD scaling** (more gradient steps, same env budget) | Qiao Fig-3 (agent-UTD helps MBPO) | **BIG WIN (0012): ×4 → 63% mean, beats PPO; 80% peak.** Crashes persist at higher amplitude → not the full fix |
 | churn reduction / NTK regularization | ICML 2025 (queued: 2506.00592) | untested |
 | continual backprop (selective reinit of dormant units) | Sutton lab (queued: 2306.13812) | untested |
-| frozen pretrained trunk (no plasticity needed) | DINO-WM / DINOv3 line | rung-3 candidate (immune by construction) |
+| **frozen encoder** (earn it, then pin it) | DINO-WM / DINOv3 line (pretrained variant) | **STABILITY SOLVED (0013): encoder freeze @r2 stops all crashes, 6/6 seeds; GRU must stay plastic.** Interference = encoder drift. Ceiling question → 0014 freeze-round sweep |
 
 ## Open questions
 

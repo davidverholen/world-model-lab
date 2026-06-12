@@ -61,6 +61,7 @@ training assets: `sources/ASSETS.md`.
 - [0010-retention-mechanics](experiments/0010-retention-mechanics.md) — clean 12-run negative: lr decay + EMA both fail (crash is directional interference = primacy bias); resets (Nikishin) are exp 0011 (done)
 - [0011-nikishin-resets](experiments/0011-nikishin-resets.md) — naive reset transfer fails (9 runs, all arms < ctrl): mis-mapped "last layers" (we reset the world model itself); primacy-bias diagnosis confirmed in-setting; corrected mapping = exp 0012 (done)
 - [0012-utd-and-targeted-resets](experiments/0012-utd-and-targeted-resets.md) — UTD ×4 wins: 63% mean, first PPO defeat at equal env budget (80% peak); resets conclusively dead; stability bar still open → 0013 trunk-freeze (done)
+- [0013-trunk-freeze](experiments/0013-trunk-freeze.md) — BREAKTHROUGH: encoder freeze stops all crashes (6/6 seeds); interference = encoder drift; GRU must stay plastic; ceiling unconverged → 0014 freeze-round sweep (done)
 
 ## Wanted pages (linked but not yet written)
 

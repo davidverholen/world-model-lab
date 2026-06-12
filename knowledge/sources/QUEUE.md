@@ -163,3 +163,9 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] Zhao et al. 2023, ACT action chunking (robotics) — extended actions as units
 - [ ] (context) Stephen E. Robbins' Bergson-based critique of computational world
       models — the philosophical counterpoint; treat as framing, not spec
+- [ ] arxiv:2310.07418 Revisiting Plasticity in Visual RL (ICLR 2024) — localizes
+      plasticity loss in the CRITIC (model-free + augmentation); TENSION with our
+      encoder-localization (exp 0013) — ingest to reconcile; their Adaptive RR +
+      data-augmentation-as-plasticity-preserver are untested levers for us
+- [ ] arxiv:2504.17490 Plasticine benchmark · arxiv:2410.07994 Neuroplastic
+      Expansion — plasticity tooling/methods (lower priority)

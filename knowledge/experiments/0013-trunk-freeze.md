@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-12
 ---
 
-# 0013: Trunk freeze at high UTD — protect, don't forget (planned)
+# 0013: Encoder freeze stops the crashes — interference localized (run 2026-06-12/13)
 
 ## Hypothesis
 
@@ -36,11 +36,38 @@ success-frac 0.25) + `--updates-per-round 6000` everywhere;
 
 ## Result
 
-_pending_
+(vs utd baseline 80/50/60 mean 63%, crashy; bar: mean ≥55% AND no >20pp crash)
+
+| arm | bests (s0/s1/s2) | mean | stability |
+|---|---|---|---|
+| **fenc** (encoder frozen @r2) | 40/50/50 | 47% | **NO crashes, all seeds monotone-rising, ALL peak at final round — unconverged** |
+| ftrunk (enc+GRU frozen @r2) | 30/50/40 | 40% | no crashes; capped (GRU plasticity was needed) |
+| warm (UTD, round-0 @1500) | 30/60/40 | 43% | round-0 primacy cost dodged (s1: 60% vs 10%) but crashes return (encoder free) |
 
 ## Lesson
 
-_pending_
+1. **Interference localized: the encoder.** Freeze it → the crash phenomenon
+   (chased through exps 0009–0012) stops in 6/6 frozen-arm seeds; leave it free →
+   crashes in every arm ever run. The GRU needs to keep learning (ftrunk < fenc);
+   the heads were never the problem (exp 0011's resets were doubly misdirected).
+2. **Stability bar: MET (fenc). Performance bar: missed (47% < 55%) but
+   unconverged** — every fenc seed ends at its own maximum; the freeze@2 encoder
+   only ever saw ignition-quality data. Hypothesis for 0014: freeze LATER
+   (round 3/4, after flywheel data improves) → higher ceiling, same stability,
+   same env budget.
+3. **Literature tension recorded (gate run 2026-06-13):** arXiv:2310.07418
+   (ICLR 2024) localizes plasticity loss in the CRITIC for model-free visual RL
+   (with data augmentation, Adaptive RR) — our localization (encoder) differs;
+   plausible reconciliation: our encoder is shared by the world model AND the
+   value path, and we use no augmentation. Queued for ingestion with Plasticine
+   (2504.17490) and Neuroplastic Expansion (2410.07994). Data augmentation as a
+   plasticity preserver is an untested lever for us.
+4. Exp 0014 (pre-registered, autonomous): **freeze-round sweep** — fenc@3 and
+   fenc@4 vs fenc@2 (existing), same budget, 6 runs. Bar unchanged. If freeze@3/4
+   clears both bars → retention SOLVED at rung 2 → propose 2b closure to Dave +
+   pivot to the actor thread.
+
+## Links
 
 ## Links
 
