@@ -57,6 +57,11 @@ Diagnostics that drove each fix (details in LOG and the play.py trace):
 Final model: dynamics ratio 0.172, latent_std 0.83, no collapse. Mean successful
 episode ≈ 50–65 steps (optimal ~11; navigation works, efficiency has headroom).
 
+**Correction (2026-06-12, from exp 0006's eval-hygiene incident):** all eval rows
+above were measured with a 2× observation-scale mismatch (play.py tile 16 vs
+training tile 8). Re-eval under matched observations: **20/20**. The recorded
+numbers understate matched performance; relative conclusions unaffected.
+
 ## Lesson
 
 1. **The world model plays its first game**: encoder + latent predictor + reward

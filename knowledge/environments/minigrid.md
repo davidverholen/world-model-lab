@@ -27,6 +27,13 @@ Useful env ids: `MiniGrid-Empty-5x5-v0`, `MiniGrid-Empty-8x8-v0`,
 `MiniGrid-DoorKey-6x6-v0`, `MiniGrid-MultiRoom-N2-S4-v0`, `MiniGrid-KeyCorridorS3R1-v0`.
 3D sibling when we need it: Miniworld (https://miniworld.farama.org).
 
+## Gotcha: tile_size is an observation parameter
+
+`tile_size` on the RGB wrappers scales the agent's *observations* (pixels per grid
+cell), not the `env.render()` output. Train and eval must use the same value or the
+encoder silently sees a different distribution (cost exp 0006 60pp success before
+diagnosis). Checkpoints store `obs_shape`; play.py asserts it at load.
+
 ## Open questions
 
 - Linear-probe targets available from env internals (agent pos, direction, carrying):

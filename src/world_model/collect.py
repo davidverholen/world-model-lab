@@ -211,7 +211,11 @@ def main() -> None:
                 "encoder": encoder.state_dict(),
                 "predictor": predictor.state_dict(),
                 "reward_head": reward_head.state_dict(),
-                "config": {**vars(args), "num_actions": num_actions},
+                "config": {
+                    **vars(args),
+                    "num_actions": num_actions,
+                    "obs_shape": tuple(env.observation_space.shape),
+                },
                 "metrics": {"probe_r2": r2, **dyn},
             },
             path,

@@ -12,6 +12,7 @@ Run: uv run python -m world_model.train_recurrent --env-id MiniGrid-DoorKey-5x5-
 
 import argparse
 import copy
+from pathlib import Path
 
 import torch
 import torch.nn.functional as F
@@ -239,7 +240,8 @@ def main() -> None:
             args.eval_episodes,
             device,
         )
-        print(f"round {rnd}: eval success rate {rate:.0%} ({args.eval_episodes} episodes)")
+        # eval_success= form is scraped by scripts/sweep.py — keep it machine-readable
+        print(f"round {rnd}: eval_success={rate:.2f} ({args.eval_episodes} episodes)")
         if best["rate"] is None or rate >= best["rate"]:
             best = {
                 "rate": rate,
@@ -252,15 +254,17 @@ def main() -> None:
                 },
             }
 
-    from pathlib import Path
-
     path = Path(args.save)
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
         {
             "recurrent": True,
             **best["state"],
-            "config": {**vars(args), "num_actions": num_actions},
+            "config": {
+                **vars(args),
+                "num_actions": num_actions,
+                "obs_shape": tuple(env.observation_space.shape),
+            },
             "metrics": {"eval_success": best["rate"], "best_round": best["round"]},
         },
         path,

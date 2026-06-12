@@ -66,13 +66,16 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
 - `/kb-lint` — wiki health check (contradictions, stale pages, orphans)
 - `/run-experiment` — hypothesis → run → durable experiment page
 - `/scout-sources` — search for new world-model work, verify, queue
-- `/milestone` — checkpoint: verify → curate knowledge → commit everything
+- `/milestone` — checkpoint: verify (tests/lint/publish-check + reviewer agent on
+  non-trivial diffs) → curate knowledge → commit everything
+- `/sweep` — multi-seed/multi-config runs with aggregated results table (scripts/sweep.py)
 
 ## Model delegation
 
 When spawning subagents, route by complexity (standing authorization from Dave):
 research design, training-failure debugging, and `owner: human` meaning stay in the
-main loop (Fable); substantial implementation/review subagents → **opus**; structured
+main loop (Fable); substantial implementation subagents and the **reviewer** agent
+(research-code diff review at milestones) → **opus**; structured
 KB work (ingest, lint, scout, experiment write-ups) → **sonnet** (curator and scout
 agents default to this); mechanical sweeps (link checks, INDEX consistency, code
 search) → **haiku**. When unsure, inherit the main-loop model.

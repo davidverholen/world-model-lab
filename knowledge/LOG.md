@@ -103,3 +103,17 @@ request: no machine names/keys/paths in tracked files; config via env vars +
 gitignored .env.remote (.env.remote.example committed); ADR 0004 records the
 design. Setup gotchas (bare HEAD main-vs-master, administrators_authorized_keys,
 DefaultShell) documented in docs/REMOTE.md.
+
+## [2026-06-12] curation | milestone: DoorKey solved — value head + flywheel (exp 0006)
+
+Exp 0006 closed: 90% per-round eval / 75% post-hoc (20 eps) vs 8% random — value
+head makes beyond-horizon reward visible; collect->train->collect compounds
+(collection 8.5%->5%->36%). First training dispatched through the remote pipeline
+(5070 Ti, ~25 min). Eval-hygiene incident found and fixed: play.py tile_size=16
+changed agent observations vs training tile 8 (4/20 -> 75% after fix); exp 0004
+re-verified at 20/20 matched; obs_shape now stored in checkpoints + asserted at
+load; minigrid.md gotcha section added. Process additions per Dave's request:
+reviewer agent (opus, research-code charter — first pass verified 0006 paths
+correct + caught sweep-scrapability gap), /sweep skill + scripts/sweep.py,
+scripts/publish_check.sh wired into /milestone verify. Next: PPO baseline
+(closes rung 2), then Crafter prep.

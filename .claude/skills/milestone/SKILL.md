@@ -12,8 +12,13 @@ description: >
 Follow `knowledge/_schema/PROCESS.md` § "Milestone checkpoint" (authoritative).
 Condensed:
 
-1. **Verify**: `uv run pytest -q` && `uv run ruff check .` — must pass; otherwise
-   report and stop (no broken checkpoints).
+1. **Verify**: `uv run pytest -q` && `uv run ruff check .` &&
+   `scripts/publish_check.sh` — must pass; otherwise report and stop (no broken
+   checkpoints, no personal machine references entering history).
+   For milestones with non-trivial code changes, additionally spawn the
+   **reviewer** agent (`.claude/agents/reviewer.md`, opus) on the diff since the
+   last milestone; fix blockers before committing, record important-but-deferred
+   findings in the LOG entry.
 2. **Curate**:
    - route learning signals from work since the last checkpoint (PROCESS.md table);
      fill Result/Lesson on any experiment pages this work concluded;

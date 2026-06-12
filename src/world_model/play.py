@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--horizon", type=int, default=20, help="MPC imagination horizon")
     parser.add_argument("--candidates", type=int, default=1024, help="MPC imagined futures/step")
+    parser.add_argument("--iters", type=int, default=3, help="CEM refinement iterations")
     parser.add_argument("--record", type=str, default=None, help="save GIF here instead of window")
     parser.add_argument(
         "--epsilon",
@@ -47,9 +48,17 @@ def main() -> None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
         recurrent = bool(ckpt.get("recurrent", False))
+        # tile_size must match training: it changes the agent's OBSERVATIONS (not the
+        # GIF render). A 16-vs-8 mismatch here silently cost 60pp success in exp 0006.
         env = make_minigrid_env(
-            args.env_id, render_mode=render_mode, tile_size=16, fully_observable=not recurrent
+            args.env_id, render_mode=render_mode, fully_observable=not recurrent
         )
+        expected = ckpt.get("config", {}).get("obs_shape")
+        if expected is not None and tuple(env.observation_space.shape) != tuple(expected):
+            raise SystemExit(
+                f"observation shape mismatch: env {env.observation_space.shape} vs "
+                f"checkpoint {tuple(expected)} — check env-id/tile_size against training"
+            )
         cls = RecurrentMPCAgent if recurrent else MPCAgent
         extra = {"epsilon": args.epsilon} if recurrent else {}
         agent = cls.from_checkpoint(
@@ -57,13 +66,14 @@ def main() -> None:
             device,
             horizon=args.horizon,
             candidates=args.candidates,
+            iters=args.iters,
             seed=args.seed,
             **extra,
         )
         kind = "recurrent belief-state" if recurrent else "feedforward"
         print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
     else:
-        env = make_minigrid_env(args.env_id, render_mode=render_mode, tile_size=16)
+        env = make_minigrid_env(args.env_id, render_mode=render_mode)
         agent = RandomAgent(env.action_space, seed=args.seed)
         print("random agent (pass --checkpoint to use a trained world model)")
 

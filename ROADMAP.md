@@ -13,10 +13,11 @@ ADR [0003](knowledge/decisions/0003-environment-ladder.md)).
 
 ## Phase 2 — Model-based control on MiniGrid
 
-- [x] First *acting* agent: latent MPC/CEM plays Empty-8x8 at 19/20 vs random 3/20
+- [x] First *acting* agent: latent MPC/CEM plays Empty-8x8 at 20/20 vs random 3/20
       (exp 0004; `python -m world_model.play --checkpoint ...`)
-- [ ] Partial observability (DoorKey): add memory (GRU/transformer) to the latent model
-- [ ] Beat a model-free baseline (PPO) on sample efficiency
+- [x] Partial observability (DoorKey): GRU belief memory + value head solves
+      DoorKey-5x5 at ~80% vs 8% random (exp 0006, trained on the remote GPU)
+- [ ] Beat a model-free baseline (PPO) on sample efficiency → closes rung 2
 
 ## Phase 3 — Crafter, then Atari100k
 

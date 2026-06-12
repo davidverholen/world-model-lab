@@ -60,8 +60,10 @@ class ReplayBuffer:
         """Fill `returns` with discounted return-to-go, reset at episode ends.
 
         Walks the (unwrapped) buffer backwards: G_i = r_i + gamma * G_{i+1}, restarting
-        at dones. The trailing partial episode (collection cut mid-episode) gets a
-        truncated return — a slight underestimate, acceptable as a value target.
+        at dones. The trailing partial episode of a collection round is not
+        done-terminated, so the next round's first-episode return leaks backward into
+        it (mild overestimate, one partial episode per round boundary) — acceptable
+        as a value target.
         """
         g = 0.0
         for i in range(self.size - 1, -1, -1):
