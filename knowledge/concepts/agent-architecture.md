@@ -43,10 +43,11 @@ flowchart TB
 
     classDef box fill:#475569,stroke:#94a3b8,color:#f8fafc
     class collect,trainstep,evalstep,loss,tricks,enc,gru,heads,cem box
-    style L4 fill:none,stroke:#64748b
-    style L3 fill:none,stroke:#64748b
-    style L2 fill:none,stroke:#64748b
-    style L1 fill:none,stroke:#64748b
+    style L4 fill:none,stroke:#64748b,color:#94a3b8
+    style L3 fill:none,stroke:#64748b,color:#94a3b8
+    style L2 fill:none,stroke:#64748b,color:#94a3b8
+    style L1 fill:none,stroke:#64748b,color:#94a3b8
+    linkStyle default stroke:#94a3b8
 ```
 
 Full per-layer specifics (loss weights, planner params, ignition rules) are in the
