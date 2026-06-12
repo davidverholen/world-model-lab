@@ -16,7 +16,9 @@ layer optimizes something different, on a different timescale, with a different
 algorithm:
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{
+%%{init: {"theme":"base",
+  "flowchart":{"padding":12,"subGraphTitleMargin":{"top":6,"bottom":14}},
+  "themeVariables":{
   "primaryColor":"#475569","primaryTextColor":"#f8fafc","primaryBorderColor":"#94a3b8",
   "lineColor":"#94a3b8","textColor":"#64748b",
   "clusterBkg":"transparent","clusterBorder":"#64748b",
