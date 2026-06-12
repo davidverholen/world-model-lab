@@ -151,3 +151,15 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
       information gain; candidate ignition fix at rung-2 scale
 - [ ] arxiv:2510.21418 DreamerV3-XP — uncertainty-driven exploration + prioritized
       replay in current Dreamer; nearest modern baseline
+
+## Temporal abstraction (events-not-ticks thread; ids unverified)
+
+- [ ] Sutton, Precup & Singh 1999, "Between MDPs and Semi-MDPs: Options" — the
+      extended-action formalism
+- [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels —
+      hierarchy inside a Dreamer world model
+- [ ] Zacks & Tversky — event segmentation theory (cog-sci; chunking at
+      prediction-error boundaries — implementable in our stack)
+- [ ] Zhao et al. 2023, ACT action chunking (robotics) — extended actions as units
+- [ ] (context) Stephen E. Robbins' Bergson-based critique of computational world
+      models — the philosophical counterpoint; treat as framing, not spec

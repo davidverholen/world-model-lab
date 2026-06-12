@@ -390,3 +390,12 @@ rung-5b entry with availability re-check.
 All VPT tier-1 assets verified on desktop ~/minecraft-assets/vpt/ (first detached
 attempt died with its ssh session — Git Bash quoting; foreground-over-held-ssh
 pattern worked). ASSETS.md claims now confirmed-true.
+
+## [2026-06-12] curation | temporal-abstraction concept page (Dave via Robbins/Bergson)
+
+Events-not-ticks critique routed: converging lines table (options, H-JEPA,
+Director, Zacks event segmentation, action chunking); Zacks mechanism directly
+implementable (segment at prediction-error spikes — boundaries for free);
+identified as the DEEP fix for exp-0005 horizon blindness and as the same
+binding problem as language-grounding. Cheap diagnostic probe pre-sketched
+(boundary alignment on DoorKey trajectories). 5 sources queued.
