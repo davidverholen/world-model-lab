@@ -99,3 +99,5 @@ the checkout on the remote at any time; `setup` rebuilds both.
   the full path; winget's link dir is normally on PATH for SSH sessions.
 - Keep the box's power plan on "High performance" so sleep doesn't kill long runs;
   run your VPN/Tailscale as a service so it survives logout.
+- GPU monitoring over ssh: `nvidia-smi dmon -s pucm` (zero install) or `uvx nvitop`
+  (full TUI, renders fine through Git Bash; gpustat does not — verified).
