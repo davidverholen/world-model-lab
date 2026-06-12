@@ -153,3 +153,17 @@ def test_value_head_and_planner_bonus():
     actions = t.randint(3, (4, 2))
     returns = agent._imagined_returns(s0, actions)
     assert returns.shape == (4,) and t.isfinite(returns).all()
+
+
+def test_success_oversampling():
+    buf = ReplayBuffer(capacity=100, obs_shape=(1,), seed=0)
+    obs = np.zeros((1,), dtype=np.float32)
+    for i in range(100):
+        # one success episode ending at index 49; episodes of length 10
+        reward = 1.0 if i == 49 else 0.0
+        buf.add(Transition(obs, 0, reward, obs, done=(i % 10 == 9)))
+    starts = buf.success_starts(length=4)
+    assert list(starts) == [46]  # only window ending exactly at the reward
+    batch = buf.sample_sequences(8, length=4, success_frac=0.5)
+    # half the batch must contain the success transition (reward at final position)
+    assert (batch["reward"][:, -1] > 0).sum() == 4

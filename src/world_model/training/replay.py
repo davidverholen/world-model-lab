@@ -72,24 +72,50 @@ class ReplayBuffer:
             g = float(self.rewards[i]) + gamma * g
             self.returns[i] = g
 
-    def sample_sequences(self, batch_size: int, length: int) -> dict[str, np.ndarray]:
+    def _valid_starts(self, cand: np.ndarray, length: int) -> np.ndarray:
+        """Filter window starts: in range, no episode boundary before the final step."""
+        cand = cand[(cand >= 0) & (cand <= self.size - length)]
+        if len(cand) == 0:
+            return cand
+        return cand[~self.dones[cand[:, None] + np.arange(length - 1)].any(axis=1)]
+
+    def success_starts(self, length: int) -> np.ndarray:
+        """Valid window starts whose final transition carries a nonzero reward.
+
+        Terminal rewards end episodes, so a reward transition can only sit at a
+        window's last position — one canonical window per reward event.
+        """
+        reward_idx = np.flatnonzero(np.abs(self.rewards[: self.size]) > 1e-6)
+        return self._valid_starts(reward_idx - length + 1, length)
+
+    def sample_sequences(
+        self, batch_size: int, length: int, success_frac: float = 0.0
+    ) -> dict[str, np.ndarray]:
         """Sample time-contiguous windows for multi-step rollout training.
 
         Windows never cross an episode boundary (no `done` inside, except possibly at
         the final transition). Assumes the buffer hasn't wrapped (our usage: capacity
         == collected steps); rejection-samples valid start indices.
 
-        Returns obs (B, L, ...), action/reward (B, L), next_obs (B, ...) — the
-        observation after the window's last transition.
+        success_frac > 0 oversamples windows that END in a reward transition (exp
+        0009 ignition fix: success episodes must not drown in the replay) — that
+        fraction of the batch is drawn from `success_starts`, the rest uniformly.
+
+        Returns obs (B, L, ...), action/reward/return (B, L), next_obs (B, ...).
         """
         if self.total_adds > self.capacity:
             raise NotImplementedError("sequence sampling assumes an unwrapped buffer")
         starts = np.empty(batch_size, dtype=np.int64)
         found = 0
+        if success_frac > 0:
+            pool = self.success_starts(length)
+            if len(pool) > 0:
+                want = int(batch_size * success_frac)
+                starts[:want] = pool[self.rng.integers(0, len(pool), size=want)]
+                found = want
         while found < batch_size:
             cand = self.rng.integers(0, self.size - length, size=2 * batch_size)
-            # episode boundary inside the window (excluding final transition) → invalid
-            valid = cand[~self.dones[cand[:, None] + np.arange(length - 1)].any(axis=1)]
+            valid = self._valid_starts(cand, length)
             take = min(len(valid), batch_size - found)
             starts[found : found + take] = valid[:take]
             found += take

@@ -62,10 +62,11 @@ def train(
     burn_in: int,
     lam: float,
     device: str,
+    success_frac: float = 0.0,
 ) -> None:
     no_act = dynamics.no_action
     for step in range(updates):
-        batch = buffer.sample_sequences(seq_batch, window)
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         obs_seq = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)  # (B, W)
         rewards = torch.as_tensor(batch["reward"], device=device)
@@ -175,6 +176,20 @@ def main() -> None:
     parser.add_argument("--burn-in", type=int, default=8)
     parser.add_argument("--sigreg-weight", type=float, default=0.05)
     parser.add_argument("--epsilon", type=float, default=0.3, help="exploration in MPC rounds")
+    parser.add_argument(
+        "--success-frac",
+        type=float,
+        default=0.25,
+        help="fraction of each training batch drawn from windows ending in a reward "
+        "(exp 0009: success episodes must not drown in replay); 0 disables",
+    )
+    parser.add_argument(
+        "--ignition-events",
+        type=int,
+        default=5,
+        help="round 0 keeps collecting (up to 2x round0-steps) until this many "
+        "reward events exist — the value head can't ignite from one example",
+    )
     parser.add_argument("--gamma", type=float, default=0.98, help="return discount")
     parser.add_argument("--eval-episodes", type=int, default=10, help="per-round eval")
     parser.add_argument("--seed", type=int, default=0)
@@ -198,9 +213,11 @@ def main() -> None:
     # random) with a deliberately cheap planner — the data only needs goal bias.
     round0_steps = args.round0_steps or args.steps_per_round
     mpc_steps = args.mpc_steps or max(10_000, args.steps_per_round // 3)
-    total_capacity = round0_steps + (args.rounds - 1) * mpc_steps
+    # round 0 may extend to 2x for ignition; reserve capacity for the worst case
+    total_capacity = 2 * round0_steps + (args.rounds - 1) * mpc_steps
     buffer = ReplayBuffer(total_capacity, env.observation_space.shape, seed=args.seed)
     best: dict = {"rate": None, "round": -1, "state": {}}
+    total_env_steps = 0
 
     for rnd in range(args.rounds):
         if rnd == 0:
@@ -225,7 +242,15 @@ def main() -> None:
             kind, steps = f"mpc(eps={args.epsilon})", mpc_steps
         print(f"round {rnd}: collecting {steps} steps with {kind} agent ...")
         rew, eps = collect_round(buffer, env, agent, steps, seed=args.seed + rnd)
-        print(f"  -> {eps} episodes, {rew} reward events")
+        total_env_steps += steps
+        # ignition: a value head can't learn success from 0-1 examples (exp 0008)
+        while rnd == 0 and rew < args.ignition_events and total_env_steps < 2 * round0_steps:
+            chunk = min(5000, 2 * round0_steps - total_env_steps)
+            print(f"  ignition: only {rew}/{args.ignition_events} reward events, +{chunk} steps")
+            r2_, e2_ = collect_round(buffer, env, agent, chunk, seed=args.seed + 100)
+            rew, eps = rew + r2_, eps + e2_
+            total_env_steps += chunk
+        print(f"  -> {eps} episodes, {rew} reward events (total_env_steps={total_env_steps})")
         buffer.compute_returns(args.gamma)
         print(f"round {rnd}: training {args.updates_per_round} updates ...")
         train(
@@ -242,6 +267,7 @@ def main() -> None:
             args.burn_in,
             args.sigreg_weight,
             device,
+            success_frac=args.success_frac,
         )
         # lesson from exp 0005: evaluate and snapshot EVERY round — round N+1
         # training can degrade the model, and the best agent must not be lost
@@ -269,6 +295,7 @@ def main() -> None:
             }
 
     path = Path(args.save)
+    path = path.with_name(f"{path.stem}_s{args.seed}{path.suffix}")  # multi-seed safe
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
         {
@@ -283,7 +310,11 @@ def main() -> None:
         },
         path,
     )
-    print(f"best checkpoint (round {best['round']}, {best['rate']:.0%}) saved to {path}")
+    # scrapable summary for scripts/sweep.py
+    print(
+        f"best_eval={best['rate']:.2f} best_round={best['round']} total_env_steps={total_env_steps}"
+    )
+    print(f"best checkpoint saved to {path}")
 
 
 if __name__ == "__main__":
