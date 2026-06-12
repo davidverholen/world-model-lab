@@ -21,11 +21,14 @@ and healthcare applications. Committed to publishing research.
 
 - **LeJEPA** (arxiv:2511.08544, Nov 2025, Balestriero & LeCun — pre-dates the company
   but defines its technical core): provable JEPA training objective. See [[lejepa-2025]].
-- **Late-May 2026 preprints** from LeCun's research circle: one proves LeJEPA can
-  recover an environment's true hidden structure under specific conditions (Gaussian
-  latents, broad exploration) — "When Does LeJEPA Learn a World Model?"
-  (arxiv:2605.26379); a companion benchmark finds current world models brittle.
-  Exact companion id still to be confirmed → sources/QUEUE.md.
+- **Late-May 2026 preprint pair** from LeCun's research circle — "a theorem and a
+  stress test": (1) "When Does LeJEPA Learn a World Model?" (arxiv:2605.26379)
+  proves linear identifiability — LeJEPA linearly recovers the world's latent
+  variables from nonlinear observations, for worlds with stationary additive-noise
+  transitions; (2) **WBench** (arxiv:2605.25874, id confirmed 2026-06-12) —
+  interactive video world-model benchmark (5 dimensions, 289 cases) whose headline
+  finding is that current models collapse under minor visual shifts. Together: the
+  destination is provable, the field isn't there yet.
 - Intellectual foundation: "A Path Towards Autonomous Machine Intelligence"
   (openreview:lecun-path) — H-JEPA, energy-based models, configurator, intrinsic cost.
 

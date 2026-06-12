@@ -43,9 +43,15 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 - [ ] arxiv:2402.15391 Genie + Genie 2/3 blogs (deepmind.google)
 - [ ] arxiv:2109.06780 Crafter · Craftax (github.com/MichaelTMatthews/Craftax)
 - [ ] arxiv:2411.14499 world-model survey · arxiv:2405.03520 Sora-as-world-simulator survey
-- [ ] AMI Labs late-May 2026 preprints (find exact ids; one proves LeJEPA recovers
-      hidden environment structure under Gaussian latents + broad exploration —
-      likely arxiv:2605.26379, confirm companion paper)
+- [ ] arxiv:2605.25874 WBench (confirmed 2026-06-12 as the late-May AMI-circle
+      companion to 2605.26379): multi-turn interactive video world-model benchmark,
+      5 dimensions, 289 cases; headline: current models collapse under minor visual
+      shifts. Read with the theorem paper as a pair.
+- [ ] arxiv:2602.11389 Causal-JEPA (Feb 2026) — world models via object-level
+      latent interventions; the causality-meets-JEPA line, relevant to whether our
+      latents capture manipulable structure (keys, doors)
+- [ ] arxiv:2512.10942 VL-JEPA (Dec 2025) — vision-language JEPA; lower priority
+      (language enters our roadmap only with mission-conditioned MiniGrid tasks)
 
 ## Low (breadth)
 

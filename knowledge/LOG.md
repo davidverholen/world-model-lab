@@ -191,3 +191,12 @@ read queued), concepts/retention (fix-family table: smoothing ruled out by 0010,
 resets running, churn/continual-backprop/frozen-trunk untested). DINOv3 queued with
 frozen-encoder framing. PROCESS gained the literature-first rule (Dave's request —
 flagged here since _schema is human-owned).
+
+## [2026-06-12] scout | AMI pair completed (WBench id), Causal-JEPA + VL-JEPA queued
+
+Watch-list sweep (3 searches): WBench arxiv:2605.25874 confirmed as the late-May
+AMI-circle companion benchmark (theorem 2605.26379 + stress test pair; "current
+models collapse under minor visual shifts") -> ami-labs page updated, QUEUE open
+item resolved. New: Causal-JEPA (2602.11389, object-level latent interventions),
+VL-JEPA (2512.10942, low priority). Dreamer/DeepMind side: nothing new beyond
+known Genie/Dreamer state; 2026 survey blogs noted but not queued (secondary).
