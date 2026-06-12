@@ -342,3 +342,9 @@ corroboration updates it, loss scales with it; imagination earns what real
 experience gets at birth. Human analogy: imagination is inexact AND functional via
 constant verification. Prototype path: corrupted-synthetic injection on Crafter.
 Symmetry noted with the KB's own verified-flag epistemics.
+
+## [2026-06-12] curation | horizon: self-generated hypotheses (Dave) — agent internalizes the research loop
+
+Text-installed beliefs -> imagination-generated beliefs -> active validation, all on
+the trust-gate substrate. Near-term echo: hypothesis-driven exploration as the
+principled ignition fix (exp 0008 thread); Plan2Explore queued.

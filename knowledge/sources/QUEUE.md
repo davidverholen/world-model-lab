@@ -122,3 +122,6 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] RTFM: reading manuals to generalize to new dynamics (Zhong et al., FAIR ~2019)
       + Messenger / EMMA (Hanjie et al. ~2021) — envs where reading is NECESSARY to
       win; the cheap text-grounding testbeds (step i of the text staircase; ids to verify)
+- [ ] Plan2Explore (Sekar et al. 2020) — world-model-uncertainty-driven exploration;
+      ancestor of the self-generated-hypotheses horizon + candidate ignition fix
+      (id to verify)

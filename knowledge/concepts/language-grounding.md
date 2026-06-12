@@ -56,6 +56,17 @@ transitions into Crafter replay with low priors; verify the gate discounts them
 and clean synthetic data earns weight. Gate failure modes are
 [[retention]]-adjacent (synthetic data = another distribution shift).
 
+## Horizon: self-generated hypotheses (Dave, 2026-06-12)
+
+Once binding + installation + the trust gate exist, the source of new beliefs can
+shift from external text to the agent itself: compose novel candidate dynamics in
+latent space ("ideas"), enter them as lowest-prior beliefs, then **act deliberately
+to validate them** — the agent internalizes the research loop (PROCESS.md) as
+cognition. Ancestry: Schmidhuber's artificial curiosity ([[intellectual-lineage]]);
+modern form: Plan2Explore-style world-model-uncertainty exploration (queue).
+Practical near-term echo: hypothesis-driven exploration is the principled fix for
+the ignition problem (exp 0008) — this horizon idea has a rung-2-scale prototype.
+
 ## Why it matters here
 
 This is the staircase's scientific payload — (i) Messenger/RTFM, (ii) text-Crafter,
