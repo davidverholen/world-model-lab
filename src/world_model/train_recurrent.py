@@ -199,6 +199,13 @@ def main() -> None:
     )
     parser.add_argument("--rounds", type=int, default=2)
     parser.add_argument("--updates-per-round", type=int, default=3000)
+    parser.add_argument(
+        "--round0-updates",
+        type=int,
+        default=None,
+        help="override updates for round 0 only (exp 0013 warm-utd arm: high UTD "
+        "later but light round-0 training to dodge the primacy cost)",
+    )
     parser.add_argument("--seq-batch", type=int, default=32)
     parser.add_argument("--window", type=int, default=24)
     parser.add_argument("--burn-in", type=int, default=8)
@@ -226,6 +233,20 @@ def main() -> None:
         "failed); qiao = shrink-perturb alpha=0.8 of the next-latent predictor only "
         "(arXiv:2310.15017 world-model reset); surgical = reinit reward+value heads "
         "only, dynamics untouched (exp 0012)",
+    )
+    parser.add_argument(
+        "--freeze",
+        choices=["none", "encoder", "trunk"],
+        default="none",
+        help="exp 0013: freeze representation after --freeze-round (encoder = conv "
+        "encoder only; trunk = encoder + GRU cell + action embed; heads keep "
+        "training). The opposite bet to resets: protect, don't forget.",
+    )
+    parser.add_argument(
+        "--freeze-round",
+        type=int,
+        default=2,
+        help="apply --freeze at the start of this round's training",
     )
     parser.add_argument(
         "--reset-round",
@@ -352,11 +373,24 @@ def main() -> None:
             )
             did_reset = True
             print(f"  reset ({args.reset}) applied; optimizer rebuilt")
-        round_updates = (
-            args.post_reset_updates
-            if (did_reset and args.post_reset_updates)
-            else args.updates_per_round
-        )
+        if args.freeze != "none" and rnd == args.freeze_round:
+            frozen = [encoder]
+            if args.freeze == "trunk":
+                frozen += [dynamics.cell, dynamics.action_embed]
+            for m in frozen:
+                for p in m.parameters():
+                    p.requires_grad_(False)
+            # optimizer over remaining trainable params only (fresh moments for them)
+            trainable = [p for m in modules for p in m.parameters() if p.requires_grad]
+            opt = torch.optim.Adam(trainable, lr=opt.param_groups[0]["lr"])
+            n_frozen = sum(p.numel() for m in frozen for p in m.parameters())
+            print(f"  freeze ({args.freeze}) applied at round {rnd}: {n_frozen} params frozen")
+        if rnd == 0 and args.round0_updates is not None:
+            round_updates = args.round0_updates
+        elif did_reset and args.post_reset_updates:
+            round_updates = args.post_reset_updates
+        else:
+            round_updates = args.updates_per_round
         print(f"round {rnd}: training {round_updates} updates ...")
         train(
             buffer,

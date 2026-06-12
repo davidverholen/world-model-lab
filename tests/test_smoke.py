@@ -217,3 +217,23 @@ def test_shrink_perturb_partial_reset():
     d = __import__("copy").deepcopy(a)
     shrink_perturb(d, alpha=0.0)
     assert dist(a, d) < 1e-7
+
+
+def test_freeze_keeps_params_constant():
+    import torch as t
+
+    from world_model.models import ConvEncoder
+
+    enc = ConvEncoder(latent_dim=16)
+    for p in enc.parameters():
+        p.requires_grad_(False)
+    before = [p.clone() for p in enc.parameters()]
+    z = enc(t.randn(2, 3, 40, 40))
+    assert not z.requires_grad  # no grad path through frozen encoder
+    head = t.nn.Linear(16, 1)
+    opt = t.optim.Adam([p for p in head.parameters()], lr=1e-2)
+    loss = head(z).sum()
+    loss.backward()
+    opt.step()
+    after = list(enc.parameters())
+    assert all(t.equal(b, a) for b, a in zip(before, after, strict=True))
