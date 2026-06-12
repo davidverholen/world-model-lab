@@ -77,7 +77,7 @@ def main() -> None:
 
     final = evaluate(model, args.env_id, episodes=20, seed_base=0)
     print(f"final: eval_success={final:.2f} (20 episodes, seeds 0+)")
-    print(f"gymnasium/minigrid/sb3 versions: see `uv tree --project baselines/ppo`")
+    print("gymnasium/minigrid/sb3 versions: see `uv tree --project baselines/ppo`")
 
 
 if __name__ == "__main__":
