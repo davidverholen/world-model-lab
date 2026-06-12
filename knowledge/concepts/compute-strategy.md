@@ -32,6 +32,21 @@ Effective throughput is therefore ~35–40% of nominal 4070L → revised speedup
 estimate for the 5070 Ti on GPU-bound training: **~4–6×** (was 2.5–3×).
 Comfort/longevity: sustained low-80s °C chassis heat + full fans on a laptop.
 
+## Measured: laptop vs desktop benchmark (2026-06-12, scripts/gpu_bench.py)
+
+| | 4070 Laptop (45 W) | 5070 Ti desktop | ratio |
+|---|---|---|---|
+| matmul fp32 sustained | 7.0 TFLOPS | 31.4 TFLOPS | **4.5×** ✅ (predicted 4–6×) |
+| recurrent train-step (b32, w24) | 30.1 upd/s | 27.9 upd/s | **0.93×** ✅ (predicted ≈1× for latency-bound) |
+
+Both predictions confirmed in one run: the desktop is 4.5× on throughput-bound
+work, and **exactly nothing** on our current small-model sequential-GRU training
+step (kernel-launch latency dominates; the GPU idles either way). Consequences:
+- dispatch decision = is the workload throughput-bound (big batches, conv-heavy,
+  rung 3+) OR long-running (>~1 h ⇒ remote regardless, for thermal reasons)?
+- to make the desktop pay off for recurrent training: bigger batch×window,
+  torch.compile / CUDA graphs to fuse the GRU loop — try when rung-2 training grows.
+
 ## Key predictions (validate when first dispatching remotely)
 
 - Rungs 1–2 workloads are env-loop/latency-bound: bigger GPUs ≈ 1.0–1.3× — don't switch.

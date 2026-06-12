@@ -90,3 +90,16 @@ checked 2026-06-12). Next: exp 0006 value head + per-round eval.
 90s, clocks ~1.2GHz vs 3.1 max, SW thermal slowdown already active ~396s cumulative
 today. compute-strategy page updated (5070 Ti advantage revised 2.5-3x -> 4-6x;
 desktop-dispatch trigger lowered 4h -> 1h); CLAUDE.md hardware note updated.
+
+## [2026-06-12] curation | milestone: remote GPU dispatch live + benchmark validates compute strategy
+
+Windows desktop (RTX 5070 Ti) wired up end-to-end: OpenSSH + Git Bash default
+shell (cmd.exe breaks git transport), bare-repo push dispatch (scripts/remote.sh
+setup/gpu/run/pull), uv sync with marker-gated cu130 torch wheels, CUDA verified.
+First real dispatch = gpu_bench.py: matmul 4.5x (prediction 4-6x confirmed),
+our recurrent train-step 0.93x (latency-bound prediction confirmed) ->
+compute-strategy page updated with measured table. Publishability pass on Dave's
+request: no machine names/keys/paths in tracked files; config via env vars +
+gitignored .env.remote (.env.remote.example committed); ADR 0004 records the
+design. Setup gotchas (bare HEAD main-vs-master, administrators_authorized_keys,
+DefaultShell) documented in docs/REMOTE.md.
