@@ -43,6 +43,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0002-knowledge-architecture](decisions/0002-knowledge-architecture.md) — Karpathy wiki × context architecture (accepted)
 - [0003-environment-ladder](decisions/0003-environment-ladder.md) — MiniGrid first, no rung-skipping (accepted)
 - [0004-remote-dispatch](decisions/0004-remote-dispatch.md) — SSH + git push over Tailscale to the 5070 Ti desktop; no orchestrator (accepted)
+- [0005-minecraft-milestone](decisions/0005-minecraft-milestone.md) — rung 5b: Minecraft via self-play + action-labeled video + text staircase (accepted)
 
 ## Experiments
 
@@ -57,6 +58,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0009-ignition-mechanics](experiments/0009-ignition-mechanics.md) — ignition solved (6 examples → 60% after round 0); retention now the isolated bottleneck (60%→0% under continued training); parity with PPO, rung 2b open → exp 0010 stability (done)
 - [0010-retention-mechanics](experiments/0010-retention-mechanics.md) — clean 12-run negative: lr decay + EMA both fail (crash is directional interference = primacy bias); resets (Nikishin) are exp 0011 (done)
 - [0011-nikishin-resets](experiments/0011-nikishin-resets.md) — naive reset transfer fails (9 runs, all arms < ctrl): mis-mapped "last layers" (we reset the world model itself); primacy-bias diagnosis confirmed in-setting; corrected mapping = exp 0012 (done)
+- [0012-utd-and-targeted-resets](experiments/0012-utd-and-targeted-resets.md) — literature-grounded arms: qiao shrink-perturb / UTD scaling / surgical heads (running)
 
 ## Wanted pages (linked but not yet written)
 

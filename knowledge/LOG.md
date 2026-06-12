@@ -325,3 +325,12 @@ text-as-data (text-induced imagination training — possibly unexplored; wall
 protocol required before claiming), text-as-weights (Schmidhuber fast weights /
 model editing). Pre-registered prediction: context suffices at Messenger scale;
 data/weights needed at wiki scale. Linked into ADR 0005 + lineage + retention.
+
+## [2026-06-12] curation | language-grounding 2b: external imagination engine (Dave)
+
+Text -> domain video generator (Oasis/Genie-3/Dreamer-4-WM class) -> VPT-IDM action
+labels -> trust-weighted synthetic replay -> corroboration gate (real play
+validates/discounts). Breaks 2a's circularity; unifies ADR-0005 signals 2+3;
+cognitive analogy: Craik's mental simulation + belief corroboration. Gate is
+mandatory (video hallucination) and retention-adjacent (synthetic distribution
+shift).
