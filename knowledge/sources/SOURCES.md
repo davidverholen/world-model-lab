@@ -29,5 +29,5 @@ was resolved and key claims checked during this project (not taken from memory).
 | web:minigrid-docs | MiniGrid documentation | https://minigrid.farama.org | docs | no | 2026-06-12 |
 | web:worldmodels-site | World Models interactive article | https://worldmodels.github.io/ | article | no | 2026-06-12 |
 | web:karpathy-llm-wiki | Karpathy: LLM Wiki gist | https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f | article | yes (2026-06-12) | 2026-06-12 |
-| pdf:context-arch-v1 | Context Architecture for Enterprise Agentic Software Delivery v1.0.0 (D. Verholen) | /home/dave/Downloads/context-architecture-whitepaper-v1.0.0.pdf | whitepaper | yes (2026-06-12, read in full) | 2026-06-12 |
+| pdf:context-arch-v1 | Context Architecture for Enterprise Agentic Software Delivery v1.0.0 (D. Verholen) | local PDF (not in repo); via author: https://www.linkedin.com/in/david-verholen-14aa23aa/ | whitepaper | yes (2026-06-12, read in full) | 2026-06-12 |
 | news:ami-funding | AMI Labs raises $1.03B (TechCrunch, 2026-03-09) | https://techcrunch.com/2026/03/09/yann-lecuns-ami-labs-raises-1-03-billion-to-build-world-models/ | news | yes (2026-06-12) | 2026-06-12 |

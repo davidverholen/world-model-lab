@@ -34,6 +34,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0001-pytorch-over-jax](decisions/0001-pytorch-over-jax.md) — PyTorch default (accepted)
 - [0002-knowledge-architecture](decisions/0002-knowledge-architecture.md) — Karpathy wiki × context architecture (accepted)
 - [0003-environment-ladder](decisions/0003-environment-ladder.md) — MiniGrid first, no rung-skipping (accepted)
+- [0004-remote-dispatch](decisions/0004-remote-dispatch.md) — SSH + git push over Tailscale to the 5070 Ti desktop; no orchestrator (accepted)
 
 ## Experiments
 

@@ -18,3 +18,4 @@ events.out.tfevents.*
 
 # Knowledge base raw source binaries (registered in sources/SOURCES.md)
 knowledge/sources/files/
+.env.remote
