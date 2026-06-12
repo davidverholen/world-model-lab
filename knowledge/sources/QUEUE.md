@@ -94,3 +94,15 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] arxiv:2509.14252 LLM-JEPA (id unverified) · arxiv:2307.12698 MC-JEPA · A-JEPA (audio, id unverified)
 - [ ] awesome-list: https://github.com/LMD0311/Awesome-World-Model
 - [ ] World Labs "Marble" (worldlabs.ai) · Oasis (oasis.decart.ai) — neural game engines
+
+### Found via Nikishin citation walk (2026-06-12, ids url-verified)
+
+- [x] arxiv:2310.15017 Mind the Model, Not the Agent — INGESTED 2026-06-12 →
+      papers/qiao-model-primacy-2023.md (redesigned exp 0012)
+- [ ] arxiv:2412.14312 Stealing That Free Lunch: Exposing the Limits of
+      Dyna-Style RL — direct Dyna-limits analysis; pairs with the lineage thread
+- [ ] arxiv:2501.16918 On Rollouts in Model-Based RL
+- [ ] arxiv:2502.00802 Fisher-Guided Selective Forgetting (primacy-bias mitigation)
+- [ ] Revisiting Plasticity in Visual RL: Data, Modules and Training Stages
+      (2023; id to verify) — module-level plasticity localization, directly our Q
+- [ ] EvoAgent: continual world model for long-horizon tasks (2025; id to verify)

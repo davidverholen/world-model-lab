@@ -289,3 +289,17 @@ coverage complete, optimizer rebuild correct — and one important latent bug:
 would silently no-op. Checked all 9 exp-0011 checkpoint configs: ema_decay=0
 throughout -> negative result stands clean. Guard added (mutually exclusive
 flags); lr-rebuild fragility commented.
+
+## [2026-06-12] scout+ingest+correction | frontier claim overturned by the wall protocol (Dave's prompt)
+
+Ran the hitting-a-wall protocol properly for the first time (OpenAlex anchor walk +
+S2 citation pages of Nikishin, ~300 citations triaged): found arXiv:2310.15017
+"Mind the Model, Not the Agent" (2023) — directly on-topic, ingested at method
+depth. It independently confirms our 0011 negative (agent resets harm MBRL),
+locates MBRL primacy bias in the world model, and predicts reset failure at low
+model-UTD (ours: ~0.1) — reframing our crashes as possible UNDER-training. Exp
+0011 page corrected (frontier claim narrowed to sparse-reward low-UTD belief-MPC
+flywheel); exp 0012 redesigned (Qiao shrink-perturb arm, UTD-scaling diagnostic
+arm, surgical-heads arm); PROCESS horizon rule hardened (deep-search mandatory
+for frontier claims); 6 more citation-walk finds queued. ./scripts/fetch_sources.sh
+to be re-run for the new PDF.

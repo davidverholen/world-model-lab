@@ -65,14 +65,23 @@ uint8 replay held 6-wide RAM at ~3.7 GB/process (no paging; ~45–55 min batches
    round; (c) post-reset round gets 4× updates (one-time cost, env-budget legal);
    (d) consider shrink-and-perturb (soft reset) as the gentler arm. Falsifiable
    bar unchanged: no >20pp crash + mean ≥55%.
-4. **Horizon-rule status**: scout finds no published work on reset/plasticity
-   mechanics for model-based latent world models under flywheel collection. Per
-   the research loop's transformed step 2, exps 0009–0012 are now the primary
-   literature for this question. The nearest-neighbor map (churn reduction,
-   continual backprop, frozen trunk, DreamerV3's critic-EMA-target) is the design
-   space; frozen-trunk (DINOv3 line) remains the structural escape hatch.
-
-## Links
+4. **Horizon-rule status — CORRECTED 2026-06-12**: the original "no published
+   work" claim was wrong; it was made from WebSearch only. The hitting-a-wall
+   protocol (S2 citation walk of Nikishin, prompted by Dave) found
+   [[qiao-model-primacy-2023]] (arXiv:2310.15017): independently confirms our
+   "agent resets harm MBRL" result, locates MBRL primacy bias in the *world
+   model*, and shows world-model resets help ONLY at high model-UTD — ours is
+   ~0.1, where they predict degradation (matches our deep arm) and imply we may
+   be **under-training, not over-fitting**. Frontier claim survives only
+   narrowed: sparse-reward, low-UTD, belief-state MPC under flywheel collection.
+5. **Exp 0012 REDESIGNED after ingestion** (supersedes item 3's sketch): arms =
+   (a) Qiao's faithful recipe — shrink-perturb α=0.8 of the next-latent predictor
+   only, at round boundaries; (b) UTD-scaling diagnostic — updates 1500→6000,
+   no resets (tests the under-training hypothesis); (c) surgical value/reward
+   reset @ round 3 + 4× updates (still literature-uncovered for our setting).
+   Bar unchanged: no >20pp crash + mean ≥55%.
+   Process lesson: frontier claims REQUIRE the deep-search protocol, never
+   WebSearch alone.
 
 ## Links
 

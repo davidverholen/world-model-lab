@@ -24,6 +24,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [dreamer4-2025](papers/dreamer4-2025.md) — offline imagination training at scale, Minecraft diamonds (stub)
 - [ijepa-2023](papers/ijepa-2023.md) — the first JEPA: multi-block masking, EMA-teacher anti-collapse (vs our SIGReg), method depth (draft)
 - [nikishin-primacy-2022](papers/nikishin-primacy-2022.md) — primacy bias + reset protocol, implementation-grade (draft)
+- [qiao-model-primacy-2023](papers/qiao-model-primacy-2023.md) — MBRL primacy bias lives in the WORLD MODEL; world-model resets help only at high UTD; confirms our 0011 negative; redesigned exp 0012 (draft)
 - [lecun-2022-path](papers/lecun-2022-path.md) — the umbrella position paper; module↔our-layer mapping (draft, skim depth)
 
 ## Labs

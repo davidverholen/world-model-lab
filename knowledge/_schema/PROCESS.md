@@ -16,7 +16,10 @@
 
 **Horizon (Dave, 2026-06-12):** this loop holds until we reach genuinely original
 territory — a blocking problem no published work solves (scout comes up empty on
-the specific question, not the general area). At that point step 2 transforms:
+the specific question, not the general area). **A frontier claim requires the
+hitting-a-wall protocol (scout skill: S2/OpenAlex citation walks from anchor
+papers), never WebSearch alone** — added after exp 0011's premature claim was
+overturned by one S2 citation walk (found arXiv:2310.15017 directly on-topic). At that point step 2 transforms:
 "ingest the answer" becomes "map nearest neighbors, design the novel mechanism,
 pre-register, and treat our experiment pages as the primary literature." The rest
 of the loop is unchanged. Note: we may be near this edge already — reset-style

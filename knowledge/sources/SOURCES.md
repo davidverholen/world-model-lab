@@ -15,6 +15,7 @@ new ingests). Non-arXiv sources (books, web docs) are not auto-fetched.
 | arxiv:2605.26379 | When Does LeJEPA Learn a World Model? | https://arxiv.org/abs/2605.26379 | paper | yes (2026-06-12) | 2026-06-12 |
 | openreview:lecun-path | A Path Towards Autonomous Machine Intelligence (v0.9.2) | https://openreview.net/pdf?id=BZ5a1r-kVsf | position paper | yes (2026-06-12, title+abstract) | 2026-06-12 |
 | arxiv:2205.07802 | The Primacy Bias in Deep RL (Nikishin et al.) | https://arxiv.org/abs/2205.07802 | paper | yes (2026-06-12, protocol sections) | 2026-06-12 |
+| arxiv:2310.15017 | Mind the Model, Not the Agent: The Primacy Bias in Model-Based RL (Qiao et al.) | https://arxiv.org/abs/2310.15017 | paper | yes (2026-06-12, full-text method) | 2026-06-12 |
 | arxiv:2508.10104 | DINOv3 (Meta) | https://arxiv.org/abs/2508.10104 | paper | yes (2026-06-12, abstract) | 2026-06-12 |
 | arxiv:2301.08243 | I-JEPA: Self-Supervised Learning from Images with a JEPA | https://arxiv.org/abs/2301.08243 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2404.08471 | V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video | https://arxiv.org/abs/2404.08471 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
