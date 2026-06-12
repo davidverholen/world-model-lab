@@ -12,21 +12,21 @@ was resolved and key claims checked during this project (not taken from memory).
 | openreview:lecun-path | A Path Towards Autonomous Machine Intelligence (v0.9.2) | https://openreview.net/pdf?id=BZ5a1r-kVsf | position paper | yes (2026-06-12, title+abstract) | 2026-06-12 |
 | arxiv:2205.07802 | The Primacy Bias in Deep RL (Nikishin et al.) | https://arxiv.org/abs/2205.07802 | paper | yes (2026-06-12, protocol sections) | 2026-06-12 |
 | arxiv:2508.10104 | DINOv3 (Meta) | https://arxiv.org/abs/2508.10104 | paper | yes (2026-06-12, abstract) | 2026-06-12 |
-| arxiv:2301.08243 | I-JEPA: Self-Supervised Learning from Images with a JEPA | https://arxiv.org/abs/2301.08243 | paper | no | 2026-06-12 |
-| arxiv:2404.08471 | V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video | https://arxiv.org/abs/2404.08471 | paper | no | 2026-06-12 |
-| arxiv:1803.10122 | World Models (Ha & Schmidhuber) | https://arxiv.org/abs/1803.10122 | paper | no | 2026-06-12 |
-| arxiv:1811.04551 | PlaNet: Learning Latent Dynamics for Planning from Pixels | https://arxiv.org/abs/1811.04551 | paper | no | 2026-06-12 |
-| arxiv:2010.02193 | DreamerV2: Mastering Atari with Discrete World Models | https://arxiv.org/abs/2010.02193 | paper | no | 2026-06-12 |
-| arxiv:2301.04104 | DreamerV3: Mastering Diverse Domains through World Models | https://arxiv.org/abs/2301.04104 | paper | no | 2026-06-12 |
-| arxiv:1911.08265 | MuZero: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model | https://arxiv.org/abs/1911.08265 | paper | no | 2026-06-12 |
-| arxiv:2310.16828 | TD-MPC2: Scalable, Robust World Models for Continuous Control | https://arxiv.org/abs/2310.16828 | paper | no | 2026-06-12 |
-| arxiv:2209.00588 | IRIS: Transformers are Sample-Efficient World Models | https://arxiv.org/abs/2209.00588 | paper | no | 2026-06-12 |
-| arxiv:2405.12399 | DIAMOND: Diffusion for World Modeling | https://arxiv.org/abs/2405.12399 | paper | no | 2026-06-12 |
-| arxiv:2402.15391 | Genie: Generative Interactive Environments | https://arxiv.org/abs/2402.15391 | paper | no | 2026-06-12 |
-| arxiv:2501.03575 | NVIDIA Cosmos World Foundation Model Platform | https://arxiv.org/abs/2501.03575 | paper | no | 2026-06-12 |
-| arxiv:2506.01622 | General agents need world models (Richens et al.) | https://arxiv.org/abs/2506.01622 | paper | no | 2026-06-12 |
+| arxiv:2301.08243 | I-JEPA: Self-Supervised Learning from Images with a JEPA | https://arxiv.org/abs/2301.08243 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2404.08471 | V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video | https://arxiv.org/abs/2404.08471 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:1803.10122 | World Models (Ha & Schmidhuber) | https://arxiv.org/abs/1803.10122 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:1811.04551 | PlaNet: Learning Latent Dynamics for Planning from Pixels | https://arxiv.org/abs/1811.04551 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2010.02193 | DreamerV2: Mastering Atari with Discrete World Models | https://arxiv.org/abs/2010.02193 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2301.04104 | DreamerV3: Mastering Diverse Domains through World Models | https://arxiv.org/abs/2301.04104 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:1911.08265 | MuZero: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model | https://arxiv.org/abs/1911.08265 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2310.16828 | TD-MPC2: Scalable, Robust World Models for Continuous Control | https://arxiv.org/abs/2310.16828 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2209.00588 | IRIS: Transformers are Sample-Efficient World Models | https://arxiv.org/abs/2209.00588 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2405.12399 | DIAMOND: Diffusion for World Modeling | https://arxiv.org/abs/2405.12399 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2402.15391 | Genie: Generative Interactive Environments | https://arxiv.org/abs/2402.15391 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2501.03575 | NVIDIA Cosmos World Foundation Model Platform | https://arxiv.org/abs/2501.03575 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2506.01622 | General agents contain world models (Richens et al.; title corrected at verification) | https://arxiv.org/abs/2506.01622 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2109.06780 | Crafter: Benchmarking the Spectrum of Agent Capabilities (Hafner) | https://arxiv.org/abs/2109.06780 | paper | yes (2026-06-12, abstract) | 2026-06-12 |
-| arxiv:2411.14499 | Survey: Understanding World or Predicting Future? | https://arxiv.org/abs/2411.14499 | survey | no | 2026-06-12 |
+| arxiv:2411.14499 | Survey: Understanding World or Predicting Future? | https://arxiv.org/abs/2411.14499 | survey | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | web:gym-docs | Gymnasium documentation | https://gymnasium.farama.org | docs | no | 2026-06-12 |
 | web:minigrid-docs | MiniGrid documentation | https://minigrid.farama.org | docs | no | 2026-06-12 |
 | web:worldmodels-site | World Models interactive article | https://worldmodels.github.io/ | article | no | 2026-06-12 |

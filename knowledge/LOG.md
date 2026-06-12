@@ -208,3 +208,13 @@ S1/S2 -> Mode-1/2), predictive brain (Rao-Ballard, Friston), LeCun's arc (LeNet 
 contrastive -> EBM -> cake -> 2022 path), model-based RL (Dyna 1991 — our flywheel's
 true name — Schmidhuber 90/91, POMDP belief states, 2018 revival). 6 lineage
 sources queued (background section). Page verified:false until ids checked on ingest.
+
+## [2026-06-12] curation + scout | QUEUE ids batch-verified via arXiv API; rung-3 SOTA line queued
+
+All ~34 queued arXiv ids verified in one API call (id->title). Catches: DINO-WM id
+was WRONG (2411.04958 = astronomy survey; corrected to 2411.04983, ICML 2025) —
+the "id uncertain" flag from intake did its job; two title corrections (General
+agents CONTAIN world models; MAINTAINING Plasticity). SOURCES verified flags
+flipped (25 rows). New rung-3 prep section: 2502.01591 (Craftax SOTA jump),
+2605.16457 ITC (May 2026, current Craftax SOTA 72.5%, identifiability framing
+converging with LeJEPA theorem), delta-IRIS + DART (low).

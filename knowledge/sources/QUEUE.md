@@ -1,8 +1,11 @@
 # Intake Queue
 
-Unread / unverified material waiting for proper ingestion (`/ingest-source`).
-Items here must NOT be cited by wiki pages. arXiv ids below come from a training-data
-compilation (2026-06-12) and need verification at ingest time unless marked otherwise.
+Unread material waiting for proper ingestion (`/ingest-source`). Items here must
+NOT be cited by wiki pages. **All arXiv ids batch-verified 2026-06-12 via the arXiv
+API (id→title match)**, except the Background/lineage section (pre-arXiv classics).
+Corrections found in that pass: DINO-WM is 2411.04983 (2411.04958 is an astronomy
+paper); "General agents CONTAIN world models" (not "need"); Sutton-lab plasticity
+paper is "MAINTAINING Plasticity in Deep Continual Learning".
 
 ## High priority (directly on our experiment path)
 
@@ -27,6 +30,18 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 - [ ] arxiv:2605.26379 When Does LeJEPA Learn a World Model? (id verified; conditions under which JEPA recovers true environment structure)
 - [~] openreview:lecun-path — INGESTED at skim depth 2026-06-12 →
       papers/lecun-2022-path.md; full-PDF read still queued for promotion to current
+
+## Rung-3 prep (Crafter/Craftax SOTA line; found + url-verified 2026-06-12)
+
+- [ ] arxiv:2502.01591 Improving Transformer World Models for Data-Efficient RL —
+      the early-2025 Craftax-classic SOTA jump (53.2%→67.4% reward); read before
+      designing our rung-3 agent
+- [ ] arxiv:2605.16457 Identifiable Token Correspondence for World Models (ITC,
+      May 2026) — current Craftax SOTA (72.5% / 35.6%), beats token-based WMs on
+      Atari100k; "identifiability" framing connects to the LeJEPA theorem
+      (2605.26379) — the two threads are converging
+- [ ] arxiv:2406.19320 Δ-IRIS context-aware tokenization · arxiv:2406.01361 DART
+      (Atari in a world of tokens) — token-WM efficiency line, lower priority
 
 ## Medium (context and alternatives)
 
@@ -69,7 +84,9 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 
 ## Low (breadth)
 
-- [ ] arxiv:2412.03572 Navigation World Models · arxiv:2411.04958 DINO-WM (id uncertain)
+- [ ] arxiv:2412.03572 Navigation World Models · arxiv:2411.04983 DINO-WM (id
+      corrected 2026-06-12; ICML 2025; frozen DINOv2 features + planning — pairs
+      with the DINOv3 frozen-encoder retention hypothesis)
 - [ ] arxiv:2403.00504 Image World Models · arxiv:2502.11831 intuitive physics from video
 - [ ] arxiv:2309.17080 GAIA-1 · arxiv:2503.20523 GAIA-2 (Wayve, driving)
 - [ ] arxiv:2501.03575 NVIDIA Cosmos · arxiv:2206.14176 DayDreamer (robots)
