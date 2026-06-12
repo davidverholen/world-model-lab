@@ -106,3 +106,16 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] Revisiting Plasticity in Visual RL: Data, Modules and Training Stages
       (2023; id to verify) — module-level plasticity localization, directly our Q
 - [ ] EvoAgent: continual world model for long-horizon tasks (2025; id to verify)
+
+## Minecraft milestone (ADR 0005; ids UNVERIFIED — batch-verify before ingest)
+
+- [ ] VPT: Learning to Act by Watching Unlabeled Online Videos (Baker et al. 2022,
+      OpenAI) — the IDM pseudo-labeling recipe; the action-labeled-video signal
+- [ ] MineDojo (Fan et al. 2022) — task suite + YouTube/wiki/Reddit corpus; the
+      text-signal data source
+- [ ] Dynalang: Learning to Model the World with Language (Lin et al.) — language
+      as a predicted modality INSIDE a Dreamer world model; closest published work
+      to our text-signal goal
+- [ ] Voyager (Wang et al. 2023) — LLM-as-planner over Minecraft skills; the
+      pragmatic fallback architecture
+- [ ] STEVE-1 — instruction-following Minecraft agent (text->behavior bridging)

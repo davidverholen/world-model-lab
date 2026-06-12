@@ -26,7 +26,19 @@ ADR [0003](knowledge/decisions/0003-environment-ladder.md)).
 - [ ] DreamerV3-class baseline on Crafter; our architecture vs it
 - [ ] Atari100k subset; compare against published world-model agents (IRIS, DIAMOND, DreamerV3)
 
-## Phase 4+ — Continuous control / 3D, real-world transfer
+## Phase 4 — Continuous control / 3D
 
-- [ ] dm_control or Miniworld; sim2real study; camera-feed world model
-- Parked until the ladder earns it (see ADR 0003).
+- [ ] dm_control or Miniworld
+
+## Phase 5 — Minecraft (ADR 0005): the pre-real-world milestone
+
+- [ ] MineRL env up; baseline study (DreamerV3 online / Dreamer 4 offline / VPT)
+- [ ] Offline world-model pretraining from action-labeled video (VPT corpus)
+- [ ] Self-play flywheel at Minecraft scale (retention fixes must hold here)
+- [ ] Language into the world model (Dynalang/VL-JEPA direction) — open research
+- [ ] "Successfully play": diamond at a published efficiency tier + task breadth
+
+## Phase 6 — Real-world transfer
+
+- [ ] sim2real study; camera-feed world model
+- Parked until the ladder earns it (ADRs 0003, 0005).

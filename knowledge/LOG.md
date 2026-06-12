@@ -303,3 +303,11 @@ flywheel); exp 0012 redesigned (Qiao shrink-perturb arm, UTD-scaling diagnostic
 arm, surgical-heads arm); PROCESS horizon rule hardened (deep-search mandatory
 for frontier claims); 6 more citation-walk finds queued. ./scripts/fetch_sources.sh
 to be re-run for the new PDF.
+
+## [2026-06-12] curation | ADR 0005: Minecraft milestone (Dave) — three-signal training
+
+New rung 5b before real-world transfer: self-play + VPT-style action-labeled video
++ text-in-world-model (open research; Dynalang/VL-JEPA direction). Ladder + ROADMAP
+amended; 5 sources queued (ids to verify). Rationale: forces multi-modal/language
+integration without robotics hardware; resource-rich (VPT corpus, MineRL/MineDojo,
+published reference agents incl. Dreamer 4 offline diamonds).

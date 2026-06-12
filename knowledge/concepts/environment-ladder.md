@@ -21,7 +21,8 @@ difficulty so failures are attributable. Accepted in [[0003-environment-ladder]]
 | 3 | Crafter | long horizon, many subgoals, procgen | nontrivial achievement count within 1M steps |
 | 4 | Atari 100k subset | pixels at scale, diverse dynamics | competitive with published WM agents on ≥3 games |
 | 5 | Continuous control (dm_control) or 3D (Miniworld) | continuous actions / 3D | TBD |
-| 6 | Real-world transfer (sim2real, robot or camera feed) | reality gap | TBD — far future |
+| 5b | **Minecraft** ([[0005-minecraft-milestone]]) | multi-modal training: self-play + action-labeled video (VPT-style) + text-in-world-model (open research); long horizons at scale | diamond at a published sample-efficiency tier + task-suite breadth (refine at entry) |
+| 6 | Real-world transfer (sim2real, robot or camera feed) | reality gap | TBD — after 5b |
 
 ## Why it matters here
 
