@@ -10,6 +10,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [imagination-training](concepts/imagination-training.md) — Dreamer lineage: RSSM, actor-critic in imagination, Dreamer 4 offline (draft)
 - [value-equivalent-planning](concepts/value-equivalent-planning.md) — MuZero/TD-MPC2: model only what decisions need (draft)
 - [environment-ladder](concepts/environment-ladder.md) — our staged env progression with exit criteria (current)
+- [latent-collapse](concepts/latent-collapse.md) — the JEPA failure mode, fixes table, measurement pitfalls (draft)
 
 ## Papers
 
@@ -35,9 +36,9 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 
 ## Experiments
 
-- [0001-naive-latent-regression](experiments/0001-naive-latent-regression.md) — reproduce latent collapse on purpose (planned)
+- [0001-naive-latent-regression](experiments/0001-naive-latent-regression.md) — collapse baseline confirmed: latent_std 0.0003, probe R² −0.49 (done)
+- [0002-sigreg-anti-collapse](experiments/0002-sigreg-anti-collapse.md) — SIGReg λ=0.05 prevents collapse (latent_std 0.74, probe R² 0.25); probe-protocol pitfalls documented (done)
 
 ## Wanted pages (linked but not yet written)
 
-- latent-collapse — referenced by jepa, imagination-training, experiment 0001
 - world-models-1803.10122 — Ha & Schmidhuber paper page (queued for ingest)

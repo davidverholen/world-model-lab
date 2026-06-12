@@ -29,3 +29,20 @@ after every meaningful milestone, curate the KB first, then commit everything in
 commit. Touched-page lint for this checkpoint: INDEX complete, frontmatter consistent,
 known dangling links registered under "Wanted pages" (latent-collapse,
 world-models-1803.10122). First commit follows this entry.
+
+## [2026-06-12] ingest | LeJEPA method sections (arXiv:2511.08544 + reference repo)
+
+SIGReg details extracted (Epps-Pulley on random slices, 17-point trapezoid, λ=0.05,
+batch≥128, bounded gradients). lejepa-2025 page stub→draft, read state: skimmed.
+Pages touched: papers/lejepa-2025, concepts/latent-collapse (new), concepts/jepa.
+
+## [2026-06-12] curation | milestone: SIGReg fixes latent collapse on MiniGrid
+
+Exp 0001 formal run recorded (full collapse, commit 6692aa2). Exp 0002 run and
+recorded: SIGReg λ=0.05 holds latent_std at ~0.75 over 1000 updates (control: 0.0003);
+final probe protocol reads SIGReg 0.25 vs control −0.49. Probe target 0.8 not met —
+representation-quality measurement itself was the main lesson (amplitude vs
+information; standardization pitfall) → documented in latent-collapse page; proper
+probe protocol is exp 0003. INDEX updated (latent-collapse off wanted list, exps
+done); touched-page frontmatter checked. Next: exp 0003 probe protocol + Empty-8x8,
+then memory for partial observability (rung 2).

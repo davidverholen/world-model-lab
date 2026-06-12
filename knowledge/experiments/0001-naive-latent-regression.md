@@ -24,9 +24,17 @@ LatentDynamicsPredictor, Adam 3e-4, 200 updates, batch 64. Collapse metric:
 
 ## Result
 
-_Formal run pending._ Preliminary smoke run (2026-06-12, reduced: `--steps 500
---updates 100`, pre-first-commit, CUDA/RTX 4070): loss=0.00000, latent_std=0.0005 by
-update 100 — full collapse, as hypothesized.
+Formal run 2026-06-12, commit 6692aa2, default settings (`uv run python -m
+world_model.collect`, seed 0, CUDA/RTX 4070): pred_loss=0.00000 from update 50 on;
+latent_std 0.0007 → 0.0003 (updates 50→200). Full collapse, as hypothesized.
+(Earlier same-day smoke run at reduced settings matched: latent_std 0.0005 @ 100.)
+
+## Lesson
+
+Confirmed: joint latent regression without anti-collapse machinery is degenerate by
+construction — pred_loss is meaningless as a standalone metric. Every latent-model
+experiment must log a collapse indicator (latent_std) and a representation metric
+(probe R²). Follow-up: [[0002-sigreg-anti-collapse]].
 
 ## Lesson
 

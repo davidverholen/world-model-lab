@@ -46,3 +46,19 @@ def test_replay_roundtrip():
     batch = buf.sample(4)
     assert batch["obs"].shape == (4, 3, 4, 4)
     assert batch["action"].dtype == np.int64
+
+
+def test_sigreg_discriminates_collapse():
+    from world_model.models import SIGReg
+
+    torch.manual_seed(0)
+    sigreg = SIGReg(num_slices=128)
+    gaussian = torch.randn(256, 32)
+    collapsed = torch.zeros(256, 32) + 0.1
+    loss_gaussian = sigreg(gaussian)
+    loss_collapsed = sigreg(collapsed)
+    assert loss_collapsed > 10 * loss_gaussian  # collapse must be heavily penalized
+    # gradients flow
+    z = torch.randn(64, 16, requires_grad=True)
+    sigreg(z).backward()
+    assert z.grad is not None and torch.isfinite(z.grad).all()

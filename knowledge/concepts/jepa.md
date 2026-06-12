@@ -49,5 +49,5 @@ sparse environments).
 
 ## Links
 
-[[world-models]] · [[latent-collapse]] (page needed — recurring topic) ·
-[[imagination-training]] · [[ami-labs]] · [[vjepa2-2025]] · [[lejepa-2025]]
+[[world-models]] · [[latent-collapse]] · [[imagination-training]] · [[ami-labs]] ·
+[[vjepa2-2025]] · [[lejepa-2025]]
