@@ -334,3 +334,11 @@ validates/discounts). Breaks 2a's circularity; unifies ADR-0005 signals 2+3;
 cognitive analogy: Craik's mental simulation + belief corroboration. Gate is
 mandatory (video hallucination) and retention-adjacent (synthetic distribution
 shift).
+
+## [2026-06-12] curation | unified trust-weighted replay (Dave): source priors + corroboration
+
+Real vs imagined experience unified on one trust scale: source sets the prior,
+corroboration updates it, loss scales with it; imagination earns what real
+experience gets at birth. Human analogy: imagination is inexact AND functional via
+constant verification. Prototype path: corrupted-synthetic injection on Crafter.
+Symmetry noted with the KB's own verified-flag epistemics.

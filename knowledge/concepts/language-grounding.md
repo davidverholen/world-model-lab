@@ -38,11 +38,23 @@ exceed context or must persist across episodes (Minecraft wiki scale).
 
 The cognitive analogy (Dave): humans convert text into mental imagery/simulation
 ([[intellectual-lineage]]: Craik's "try it in the head"), which becomes belief only
-through corroboration against experience. 2b's corroboration gate is the
-engineering version: synthetic transitions enter replay with a trust weight that
-real rollouts raise or lower — never as ground truth. This gate is mandatory
-(generated video hallucinates physics) and is itself a [[retention]]-class problem
-(synthetic data = one more distribution shift the training must survive).
+through corroboration against experience. Human imagination is not exact simulation
+either — it works *because of* constant verification and reinforcement, not despite
+inexactness. So hallucination is not disqualifying; the gate IS the mechanism.
+
+**Unified trust-weighted replay (Dave, 2026-06-12):** every transition carries a
+trust weight w. The SOURCE sets the prior (own validated play: high; others'
+IDM-labeled video: medium; generated video: low; own dreams: lowest); CORROBORATION
+updates it (consistency with verified experience raises w, contradiction lowers it);
+training loss scales with w. "Real" vs "imagined" stops being categorical — just
+different priors on one scale; imagination must earn the weight real experience
+gets at birth. Engineering neighbors: prioritized replay (different objective),
+MBPO's model-trust lessons, Bayesian source priors. Note the symmetry with this
+KB's own epistemics (sources enter unverified, trust is earned by verification).
+Cheap prototype (pre-Minecraft): inject deliberately corrupted synthetic
+transitions into Crafter replay with low priors; verify the gate discounts them
+and clean synthetic data earns weight. Gate failure modes are
+[[retention]]-adjacent (synthetic data = another distribution shift).
 
 ## Why it matters here
 
