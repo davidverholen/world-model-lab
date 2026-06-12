@@ -69,6 +69,18 @@ run)
   echo "running on $REMOTE @ $(git rev-parse --short HEAD): uv run $*"
   ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && uv run $*"
   ;;
+shell)
+  [ -z "$(git status --porcelain)" ] || {
+    echo "working tree dirty — commit first (remote runs are pinned to a commit)" >&2
+    exit 1
+  }
+  git push desktop HEAD:refs/heads/dispatch -f
+  echo "shell on $REMOTE @ $(git rev-parse --short HEAD): $*"
+  ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && $*"
+  ;;
+kill)
+  ssh "$REMOTE" "taskkill //IM python.exe //F" || true
+  ;;
 pull)
   mkdir -p runs/remote
   scp -r "$REMOTE:$REMOTE_DIR/runs/*" runs/remote/ || echo "(no remote runs yet)"
