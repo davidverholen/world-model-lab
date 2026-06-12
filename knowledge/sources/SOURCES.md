@@ -23,7 +23,7 @@ was resolved and key claims checked during this project (not taken from memory).
 | arxiv:2402.15391 | Genie: Generative Interactive Environments | https://arxiv.org/abs/2402.15391 | paper | no | 2026-06-12 |
 | arxiv:2501.03575 | NVIDIA Cosmos World Foundation Model Platform | https://arxiv.org/abs/2501.03575 | paper | no | 2026-06-12 |
 | arxiv:2506.01622 | General agents need world models (Richens et al.) | https://arxiv.org/abs/2506.01622 | paper | no | 2026-06-12 |
-| arxiv:2109.06780 | Crafter: Benchmarking the Spectrum of Agent Capabilities | https://arxiv.org/abs/2109.06780 | paper | no | 2026-06-12 |
+| arxiv:2109.06780 | Crafter: Benchmarking the Spectrum of Agent Capabilities (Hafner) | https://arxiv.org/abs/2109.06780 | paper | yes (2026-06-12, abstract) | 2026-06-12 |
 | arxiv:2411.14499 | Survey: Understanding World or Predicting Future? | https://arxiv.org/abs/2411.14499 | survey | no | 2026-06-12 |
 | web:gym-docs | Gymnasium documentation | https://gymnasium.farama.org | docs | no | 2026-06-12 |
 | web:minigrid-docs | MiniGrid documentation | https://minigrid.farama.org | docs | no | 2026-06-12 |

@@ -139,3 +139,17 @@ collection success -> 0% eval after retraining). Exp 0009 agenda: ignition
 (adaptive round 0, success-episode oversampling in replay, intrinsic signal) +
 stability (success-balanced sampling, lr schedule, EMA agent weights); world-model
 runs need >=2-3 seeds (round-0 luck is decisive). Rung 2b open; scoreboard PPO 2:1.
+
+## [2026-06-12] curation | milestone: ignition solved, retention isolated (exp 0009)
+
+3 parallel seeds on the 5070 Ti (first remote.sh shell use; ~2h wall, 82% util,
+49C). Adaptive round 0 + success-window oversampling fixed ignition everywhere
+(seed 1: 6 success examples -> 60% greedy straight after round 0 — vs PPO 0% at
+that budget). But continued round training destroyed and only partly rebuilt that
+competence (60->0->50%): catastrophic interference under distribution shift is now
+THE isolated bottleneck (3rd sighting, first clean). Best-checkpoint means: WM 40%
+@ 115-130k vs PPO 37% @ 110k — parity via guard, not a win; rung 2b open. Exp 0010
+(pre-registered): retention mechanics — EMA/snapshot acting weights, lr decay after
+round 0, value target network, or frozen-trunk/head-only later rounds. Crafter
+source verified (abstract) during the wait. remote.sh gained shell+kill; killed
+runs survive ssh death on Windows — kill subcommand is the off switch.

@@ -46,6 +46,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0006-value-head-doorkey](experiments/0006-value-head-doorkey.md) — DoorKey solved: value head + flywheel → 90%/75% vs 8% random; eval-hygiene incident (tile-size obs mismatch) resolved + guarded (done)
 - [0007-ppo-baseline](experiments/0007-ppo-baseline.md) — honest loss: PPO 100% @ 80k on DoorKey-5x5, ahead at every budget; rung 2 stays open → escalate env + faster flywheel (done)
 - [0008-doorkey6x6-vs-ppo](experiments/0008-doorkey6x6-vs-ppo.md) — flywheel fails to ignite on 6x6 (1 reward event in round 0); PPO ~37% > WM 10%; ignition + round-instability are the real blockers → exp 0009 (done)
+- [0009-ignition-mechanics](experiments/0009-ignition-mechanics.md) — ignition solved (6 examples → 60% after round 0); retention now the isolated bottleneck (60%→0% under continued training); parity with PPO, rung 2b open → exp 0010 stability (done)
 
 ## Wanted pages (linked but not yet written)
 

@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-12
 ---
 
-# 0009: Ignition mechanics — oversampling + adaptive round 0 on DoorKey-6x6 (planned)
+# 0009: Ignition fixed, retention broken — DoorKey-6x6, 3 seeds (run 2026-06-12)
 
 ## Hypothesis
 
@@ -37,11 +37,45 @@ PPO comparator: exp 0008 sweeps (`runs/sweeps/exp0008-ppo/`), curves up to 110k.
 
 ## Result
 
-_pending_
+3 seeds in parallel on one GPU (~82% util, 49 °C — first use of `remote.sh shell`;
+wall ~2h vs ~4.5h sequential). Checkpoints: `runs/remote/doorkey6x6_ign_s{0,1,2}.pt`.
+
+| seed | ignition (events @ steps) | best eval (round) | final round | total steps |
+|---|---|---|---|---|
+| 0 | 3 @ 40k (cap) | 20% (r4) | 10% | 130k |
+| 1 | 6 @ 25k | **60% (r0)** | 50% | 115k |
+| 2 | 3 @ 40k (cap) | 40% (r6) | 40% | 130k |
+
+PPO comparator (exp 0008, 110k): 40/60/10, mean ~37%. WM best-checkpoints
+20/60/40, mean 40% at 115–130k — **parity at best, not the hypothesized ≥20pp win**,
+and bought with extra ignition budget.
+
+**The decisive observation is seed 1**: 6 success examples + oversampling → 60%
+greedy directly after round 0 (the approach works, fast!) — then five rounds of
+further training *destroyed and only partially rebuilt* it (60→10→0→10→20→20→50%).
+Hypothesis's no-regression criterion failed; the pre-registered alternative fires:
+**instability is not a sampling problem.**
 
 ## Lesson
 
-_pending_
+1. **Ignition: solved.** Adaptive round 0 + 25% success-window oversampling → every
+   seed evaluates >0% after round 0 (exp 0008: 0%); 6 examples sufficed for 60%.
+   Both mechanics stay on by default.
+2. **Retention is the bottleneck now, cleanly isolated.** Continuing Adam training
+   over a distribution that shifts every round catastrophically interferes with
+   exactly the competence just acquired. Exp 0010 candidates (pre-registered):
+   EMA/snapshot weights for the acting agent, lower lr after round 0, value-head
+   target networks, or freezing encoder/dynamics once good and training only heads.
+3. Seed variance is large (ignition luck: 25k vs 40k just to start); 3 seeds is the
+   floor for any claim on this rung.
+4. Parallel-seeds-on-one-GPU works exactly as the [[compute-strategy]] corollary
+   predicted (3× wall-time, 49 °C); `remote.sh shell/kill` are the new primitives.
+5. Rung 2b verdict: **still open** — we match PPO's mean via best-checkpoint
+   selection, but matching with a guard is not beating. Fix retention first;
+   the 60%-after-25k-steps data point says the win is there once the agent can
+   keep what it learns (PPO at 25k: 0%).
+
+## Links
 
 ## Links
 
