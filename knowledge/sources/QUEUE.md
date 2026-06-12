@@ -53,6 +53,20 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 - [ ] arxiv:2512.10942 VL-JEPA (Dec 2025) — vision-language JEPA; lower priority
       (language enters our roadmap only with mission-conditioned MiniGrid tasks)
 
+## Background / lineage (no rush; see concepts/intellectual-lineage.md; ids unverified)
+
+- [ ] Sutton 1991, "Dyna, an Integrated Architecture for Learning, Planning, and
+      Reacting" (SIGART) — our flywheel's true name; read before exp ~0012
+- [ ] LeCun et al. 2006, "A Tutorial on Energy-Based Learning" — the formal frame
+      under JEPA
+- [ ] Hadsell, Chopra & LeCun 2006, "Dimensionality Reduction by Learning an
+      Invariant Mapping" (CVPR) — contrastive/joint-embedding origin
+- [ ] Kaelbling, Littman & Cassandra 1998, "Planning and Acting in Partially
+      Observable Stochastic Domains" — belief states, formally
+- [ ] Rao & Ballard 1999, "Predictive Coding in the Visual Cortex" (Nat. Neurosci.)
+- [ ] Craik 1943, *The Nature of Explanation* (book; excerpt suffices) — the origin
+      sentence of the whole field
+
 ## Low (breadth)
 
 - [ ] arxiv:2412.03572 Navigation World Models · arxiv:2411.04958 DINO-WM (id uncertain)

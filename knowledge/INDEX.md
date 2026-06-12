@@ -14,6 +14,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [compute-strategy](concepts/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
 - [agent-architecture](concepts/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
 - [retention](concepts/retention.md) — plasticity loss/primacy bias/interference: fix families, literature↔our status (draft)
+- [intellectual-lineage](concepts/intellectual-lineage.md) — 80 years of background in 4 threads: mental models, predictive brain, LeCun's arc, model-based RL; our flywheel = Dyna (draft, unverified ids)
 
 ## Papers
 

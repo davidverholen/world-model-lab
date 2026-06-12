@@ -200,3 +200,11 @@ models collapse under minor visual shifts") -> ami-labs page updated, QUEUE open
 item resolved. New: Causal-JEPA (2602.11389, object-level latent interventions),
 VL-JEPA (2512.10942, low priority). Dreamer/DeepMind side: nothing new beyond
 known Genie/Dreamer state; 2026 survey blogs noted but not queued (secondary).
+
+## [2026-06-12] curation | intellectual-lineage page (Dave's request: decades of background)
+
+New concept page organizing 4 threads: mental models (Craik 1943, Tolman, Kahneman
+S1/S2 -> Mode-1/2), predictive brain (Rao-Ballard, Friston), LeCun's arc (LeNet ->
+contrastive -> EBM -> cake -> 2022 path), model-based RL (Dyna 1991 — our flywheel's
+true name — Schmidhuber 90/91, POMDP belief states, 2018 revival). 6 lineage
+sources queued (background section). Page verified:false until ids checked on ingest.
