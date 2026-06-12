@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Experiment artifacts
+runs/
+experiments/runs/
+*.ckpt
+*.pt
+events.out.tfevents.*
+
+# Knowledge base raw source binaries (registered in sources/SOURCES.md)
+knowledge/sources/files/
