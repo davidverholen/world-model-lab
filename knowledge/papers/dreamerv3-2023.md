@@ -1,15 +1,15 @@
 ---
-status: stub
+status: draft
 owner: agent
 scope: local
 sources: [arxiv:2301.04104]
-verified: false
+verified: true
 last_reviewed: 2026-06-12
 ---
 
 # DreamerV3: Mastering Diverse Domains through World Models (Hafner et al., 2023)
 
-**Lab:** DeepMind / U Toronto · **Code:** https://github.com/danijar/dreamerv3 · **Read state:** abstract-only
+**Lab:** DeepMind / U Toronto · **Code:** https://github.com/danijar/dreamerv3 · **Read state:** skimmed (method sections via full text, 2026-06-12)
 
 ## One-paragraph summary
 
@@ -19,10 +19,32 @@ configuration work across 150+ tasks — first agent to collect Minecraft diamon
 scratch without human data. Later published in Nature (2025). The reference
 general-purpose world-model RL algorithm and our designated baseline.
 
+## Key ideas (implementation-grade, fetched 2026-06-12)
+
+- **RSSM**: 32 categorical latents × 32 classes + GRU deterministic state (256–4096
+  units by size); model state = concat(h, z). Latents are *stochastic discrete* —
+  vs our deterministic GRU belief.
+- **Symlog**: `sign(x)·ln(|x|+1)` on encoder inputs, reconstruction, reward, and
+  value targets — scale robustness across domains without per-env tuning.
+- **Two-hot distributional critic**: K=255 buckets over symlog[-20,20]; soft labels.
+- **KL balancing + free bits**: β_pred 1, β_dyn 0.5, β_rep 0.1; KL clipped below
+  1 nat (free bits) — prevents both collapse and over-regularization. Unimix 1%.
+- **Imagination actor-critic**: horizon 15, λ=0.95, γ=0.997, entropy 3e-4 fixed;
+  return normalization by inter-percentile range Per(95)−Per(5), only scale-down.
+- **Stability kit relevant to our [[retention]] thread**: critic EMA *target*
+  (decay 0.98, regularize critic toward it — NOT acting-EMA like our failed 0010
+  arm!), return-scale EMA 0.99, grad clip, no schedules/decay/dropout anywhere.
+- Sizes XS(8M)→XL(200M); training ratio 0.5–16 replayed steps per env step.
+
 ## Relevance to our experiments
 
-Ladder rungs 2–4 baseline. Also a parts bin: symlog and two-hot are reusable in any of
-our training loops regardless of architecture choice.
+Ladder rungs 2–4 baseline and a parts bin: symlog + two-hot for our reward/value
+heads (would replace pos_weight hacks more principledly), free-bits for SIGReg
+balance, and — directly on-thread — their critic-EMA-as-*target* (vs our
+EMA-as-actor that failed in 0010) is another untested retention mechanism: it
+regularizes the critic toward its own slow copy instead of replacing the actor.
+Note their training ratio (up to 16) vs ours (~0.1) — consistent with the Nikishin
+replay-ratio finding; our exp-0011 arm (c) probes this.
 
 ## Links
 

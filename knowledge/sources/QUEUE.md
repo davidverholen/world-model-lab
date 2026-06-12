@@ -22,8 +22,9 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] arxiv:2307.04887 Measuring and Mitigating Interference in RL — diagnosis metrics
 
 
-- [ ] arxiv:2301.08243 I-JEPA — read fully; foundation for our first latent predictor
-- [ ] arxiv:2301.04104 DreamerV3 — read fully; the reference baseline algorithm
+- [x] arxiv:2301.08243 I-JEPA — INGESTED 2026-06-12 → papers/ijepa-2023.md (method depth)
+- [x] arxiv:2301.04104 DreamerV3 — INGESTED 2026-06-12 → papers/dreamerv3-2023.md
+      (implementation-grade; symlog/two-hot/free-bits + critic-EMA-target noted for retention)
 - [ ] arxiv:1803.10122 World Models (Ha & Schmidhuber) + https://worldmodels.github.io/
 - [ ] arxiv:2509.24527 Dreamer 4 — read fully (id verified)
 - [ ] arxiv:2511.08544 LeJEPA + code https://github.com/rbalestr-lab/lejepa (id verified)

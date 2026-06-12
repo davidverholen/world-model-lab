@@ -3,6 +3,10 @@
 Immutable layer: sources are referenced by id, never edited. `verified` means the URL
 was resolved and key claims checked during this project (not taken from memory).
 
+Local reading copies: `scripts/fetch_sources.sh` downloads every arXiv source below
+to `knowledge/sources/files/arxiv-<id>.pdf` (gitignored; idempotent; re-run after
+new ingests). Non-arXiv sources (books, web docs) are not auto-fetched.
+
 | id | title | url | type | verified | added |
 |---|---|---|---|---|---|
 | arxiv:2506.09985 | V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning | https://arxiv.org/abs/2506.09985 | paper | yes (2026-06-12) | 2026-06-12 |

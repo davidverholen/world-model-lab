@@ -218,3 +218,14 @@ agents CONTAIN world models; MAINTAINING Plasticity). SOURCES verified flags
 flipped (25 rows). New rung-3 prep section: 2502.01591 (Craftax SOTA jump),
 2605.16457 ITC (May 2026, current Craftax SOTA 72.5%, identifiability framing
 converging with LeJEPA theorem), delta-IRIS + DART (low).
+
+## [2026-06-12] ingest | DreamerV3 (implementation depth) + I-JEPA (method depth); local PDF archive
+
+dreamerv3-2023 stub->draft: full trick kit extracted (symlog, two-hot K=255,
+KL balancing 1/0.5/0.1 + free bits 1 nat, return percentile norm, imagination
+H=15/lambda .95) — retention-relevant find: their critic-EMA is a TARGET
+(regularize toward slow copy), not acting weights like our failed 0010 arm; +
+training ratio up to 16 vs our 0.1. New page ijepa-2023: multi-block masking
+params, EMA-teacher 0.996->1.0 — the heuristic LeJEPA replaced. QUEUE marks.
+Dave's request: scripts/fetch_sources.sh -> 21 arXiv PDFs (183MB) in gitignored
+knowledge/sources/files/ for personal reading; idempotent, documented in SOURCES.
