@@ -134,6 +134,20 @@ def reinit(module: torch.nn.Module) -> None:
             sub.reset_parameters()
 
 
+def shrink_perturb(module: torch.nn.Module, alpha: float = 0.8) -> None:
+    """Soft reset toward fresh init: p <- (1-alpha)*p + alpha*p_fresh.
+
+    Qiao et al. (arXiv:2310.15017) world-model resetting recipe for Dreamer-style
+    transition predictors (their alpha=0.8). Unlike reinit, retains a fraction of
+    learned structure for faster recovery.
+    """
+    fresh = copy.deepcopy(module)
+    reinit(fresh)
+    with torch.no_grad():
+        for p, p_fresh in zip(module.parameters(), fresh.parameters(), strict=True):
+            p.mul_(1.0 - alpha).add_(p_fresh, alpha=alpha)
+
+
 def evaluate(
     encoder, dynamics, reward_head, value_head, env_id: str, episodes: int, device: str
 ) -> float:
@@ -206,11 +220,25 @@ def main() -> None:
     )
     parser.add_argument(
         "--reset",
-        choices=["none", "heads", "deep"],
+        choices=["none", "heads", "deep", "qiao", "surgical"],
         default="none",
-        help="primacy-bias resets (Nikishin, arXiv:2205.07802) at each round start: "
-        "reinit heads (reward/value/next-latent) or deep (also GRU+action embed; "
-        "encoder always kept), rebuild optimizer, keep replay — exp 0011",
+        help="retention mechanics: heads/deep = Nikishin-style reinit (exp 0011, "
+        "failed); qiao = shrink-perturb alpha=0.8 of the next-latent predictor only "
+        "(arXiv:2310.15017 world-model reset); surgical = reinit reward+value heads "
+        "only, dynamics untouched (exp 0012)",
+    )
+    parser.add_argument(
+        "--reset-round",
+        type=int,
+        default=-1,
+        help="apply the reset only at this round (-1 = every round >= 1)",
+    )
+    parser.add_argument(
+        "--post-reset-updates",
+        type=int,
+        default=None,
+        help="updates for rounds where a reset fired (default: updates-per-round); "
+        "exp 0011 lesson: reset heads need a generous relearn budget",
     )
     parser.add_argument(
         "--later-lr-scale",
@@ -302,21 +330,34 @@ def main() -> None:
             total_env_steps += chunk
         print(f"  -> {eps} episodes, {rew} reward events (total_env_steps={total_env_steps})")
         buffer.compute_returns(args.gamma)
-        if rnd >= 1 and args.reset != "none":
-            # Nikishin reset: forget the weights, keep the replay; oversampling makes
-            # the relearn fast. Acting agents already hold refs to these modules, so
-            # reinit in place; optimizer rebuilt (fresh Adam moments).
-            targets_to_reset = [reward_head, value_head, dynamics.next_latent]
-            if args.reset == "deep":
-                targets_to_reset += [dynamics.cell, dynamics.action_embed]
-            for m in targets_to_reset:
-                reinit(m)
+        did_reset = False
+        if rnd >= 1 and args.reset != "none" and args.reset_round in (-1, rnd):
+            # forget weights, keep replay; oversampling speeds the relearn. Acting
+            # agents hold refs to these modules (EMA combo excluded by the startup
+            # guard), so mutate in place; optimizer rebuilt (fresh Adam moments).
+            if args.reset == "qiao":
+                shrink_perturb(dynamics.next_latent, alpha=0.8)
+            elif args.reset == "surgical":
+                reinit(reward_head)
+                reinit(value_head)
+            else:
+                targets_to_reset = [reward_head, value_head, dynamics.next_latent]
+                if args.reset == "deep":
+                    targets_to_reset += [dynamics.cell, dynamics.action_embed]
+                for m in targets_to_reset:
+                    reinit(m)
             # single param group assumed: group[0]'s lr already carries later-lr-scale
             opt = torch.optim.Adam(
                 [p for m in modules for p in m.parameters()], lr=opt.param_groups[0]["lr"]
             )
+            did_reset = True
             print(f"  reset ({args.reset}) applied; optimizer rebuilt")
-        print(f"round {rnd}: training {args.updates_per_round} updates ...")
+        round_updates = (
+            args.post_reset_updates
+            if (did_reset and args.post_reset_updates)
+            else args.updates_per_round
+        )
+        print(f"round {rnd}: training {round_updates} updates ...")
         train(
             buffer,
             encoder,
@@ -325,7 +366,7 @@ def main() -> None:
             value_head,
             sigreg,
             opt,
-            args.updates_per_round,
+            round_updates,
             args.seq_batch,
             args.window,
             args.burn_in,

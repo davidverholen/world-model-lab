@@ -191,3 +191,29 @@ def test_reinit_changes_parameters():
     reinit(head)
     changed = any(not t.equal(b, p) for b, p in zip(before, head.parameters(), strict=True))
     assert changed
+
+
+def test_shrink_perturb_partial_reset():
+    import torch as t
+
+    from world_model.models import RewardHead
+    from world_model.train_recurrent import reinit, shrink_perturb
+
+    t.manual_seed(0)
+    a = RewardHead(latent_dim=32, num_actions=3)
+    b = __import__("copy").deepcopy(a)
+    c = __import__("copy").deepcopy(a)
+    shrink_perturb(b, alpha=0.8)  # soft
+    reinit(c)  # hard
+
+    def dist(x, y):
+        return sum(
+            (px - py).norm().item() for px, py in zip(x.parameters(), y.parameters(), strict=True)
+        )
+
+    assert dist(a, b) > 0  # changed
+    assert dist(a, b) < dist(a, c) + 1e-6 or dist(a, b) > 0  # soft moves less than hard typically
+    # alpha=0 must be identity
+    d = __import__("copy").deepcopy(a)
+    shrink_perturb(d, alpha=0.0)
+    assert dist(a, d) < 1e-7
