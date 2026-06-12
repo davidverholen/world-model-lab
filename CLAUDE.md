@@ -18,9 +18,11 @@ uv-managed (Python 3.12, PyTorch).
 
 ## Hardware
 
-- **Local (this machine, Linux):** RTX 4070 Laptop, 8 GB — default for all
-  development and rung-1/2 experiments. Keep models small; prefer batch-size/precision
-  tweaks over architecture growth when memory binds.
+- **Local (this machine, Linux):** RTX 4070 Laptop, 8 GB — default for development
+  and short (<~1 h) experiments. Keep models small; prefer batch-size/precision
+  tweaks over architecture growth when memory binds. Note: power-capped at ~45 W and
+  thermally throttles within minutes of sustained load (measured — see
+  knowledge/concepts/compute-strategy.md); don't schedule multi-hour training here.
 - **Remote (Windows desktop):** RTX 5070 Ti, 16 GB — available for bigger runs
   (rung 3+, longer training). Not yet wired up: needs uv + CUDA PyTorch there and a
   way to dispatch runs (simplest: git pull + `uv run` over SSH; decide when first

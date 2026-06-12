@@ -83,3 +83,10 @@ GRU belief model, burn-in/open-loop sequence training, RecurrentMPCAgent,
 play --epsilon + recurrent checkpoint auto-detection, RGB partial-obs wrapper.
 Also: compute-strategy concept page (local vs 5070 Ti vs vast.ai prediction, prices
 checked 2026-06-12). Next: exp 0006 value head + per-round eval.
+
+## [2026-06-12] curation | thermal measurement: laptop GPU power-capped + throttling
+
+90s load test after Dave noticed heat: 4070L capped at ~45W (TGP floor), 62->78C in
+90s, clocks ~1.2GHz vs 3.1 max, SW thermal slowdown already active ~396s cumulative
+today. compute-strategy page updated (5070 Ti advantage revised 2.5-3x -> 4-6x;
+desktop-dispatch trigger lowered 4h -> 1h); CLAUDE.md hardware note updated.
