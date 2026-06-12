@@ -384,3 +384,9 @@ Key finding: the 70k-h YouTube corpus was NEVER released (recipe only) —
 contractor data + IDM are the retainable substance. VPT id verified:
 arXiv:2206.11795. T2 (contractor subsets, MineRL, MineDojo dumps) deferred to
 rung-5b entry with availability re-check.
+
+## [2026-06-12] curation | tier-1 retention confirmed: 21/21 OK, 9.8 GB
+
+All VPT tier-1 assets verified on desktop ~/minecraft-assets/vpt/ (first detached
+attempt died with its ssh session — Git Bash quoting; foreground-over-held-ssh
+pattern worked). ASSETS.md claims now confirmed-true.
