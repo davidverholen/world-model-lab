@@ -16,30 +16,28 @@ layer optimizes something different, on a different timescale, with a different
 algorithm:
 
 ```mermaid
-%%{init: {"theme":"base",
-  "flowchart":{"padding":12,"subGraphTitleMargin":{"top":6,"bottom":14}},
-  "themeVariables":{
+%%{init: {"theme":"base","themeVariables":{
   "primaryColor":"#475569","primaryTextColor":"#f8fafc","primaryBorderColor":"#94a3b8",
   "lineColor":"#94a3b8","textColor":"#64748b",
   "clusterBkg":"transparent","clusterBorder":"#64748b",
   "edgeLabelBackground":"#475569","fontSize":"14px"}}}%%
 flowchart TB
-    subgraph L4["L4 - DATA FLYWHEEL (per round)"]
+    subgraph L4["L4 FLYWHEEL"]
         direction LR
         collect["collect<br/>eps-greedy MPC"] --> trainstep["train on replay"] --> evalstep["eval + best-<br/>checkpoint guard"] --> collect
     end
 
-    subgraph L3["L3 - TRAINING (Adam, per update)"]
+    subgraph L3["L3 TRAINING"]
         direction LR
         loss["prediction + SIGReg<br/>+ reward + value loss"] --- tricks["success oversampling<br/>EMA / lr-decay arms"]
     end
 
-    subgraph L2["L2 - BELIEF (per env step)"]
+    subgraph L2["L2 BELIEF"]
         direction LR
         enc["encoder<br/>RGB to z"] --> gru["GRU belief s"] --> heads["heads:<br/>z-hat, r, V"]
     end
 
-    subgraph L1["L1 - PLANNING (CEM, per action)"]
+    subgraph L1["L1 PLANNING"]
         cem["imagine 512 futures, score<br/>sum gamma^t r + gamma^H V"]
     end
 
