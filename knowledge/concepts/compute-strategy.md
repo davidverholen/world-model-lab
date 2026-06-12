@@ -84,6 +84,13 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   agent (baselines/ppo pattern), parity via golden tests against the PyTorch
   reference, the KB agent-architecture page as the framework-neutral spec.
   JEPA-side research stays PyTorch.
+  Nuances (2026-06-12): no PyTorch port of Craftax known (verify at trigger);
+  its gym wrapper + dlpack hybrid gives PyTorch most of the env speedup without
+  a port — hence spike-first. JAX's other real advantages for us: scan/jit would
+  fuse our measured kernel-launch-bound GRU loop (28 upd/s problem), vmap = native
+  parallel seeds. PyTorch's partial answer (torch.compile/CUDA graphs) is UNTESTED
+  on our stack — cheap experiment, do BEFORE any framework decision. JAX-native
+  MiniGrid-likes exist too (XLand-MiniGrid, gymnax).
 
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
