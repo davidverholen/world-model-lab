@@ -239,3 +239,10 @@ ingest-source gained archive step + read-depth labels + ar5iv route;
 scout-sources gained the arXiv-API batch-verification trick. Assessment: no new
 skills/agents needed at current KB size; ingestion stays on-demand per the
 literature-first rule (exceptions queued: Dyna, WBench).
+
+## [2026-06-12] curation | research loop codified as top-level process (Dave)
+
+PROCESS.md gains "The research loop": experiment-verify <-> literature-first <->
+route-to-KB <-> skills-carry-procedure-not-knowledge. Point 4 sharpened from
+Dave's draft: maintenance trigger is process drift, not knowledge growth (thin
+skills + INDEX navigation make new knowledge reachable without skill edits).

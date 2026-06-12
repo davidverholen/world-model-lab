@@ -1,5 +1,19 @@
 # Knowledge Base Operating Process
 
+## The research loop (default operating cycle — adopted 2026-06-12, Dave)
+
+1. **Experiment** to incrementally verify knowledge — ours AND the literature's
+   claims in our setting (pre-registered hypothesis with refutation alternatives;
+   /run-experiment, /sweep, /milestone).
+2. **Literature-first** when a thread opens: scout → verify → ingest the key
+   source → implement the published protocol → deviate deliberately.
+3. **Route verified learnings into the KB** (table below); sources are cited only
+   after verification; experiment pages are the durable record.
+4. **Skills/agents carry procedure, not knowledge** — the KB carries knowledge,
+   reachable via INDEX + frontmatter with no skill changes. Update a skill only
+   when *practice* improves (new technique, new gotcha); lint and milestone check
+   this seam. Trigger = process drift, not knowledge growth.
+
 The wiki only stays trustworthy if signals are curated, routed, and re-checked.
 Three recurring operations (Karpathy's ingest/query/lint, run under the whitepaper's
 curation model):
