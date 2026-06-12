@@ -17,7 +17,7 @@ difficulty so failures are attributable. Accepted in [[0003-environment-ladder]]
 | Rung | Environment | New difficulty | Exit criterion |
 |---|---|---|---|
 | 1 | MiniGrid Empty-5x5 / 8x8 | none — pipeline bring-up | ✅ **met 2026-06-12** ([[0003-probe-protocol-8x8]]: no collapse, dynamics 4–5× better than copy baseline, 3 seeds) |
-| 2 | MiniGrid DoorKey, partial view | sparse reward, partial observability, memory | model-based agent beats model-free baseline on sample efficiency |
+| 2 | MiniGrid DoorKey, partial view | sparse reward, partial observability, memory | 2a ✅ **met 2026-06-12**: DoorKey-5x5 solved under partial obs ([[0006-value-head-doorkey]]); 2b open: beat model-free (PPO) on sample efficiency *on the smallest env where PPO struggles at budget* — split approved by Dave 2026-06-12 after [[0007-ppo-baseline]] |
 | 3 | Crafter | long horizon, many subgoals, procgen | nontrivial achievement count within 1M steps |
 | 4 | Atari 100k subset | pixels at scale, diverse dynamics | competitive with published WM agents on ≥3 games |
 | 5 | Continuous control (dm_control) or 3D (Miniworld) | continuous actions / 3D | TBD |

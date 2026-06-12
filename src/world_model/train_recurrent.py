@@ -155,6 +155,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-id", default="MiniGrid-DoorKey-5x5-v0")
     parser.add_argument("--steps-per-round", type=int, default=60000)
+    parser.add_argument(
+        "--round0-steps",
+        type=int,
+        default=None,
+        help="random-collection budget for round 0 (default: steps-per-round); "
+        "exp 0007 lesson: long random round 0 burns budget before the flywheel spins",
+    )
+    parser.add_argument(
+        "--mpc-steps",
+        type=int,
+        default=None,
+        help="steps per MPC collection round (default: max(10000, steps-per-round/3))",
+    )
     parser.add_argument("--rounds", type=int, default=2)
     parser.add_argument("--updates-per-round", type=int, default=3000)
     parser.add_argument("--seq-batch", type=int, default=32)
@@ -183,15 +196,16 @@ def main() -> None:
 
     # MPC rounds collect fewer steps (planning per env step is ~100x slower than
     # random) with a deliberately cheap planner — the data only needs goal bias.
-    mpc_steps = max(10_000, args.steps_per_round // 3)
-    total_capacity = args.steps_per_round + (args.rounds - 1) * mpc_steps
+    round0_steps = args.round0_steps or args.steps_per_round
+    mpc_steps = args.mpc_steps or max(10_000, args.steps_per_round // 3)
+    total_capacity = round0_steps + (args.rounds - 1) * mpc_steps
     buffer = ReplayBuffer(total_capacity, env.observation_space.shape, seed=args.seed)
     best: dict = {"rate": None, "round": -1, "state": {}}
 
     for rnd in range(args.rounds):
         if rnd == 0:
             agent = RandomAgent(env.action_space, seed=args.seed)
-            kind, steps = "random", args.steps_per_round
+            kind, steps = "random", round0_steps
         else:
             agent = RecurrentMPCAgent(
                 encoder,
