@@ -127,6 +127,13 @@ def train(
             )
 
 
+def reinit(module: torch.nn.Module) -> None:
+    """Re-initialize every parametrized submodule (Linear/GRUCell/Embedding/Conv)."""
+    for sub in module.modules():
+        if hasattr(sub, "reset_parameters"):
+            sub.reset_parameters()
+
+
 def evaluate(
     encoder, dynamics, reward_head, value_head, env_id: str, episodes: int, device: str
 ) -> float:
@@ -196,6 +203,14 @@ def main() -> None:
         default=5,
         help="round 0 keeps collecting (up to 2x round0-steps) until this many "
         "reward events exist — the value head can't ignite from one example",
+    )
+    parser.add_argument(
+        "--reset",
+        choices=["none", "heads", "deep"],
+        default="none",
+        help="primacy-bias resets (Nikishin, arXiv:2205.07802) at each round start: "
+        "reinit heads (reward/value/next-latent) or deep (also GRU+action embed; "
+        "encoder always kept), rebuild optimizer, keep replay — exp 0011",
     )
     parser.add_argument(
         "--later-lr-scale",
@@ -281,6 +296,19 @@ def main() -> None:
             total_env_steps += chunk
         print(f"  -> {eps} episodes, {rew} reward events (total_env_steps={total_env_steps})")
         buffer.compute_returns(args.gamma)
+        if rnd >= 1 and args.reset != "none":
+            # Nikishin reset: forget the weights, keep the replay; oversampling makes
+            # the relearn fast. Acting agents already hold refs to these modules, so
+            # reinit in place; optimizer rebuilt (fresh Adam moments).
+            targets_to_reset = [reward_head, value_head, dynamics.next_latent]
+            if args.reset == "deep":
+                targets_to_reset += [dynamics.cell, dynamics.action_embed]
+            for m in targets_to_reset:
+                reinit(m)
+            opt = torch.optim.Adam(
+                [p for m in modules for p in m.parameters()], lr=opt.param_groups[0]["lr"]
+            )
+            print(f"  reset ({args.reset}) applied; optimizer rebuilt")
         print(f"round {rnd}: training {args.updates_per_round} updates ...")
         train(
             buffer,

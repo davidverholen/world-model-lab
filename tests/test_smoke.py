@@ -167,3 +167,27 @@ def test_success_oversampling():
     batch = buf.sample_sequences(8, length=4, success_frac=0.5)
     # half the batch must contain the success transition (reward at final position)
     assert (batch["reward"][:, -1] > 0).sum() == 4
+
+
+def test_uint8_replay_roundtrip_exact():
+    env = make_minigrid_env("MiniGrid-Empty-5x5-v0")
+    obs, _ = env.reset(seed=0)
+    buf = ReplayBuffer(capacity=4, obs_shape=obs.shape, seed=0)
+    buf.add(Transition(obs, 0, 0.0, obs, False))
+    batch = buf.sample(1)
+    assert batch["obs"].dtype == np.float32
+    assert np.array_equal(batch["obs"][0], obs)  # exact, not just close
+
+
+def test_reinit_changes_parameters():
+    import torch as t
+
+    from world_model.models import RewardHead
+    from world_model.train_recurrent import reinit
+
+    t.manual_seed(0)
+    head = RewardHead(latent_dim=32, num_actions=3)
+    before = [p.clone() for p in head.parameters()]
+    reinit(head)
+    changed = any(not t.equal(b, p) for b, p in zip(before, head.parameters(), strict=True))
+    assert changed

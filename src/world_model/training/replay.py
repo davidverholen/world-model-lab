@@ -23,9 +23,13 @@ class ReplayBuffer:
     """Flat ring buffer of transitions with uniform sampling."""
 
     def __init__(self, capacity: int, obs_shape: tuple[int, ...], seed: int | None = None):
+        # Observations are stored as uint8 (they originate from uint8 pixels scaled to
+        # [0,1], so round-trip via round(x*255) is exact) — 4x less RAM than float32;
+        # at 130k transitions x 2 obs arrays that's ~2.5 GB instead of ~10 GB per run
+        # (exp 0010 ops lesson: 6 parallel float32 buffers paged the desktop to death).
         self.capacity = capacity
-        self.obs = np.zeros((capacity, *obs_shape), dtype=np.float32)
-        self.next_obs = np.zeros((capacity, *obs_shape), dtype=np.float32)
+        self.obs = np.zeros((capacity, *obs_shape), dtype=np.uint8)
+        self.next_obs = np.zeros((capacity, *obs_shape), dtype=np.uint8)
         self.actions = np.zeros(capacity, dtype=np.int64)
         self.rewards = np.zeros(capacity, dtype=np.float32)
         self.returns = np.zeros(capacity, dtype=np.float32)
@@ -37,8 +41,8 @@ class ReplayBuffer:
 
     def add(self, t: Transition) -> None:
         i = self.pos
-        self.obs[i] = t.obs
-        self.next_obs[i] = t.next_obs
+        self.obs[i] = np.round(t.obs * 255.0)
+        self.next_obs[i] = np.round(t.next_obs * 255.0)
         self.actions[i] = t.action
         self.rewards[i] = t.reward
         self.dones[i] = t.done
@@ -46,13 +50,16 @@ class ReplayBuffer:
         self.size = min(self.size + 1, self.capacity)
         self.total_adds += 1
 
+    def _to_float(self, obs_u8: np.ndarray) -> np.ndarray:
+        return obs_u8.astype(np.float32) / 255.0
+
     def sample(self, batch_size: int) -> dict[str, np.ndarray]:
         idx = self.rng.integers(0, self.size, size=batch_size)
         return {
-            "obs": self.obs[idx],
+            "obs": self._to_float(self.obs[idx]),
             "action": self.actions[idx],
             "reward": self.rewards[idx],
-            "next_obs": self.next_obs[idx],
+            "next_obs": self._to_float(self.next_obs[idx]),
             "done": self.dones[idx],
         }
 
@@ -121,11 +128,11 @@ class ReplayBuffer:
             found += take
         idx = starts[:, None] + np.arange(length)
         return {
-            "obs": self.obs[idx],
+            "obs": self._to_float(self.obs[idx]),
             "action": self.actions[idx],
             "reward": self.rewards[idx],
             "return": self.returns[idx],
-            "next_obs": self.next_obs[starts + length - 1],
+            "next_obs": self._to_float(self.next_obs[starts + length - 1]),
         }
 
     def __len__(self) -> int:
