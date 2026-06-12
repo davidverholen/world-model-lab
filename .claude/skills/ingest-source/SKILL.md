@@ -23,6 +23,12 @@ Follow `knowledge/_schema/PROCESS.md` §1 (authoritative). Checklist:
    touches several) and cross-link both directions. Check INDEX's "Wanted pages" —
    does this ingest let us create one?
 5. **Bookkeep**: INDEX.md line, LOG.md entry (`## [date] ingest | <title>`, pages touched).
+6. **Archive**: run `scripts/fetch_sources.sh` (idempotent) so the local PDF copy
+   lands in `knowledge/sources/files/` for offline reading.
+
+Depth labels for `Read state`: abstract-only < skimmed (method sections fetched) <
+read. Full-text fetch route: `ar5iv.labs.arxiv.org/html/<id>` (abs pages give
+abstracts only). Pages below `read` stay `status: draft` at best.
 
 Authority reminders: claims cite source ids; this page may not cite stubs/stale pages;
 never edit `owner: human` pages without proposing.

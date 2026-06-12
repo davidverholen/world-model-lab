@@ -17,7 +17,10 @@ Goal: find and *verify existence of* new material; ingestion is a separate step
    awesome-list github.com/LMD0311/Awesome-World-Model. Also check open items in
    `knowledge/sources/QUEUE.md` marked unverified.
 2. **Verify** every candidate: WebFetch the arXiv/page, confirm title + authors.
-   No unverified ids enter the registry as verified.
+   No unverified ids enter the registry as verified. Batch trick (2026-06-12): one
+   call to `export.arxiv.org/api/query?id_list=<id1>,<id2>,...` verifies dozens of
+   ids at once (id→title match) — use it for backlog sweeps; it caught a wrong id
+   that pointed at an astronomy paper.
 3. **Triage** into `knowledge/sources/QUEUE.md` (high/medium/low) with a one-line
    why-it-matters. Register clearly-relevant items in SOURCES.md (`verified` per
    what you actually checked).

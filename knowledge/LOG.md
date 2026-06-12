@@ -229,3 +229,13 @@ training ratio up to 16 vs our 0.1. New page ijepa-2023: multi-block masking
 params, EMA-teacher 0.996->1.0 — the heuristic LeJEPA replaced. QUEUE marks.
 Dave's request: scripts/fetch_sources.sh -> 21 arXiv PDFs (183MB) in gitignored
 knowledge/sources/files/ for personal reading; idempotent, documented in SOURCES.
+
+## [2026-06-12] lint | 6-ingest checkpoint: graph closed, 1 INDEX gap fixed
+
+Scripted pass over 45 pages: zero dangling [[links]] (cross-link graph fully
+closed); INDEX was missing exp 0011 (fixed); remaining stubs (dreamer4, vjepa2)
+honestly labeled, not cited as authority. Skills updated with today's craft:
+ingest-source gained archive step + read-depth labels + ar5iv route;
+scout-sources gained the arXiv-API batch-verification trick. Assessment: no new
+skills/agents needed at current KB size; ingestion stays on-demand per the
+literature-first rule (exceptions queued: Dyna, WBench).
