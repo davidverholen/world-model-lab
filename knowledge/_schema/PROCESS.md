@@ -126,3 +126,11 @@ knowledge base consistent with its code:
 
 Full `/kb-lint` stays a separate periodic pass; the checkpoint lint covers only
 pages touched since the last checkpoint.
+
+## Per-iteration literature gate (Dave, 2026-06-12)
+
+Sharpens the literature-first rule for autonomous operation: EVERY new learning —
+especially each specific failure — triggers a targeted search (WebSearch + wall
+protocol when blocking) BEFORE the next experiment is designed. Encoded in the
+/research-cycle skill; exps 0011/0012 are the precedent (two redesigns from found
+papers, zero wasted GPU on mapped walls).

@@ -365,3 +365,11 @@ Claim -> page -> source id -> verified registry row chain is manuscript-grade by
 construction; read-depth labels gate citability (only `read` sources citable in a
 manuscript). Gap closed: venue/peer-review status now recorded at ingest (backfill
 at pre-paper lint); BibTeX export planned (mechanical from arXiv ids).
+
+## [2026-06-12] curation | /research-cycle skill: autonomous loop with mandatory per-failure literature gate
+
+Prepared for overnight autonomous operation (Dave's standing instruction, to be
+activated later): harvest -> record -> mandatory failure-specific search ->
+pre-register -> implement -> dispatch -> milestone; guardrails (scope, spend,
+2-strike stall rule, honesty, state-of-the-night report). PROCESS gained the
+per-iteration literature gate.
