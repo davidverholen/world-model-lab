@@ -65,6 +65,19 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   projected > **~1 h** on the laptop (lowered from 4 h after the thermal
   measurement — long runs throttle AND cook the chassis).
 
+## Crafter-phase rental mapping (asked by Dave 2026-06-12)
+
+- Actor *development* (MiniGrid-scale iterations): rental buys ~nothing
+  (measured latency-bound regime; bottleneck is the redesign loop).
+- Crafter *hyperparameter sweeps*: the killer rental use — ~10 parallel 4090s
+  turn a week of sequential desktop tuning into overnight for $30–80. Trigger:
+  first designed Crafter sweep; prerequisite: one session of vast provisioning
+  (docker/setup + sweep.py backend). Cloud spend stays human-triggered
+  (autonomous-mode guardrail).
+- Single long runs: 5090 ≈ 2–2.5× the 5070 Ti (~$3/run) — nice, not strategic.
+- If the Python env loop becomes the wall: Craftax (JAX, env-on-GPU, ~100×)
+  is the radical option — would reopen ADR 0001 (Dave's call).
+
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
 Buy trigger: Crafter-scale runs keep the 5070 Ti >90% utilized for multi-hour
