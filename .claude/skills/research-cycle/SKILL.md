@@ -50,3 +50,7 @@ One iteration (repeat until a stop condition):
 - **Report**: each milestone commit message is the journal; on session end leave
   a "state of the night" LOG entry: threads advanced, results, what's running,
   recommended next decision for Dave.
+- **PAID-RESOURCE IMPACT flag (Dave, 2026-06-12)**: whenever a planned sweep or
+  run would gain >~3x wall-clock from rented GPUs (vast.ai), or env throughput
+  becomes the bottleneck (Craftax/ADR-0001 revisit trigger), flag it explicitly
+  in the report with a cost estimate — spend decisions stay Dave's.
