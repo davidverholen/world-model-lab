@@ -17,46 +17,35 @@ algorithm:
 
 ```mermaid
 flowchart TB
-    subgraph L4["L4 · DATA FLYWHEEL — optimizes the data distribution (per round, ~15k env steps)"]
+    subgraph L4["L4 - DATA FLYWHEEL: optimizes the data distribution (per round, ~15k env steps)"]
         direction LR
-        collect["collect with ε-greedy MPC agent
-        (round 0: random + adaptive ignition ≥5 successes)"]
-        --> trainstep["train all modules on replay"]
-        --> evalstep["eval (greedy, fixed seeds)
-        + best-checkpoint guard"]
-        --> collect
+        collect["collect with eps-greedy MPC agent<br/>(round 0: random + adaptive ignition >=5 successes)"]
+        trainstep["train all modules on replay"]
+        evalstep["eval greedy, fixed seeds<br/>+ best-checkpoint guard"]
+        collect --> trainstep --> evalstep --> collect
     end
 
-    subgraph L3["L3 · MODEL TRAINING — optimizes weights (Adam 3e-4, per update)"]
-        loss["joint loss =
-        (1−λ)·multi-step latent prediction (open-loop, burn-in 8)
-        + λ·SIGReg (anti-collapse, λ=0.05)
-        + reward loss (pos_weight 100)
-        + value loss (MC return-to-go, pos_weight 20)"]
-        tricks["success-window oversampling 25% ·
-        grad-clip 10 · [exp 0010: EMA shadow / lr decay]"]
+    subgraph L3["L3 - MODEL TRAINING: optimizes weights (Adam 3e-4, per update)"]
+        loss["joint loss = (1-lambda) multi-step latent prediction<br/>+ lambda SIGReg (anti-collapse, 0.05)<br/>+ reward loss (pos_weight 100)<br/>+ value loss (MC return-to-go, pos_weight 20)"]
+        tricks["success-window oversampling 25%<br/>grad-clip 10 - exp 0010: EMA shadow / lr decay"]
         loss --- tricks
     end
 
-    subgraph L2["L2 · BELIEF & MODEL — optimizes state estimation (per env step)"]
-        enc["ConvEncoder: 56×56 RGB → z (128)"]
-        gru["GRU belief s (256): closed-loop on real z,
-        open-loop on imagined ẑ"]
-        heads["heads: next-ẑ · reward r̂(s,a) · value V(s)"]
+    subgraph L2["L2 - BELIEF and MODEL: optimizes state estimation (per env step)"]
+        enc["ConvEncoder: 56x56 RGB to z (128)"]
+        gru["GRU belief s (256): closed-loop on real z,<br/>open-loop on imagined z-hat"]
+        heads["heads: next z-hat, reward r(s,a), value V(s)"]
         enc --> gru --> heads
     end
 
-    subgraph L1["L1 · PLANNING — optimizes the action (CEM, per env step)"]
-        cem["sample 512 action sequences (H=20)
-        → imagine rollouts in latent space
-        → score Σ γᵗ·r̂ + γᴴ·V(s_H)
-        → refit to elites ×2–3 → act, re-plan"]
+    subgraph L1["L1 - PLANNING: optimizes the action (CEM, per env step)"]
+        cem["sample 512 action sequences (H=20)<br/>imagine rollouts in latent space<br/>score: sum gamma^t r + gamma^H V(s_H)<br/>refit to elites x2-3, act, re-plan"]
     end
 
-    L4 -->|"replay windows"| L3
-    L3 -->|"weights (or EMA shadow)"| L2
-    L2 -->|"belief s_t"| L1
-    L1 -->|"actions → env steps"| L4
+    L4 -->|replay windows| L3
+    L3 -->|weights or EMA shadow| L2
+    L2 -->|belief s_t| L1
+    L1 -->|actions / env steps| L4
 ```
 
 ## Which algorithm optimizes what
