@@ -434,3 +434,11 @@ model-free visual RL — tension recorded, ingestion queued (augmentation lever
 noted). Exp 0014 pre-registered + launching: freeze-round sweep (fenc@3, fenc@4,
 3 seeds each, same budget) — if both bars clear, propose rung-2b closure to Dave
 and pivot to the actor thread.
+
+## [2026-06-13] ingest | Ma et al. ICLR24 plasticity paper — the 0013 tension resolves [autonomous]
+
+Their encoder-stays-healthy + frozen-pretrained-encoders-suffice findings
+COMPLEMENT our encoder-drift result (different pathology — dormancy vs drift —
+same prescription: stop training the encoder once competent). Critic-bottleneck
+mechanism is TD-specific (our MC values dodge it). Imports queued for exp 0015:
+FAU per-module logging, Adaptive-RR scheduling atop our UTD finding.
