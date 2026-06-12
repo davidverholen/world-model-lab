@@ -65,6 +65,20 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   projected > **~1 h** on the laptop (lowered from 4 h after the thermal
   measurement — long runs throttle AND cook the chassis).
 
+## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
+
+Buy trigger: Crafter-scale runs keep the 5070 Ti >90% utilized for multi-hour
+stretches AND experiments queue behind it (gpu_bench + run timestamps make this
+measurable, not vibes). Then, in order of €-efficiency:
+1. used RTX 3090 24 GB (~€700) as second GPU in the desktop — VRAM headroom +
+   a parallel lane;
+2. dedicated tower: RTX 5090 32 GB + 16-core CPU + 96 GB RAM (~€3.5–4k) —
+   ~2–2.5× throughput, rung-4 headroom;
+3. vast.ai bursts stay the answer for rare big sweeps regardless (at ~€0.35/kWh,
+   owning only beats renting for daily sustained use).
+Rejected: enterprise rack gear (>€5k for non-ancient silicon, noise, idle power),
+Mac unified memory (MPS second-class for the PyTorch/CUDA RL ecosystem).
+
 ## Links
 
 [[environment-ladder]] · CLAUDE.md hardware section · future ADR: remote dispatch
