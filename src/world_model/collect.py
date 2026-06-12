@@ -24,7 +24,8 @@ import torch.nn.functional as F
 
 from world_model.agents import RandomAgent
 from world_model.envs import make_minigrid_env
-from world_model.models import ConvEncoder, LatentDynamicsPredictor, SIGReg
+from world_model.models import ConvEncoder, LatentDynamicsPredictor, RewardHead, SIGReg
+from world_model.models.reward import reward_loss
 from world_model.training import ReplayBuffer, Transition
 
 
@@ -116,6 +117,13 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--sigreg-weight", type=float, default=0.0, help="lambda; 0 disables")
     parser.add_argument("--sigreg-slices", type=int, default=512)
+    parser.add_argument(
+        "--rollout-length",
+        type=int,
+        default=1,
+        help="train predictor on H-step imagined rollouts (1 = single-step); "
+        "multi-step is required for usable planning (exp 0004: compounding error)",
+    )
     parser.add_argument("--probe-steps", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--save", type=str, default=None, help="path to save checkpoint (.pt)")
@@ -130,26 +138,51 @@ def main() -> None:
     print(f"collecting {args.steps} random steps in {args.env_id} ...")
     collect(buffer, env, agent, args.steps)
 
+    num_actions = int(env.action_space.n)
     encoder = ConvEncoder().to(device)
-    predictor = LatentDynamicsPredictor(num_actions=int(env.action_space.n)).to(device)
+    predictor = LatentDynamicsPredictor(num_actions=num_actions).to(device)
+    reward_head = RewardHead(num_actions=num_actions).to(device)
     sigreg = SIGReg(num_slices=args.sigreg_slices).to(device)
-    opt = torch.optim.Adam([*encoder.parameters(), *predictor.parameters()], lr=3e-4)
+    opt = torch.optim.Adam(
+        [*encoder.parameters(), *predictor.parameters(), *reward_head.parameters()], lr=3e-4
+    )
     lam = args.sigreg_weight
 
-    print(f"training latent predictor for {args.updates} updates on {device} (lambda={lam}) ...")
+    horizon = args.rollout_length
+    seq_batch = args.batch_size if horizon == 1 else max(16, args.batch_size // horizon * 2)
+    print(
+        f"training latent predictor for {args.updates} updates on {device} "
+        f"(lambda={lam}, rollout H={horizon}, batch={seq_batch}) ..."
+    )
     for step in range(args.updates):
-        batch = buffer.sample(args.batch_size)
-        obs = torch.as_tensor(batch["obs"], device=device)
-        action = torch.as_tensor(batch["action"], device=device)
-        next_obs = torch.as_tensor(batch["next_obs"], device=device)
+        batch = buffer.sample_sequences(seq_batch, horizon)
+        obs_seq = torch.as_tensor(batch["obs"], device=device)  # (B, H, C, h, w)
+        actions = torch.as_tensor(batch["action"], device=device)  # (B, H)
+        rewards = torch.as_tensor(batch["reward"], device=device)  # (B, H)
+        final_obs = torch.as_tensor(batch["next_obs"], device=device)  # (B, C, h, w)
 
-        z = encoder(obs)
-        z_next = encoder(next_obs)
-        pred_loss = F.mse_loss(predictor(z, action), z_next)
+        b, h = actions.shape
+        z_seq = encoder(obs_seq.flatten(0, 1)).unflatten(0, (b, h))  # (B, H, D)
+        z_final = encoder(final_obs)  # (B, D)
+        targets = torch.cat([z_seq[:, 1:], z_final.unsqueeze(1)], dim=1)  # (B, H, D)
+
+        # open-loop rollout from the window's first latent; losses at every step
+        pred_loss = torch.zeros((), device=device)
+        r_loss = torch.zeros((), device=device)
+        z_hat = z_seq[:, 0]
+        for k in range(h):
+            # reward on real AND imagined latents: the planner queries drifted latents
+            r_loss = r_loss + reward_loss(reward_head(z_seq[:, k], actions[:, k]), rewards[:, k])
+            r_loss = r_loss + reward_loss(reward_head(z_hat, actions[:, k]), rewards[:, k])
+            z_hat = predictor(z_hat, actions[:, k])
+            pred_loss = pred_loss + F.mse_loss(z_hat, targets[:, k])
+        pred_loss, r_loss = pred_loss / h, r_loss / (2 * h)
+
         if lam > 0:
-            loss = (1 - lam) * pred_loss + lam * sigreg(torch.cat([z, z_next], dim=0))
+            all_z = torch.cat([z_seq.flatten(0, 1), z_final], dim=0)
+            loss = (1 - lam) * pred_loss + lam * sigreg(all_z) + r_loss
         else:
-            loss = pred_loss
+            loss = pred_loss + r_loss
 
         opt.zero_grad()
         loss.backward()
@@ -157,7 +190,7 @@ def main() -> None:
         if (step + 1) % 50 == 0:
             print(
                 f"  update {step + 1}: pred_loss={pred_loss.item():.5f} "
-                f"latent_std={z_next.std(dim=0).mean().item():.4f}"
+                f"latent_std={z_final.std(dim=0).mean().item():.4f}"
             )
 
     r2 = probe_agent_position(encoder, env, agent, args.probe_steps, device)
@@ -177,7 +210,8 @@ def main() -> None:
             {
                 "encoder": encoder.state_dict(),
                 "predictor": predictor.state_dict(),
-                "config": vars(args),
+                "reward_head": reward_head.state_dict(),
+                "config": {**vars(args), "num_actions": num_actions},
                 "metrics": {"probe_r2": r2, **dyn},
             },
             path,

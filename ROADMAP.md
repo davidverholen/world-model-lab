@@ -7,16 +7,15 @@ ADR [0003](knowledge/decisions/0003-environment-ladder.md)).
 ## Phase 1 — Pipeline bring-up (now)
 
 - [x] Project + knowledge-base scaffold
-- [ ] Experiment 0001: reproduce latent collapse with naive JEPA (`world_model.collect`)
-- [ ] Experiment 0002: add SIGReg (LeJEPA) or EMA target encoder; latents survive,
-      linear-probe for agent position works
-- [ ] Multi-step latent rollouts; prediction-error curves vs horizon
+- [x] Experiment 0001: reproduce latent collapse with naive JEPA (`world_model.collect`)
+- [x] Experiment 0002: add SIGReg (LeJEPA); latents survive (linear probe demoted, exp 0003)
+- [x] Multi-step latent rollouts (exp 0004: required for planning — compounding error)
 
 ## Phase 2 — Model-based control on MiniGrid
 
+- [x] First *acting* agent: latent MPC/CEM plays Empty-8x8 at 19/20 vs random 3/20
+      (exp 0004; `python -m world_model.play --checkpoint ...`)
 - [ ] Partial observability (DoorKey): add memory (GRU/transformer) to the latent model
-- [ ] First *acting* agent: planning in latent space (MPC/MCTS) or small actor-critic
-      trained on imagined rollouts
 - [ ] Beat a model-free baseline (PPO) on sample efficiency
 
 ## Phase 3 — Crafter, then Atari100k

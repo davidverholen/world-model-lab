@@ -1,40 +1,59 @@
 """Watch an agent play MiniGrid — live window or GIF recording.
 
-    uv run python -m world_model.play                        # random agent, live window
-    uv run python -m world_model.play --env-id MiniGrid-DoorKey-6x6-v0
-    uv run python -m world_model.play --record out.gif       # headless, saves a GIF
+    uv run python -m world_model.play                          # random agent, live window
+    uv run python -m world_model.play --checkpoint runs/wm.pt  # trained world-model agent
+    uv run python -m world_model.play --record out.gif         # headless, saves a GIF
 
-Agents:
-    random       baseline (default)
-    [future]     trained world-model agents plug in here via --checkpoint
-                 (exp 0004: planner / actor-critic over the learned latent model)
+With --checkpoint, the agent is an MPC planner over the learned latent world model
+(see world_model/agents/mpc.py): every step it imagines candidate futures in latent
+space and executes the first action of the best one. Checkpoints come from
+`python -m world_model.collect --save runs/wm.pt`.
 
-Close the window or Ctrl-C to stop. Episode outcomes are printed per episode.
+Close the window or Ctrl-C to stop. Prints per-episode outcomes and a final
+success-rate summary.
 """
 
 import argparse
 import time
 
 import numpy as np
+import torch
 
-from world_model.agents import RandomAgent
+from world_model.agents import MPCAgent, RandomAgent
 from world_model.envs import make_minigrid_env
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-id", default="MiniGrid-Empty-8x8-v0")
+    parser.add_argument("--checkpoint", type=str, default=None, help="trained world model (.pt)")
     parser.add_argument("--episodes", type=int, default=5)
     parser.add_argument("--fps", type=float, default=8.0)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--horizon", type=int, default=20, help="MPC imagination horizon")
+    parser.add_argument("--candidates", type=int, default=1024, help="MPC imagined futures/step")
     parser.add_argument("--record", type=str, default=None, help="save GIF here instead of window")
     args = parser.parse_args()
 
     render_mode = "rgb_array" if args.record else "human"
     env = make_minigrid_env(args.env_id, render_mode=render_mode, tile_size=16)
-    agent = RandomAgent(env.action_space, seed=args.seed)
-    frames: list[np.ndarray] = []
 
+    if args.checkpoint:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        agent = MPCAgent.from_checkpoint(
+            args.checkpoint,
+            device,
+            horizon=args.horizon,
+            candidates=args.candidates,
+            seed=args.seed,
+        )
+        print(f"world-model MPC agent from {args.checkpoint} (device={device})")
+    else:
+        agent = RandomAgent(env.action_space, seed=args.seed)
+        print("random agent (pass --checkpoint to use a trained world model)")
+
+    frames: list[np.ndarray] = []
+    successes = 0
     try:
         for episode in range(args.episodes):
             obs, _ = env.reset(seed=args.seed + episode)
@@ -48,13 +67,16 @@ def main() -> None:
                 total_reward += float(reward)
                 steps += 1
                 done = terminated or truncated
-            outcome = "reached goal" if total_reward > 0 else "timed out"
+            success = total_reward > 0
+            successes += int(success)
+            outcome = "reached goal" if success else "timed out"
             print(f"episode {episode + 1}: {outcome} in {steps} steps, reward={total_reward:.2f}")
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
         env.close()
 
+    print(f"success rate: {successes}/{args.episodes}")
     if args.record and frames:
         import imageio
 

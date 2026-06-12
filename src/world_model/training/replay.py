@@ -31,6 +31,7 @@ class ReplayBuffer:
         self.dones = np.zeros(capacity, dtype=bool)
         self.size = 0
         self.pos = 0
+        self.total_adds = 0
         self.rng = np.random.default_rng(seed)
 
     def add(self, t: Transition) -> None:
@@ -42,6 +43,7 @@ class ReplayBuffer:
         self.dones[i] = t.done
         self.pos = (self.pos + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
+        self.total_adds += 1
 
     def sample(self, batch_size: int) -> dict[str, np.ndarray]:
         idx = self.rng.integers(0, self.size, size=batch_size)
@@ -51,6 +53,35 @@ class ReplayBuffer:
             "reward": self.rewards[idx],
             "next_obs": self.next_obs[idx],
             "done": self.dones[idx],
+        }
+
+    def sample_sequences(self, batch_size: int, length: int) -> dict[str, np.ndarray]:
+        """Sample time-contiguous windows for multi-step rollout training.
+
+        Windows never cross an episode boundary (no `done` inside, except possibly at
+        the final transition). Assumes the buffer hasn't wrapped (our usage: capacity
+        == collected steps); rejection-samples valid start indices.
+
+        Returns obs (B, L, ...), action/reward (B, L), next_obs (B, ...) — the
+        observation after the window's last transition.
+        """
+        if self.total_adds > self.capacity:
+            raise NotImplementedError("sequence sampling assumes an unwrapped buffer")
+        starts = np.empty(batch_size, dtype=np.int64)
+        found = 0
+        while found < batch_size:
+            cand = self.rng.integers(0, self.size - length, size=2 * batch_size)
+            # episode boundary inside the window (excluding final transition) → invalid
+            valid = cand[~self.dones[cand[:, None] + np.arange(length - 1)].any(axis=1)]
+            take = min(len(valid), batch_size - found)
+            starts[found : found + take] = valid[:take]
+            found += take
+        idx = starts[:, None] + np.arange(length)
+        return {
+            "obs": self.obs[idx],
+            "action": self.actions[idx],
+            "reward": self.rewards[idx],
+            "next_obs": self.next_obs[starts + length - 1],
         }
 
     def __len__(self) -> int:

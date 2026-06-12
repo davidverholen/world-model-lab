@@ -62,3 +62,34 @@ def test_sigreg_discriminates_collapse():
     z = torch.randn(64, 16, requires_grad=True)
     sigreg(z).backward()
     assert z.grad is not None and torch.isfinite(z.grad).all()
+
+
+def test_mpc_agent_acts():
+    from world_model.agents import MPCAgent
+    from world_model.models import RewardHead
+
+    env = make_minigrid_env("MiniGrid-Empty-5x5-v0")
+    n = int(env.action_space.n)
+    agent = MPCAgent(
+        ConvEncoder(),
+        LatentDynamicsPredictor(num_actions=n),
+        RewardHead(num_actions=n),
+        num_actions=n,
+        device="cpu",
+        horizon=3,
+        candidates=16,
+    )
+    obs, _ = env.reset(seed=0)
+    action = agent.act(obs)
+    assert 0 <= action < n
+
+
+def test_sequence_sampling():
+    buf = ReplayBuffer(capacity=50, obs_shape=(3, 4, 4), seed=0)
+    obs = np.zeros((3, 4, 4), dtype=np.float32)
+    for i in range(50):
+        buf.add(Transition(obs, i % 3, 0.0, obs, done=(i % 10 == 9)))
+    batch = buf.sample_sequences(8, length=4)
+    assert batch["obs"].shape == (8, 4, 3, 4, 4)
+    assert batch["action"].shape == (8, 4)
+    assert batch["next_obs"].shape == (8, 3, 4, 4)

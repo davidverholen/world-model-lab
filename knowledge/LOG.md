@@ -56,3 +56,16 @@ review). Linear probe demoted to diagnostic-only after persistent seed noise;
 dynamics-vs-copy ratio promoted to primary metric (latent-collapse page updated).
 New tooling: world_model.play viewer (human render / GIF record), checkpoint saving
 (--save). Next: rung 2 — DoorKey partial obs, memory, then first acting agent.
+
+## [2026-06-12] curation | milestone: first acting agent — world model plays Empty-8x8 at 19/20
+
+Exp 0004 closed after three iterations (6/20 -> 0/20 -> 12/20 -> 19/20 with stronger
+eval-time planning; random baseline 3/20). Root causes found by diagnostics, not
+tuning: (1) compounding rollout error from 1-step-only training -> multi-step rollout
+training (replay sequence windows, losses at every imagined step, reward head trained
+on drifted latents); (2) reward-magnitude starvation under sparse rewards ->
+pos_weight 100. New code: RewardHead, MPCAgent (CEM), play --checkpoint,
+ReplayBuffer.sample_sequences, --rollout-length. ROADMAP phase-1 complete + first
+acting agent ticked. Lessons routed to exp page; "compounding rollout error" is now
+mentioned on 2 pages — concept-page candidate if it recurs. Next: DoorKey + memory
+(rung 2), PPO baseline comparison.
