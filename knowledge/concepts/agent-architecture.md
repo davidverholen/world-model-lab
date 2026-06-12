@@ -16,11 +16,6 @@ layer optimizes something different, on a different timescale, with a different
 algorithm:
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{
-  "primaryColor":"#475569","primaryTextColor":"#f8fafc","primaryBorderColor":"#94a3b8",
-  "lineColor":"#94a3b8","textColor":"#64748b",
-  "clusterBkg":"transparent","clusterBorder":"#64748b",
-  "edgeLabelBackground":"#475569","fontSize":"14px"}}}%%
 flowchart TB
     subgraph L4["L4 FLYWHEEL"]
         direction LR
@@ -45,6 +40,13 @@ flowchart TB
     L3 -->|weights / EMA shadow| L2
     L2 -->|belief s_t| L1
     L1 -->|actions| L4
+
+    classDef box fill:#475569,stroke:#94a3b8,color:#f8fafc
+    class collect,trainstep,evalstep,loss,tricks,enc,gru,heads,cem box
+    style L4 fill:none,stroke:#64748b
+    style L3 fill:none,stroke:#64748b
+    style L2 fill:none,stroke:#64748b
+    style L1 fill:none,stroke:#64748b
 ```
 
 Full per-layer specifics (loss weights, planner params, ignition rules) are in the
