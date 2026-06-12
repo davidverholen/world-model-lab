@@ -108,6 +108,8 @@ class RecurrentMPCAgent:
 
     Maintains the GRU belief online (closed-loop with real observations); plans by
     imagining open-loop continuations where predicted latents feed the belief.
+    With a value head, imagined returns get a gamma^H * V(s_H) terminal bonus —
+    rewards beyond the horizon become visible to the planner (exp 0006).
     Call reset() at episode start. epsilon > 0 mixes in random actions — used when
     this agent collects training data (exploration), zero for evaluation.
     """
@@ -119,6 +121,7 @@ class RecurrentMPCAgent:
         reward_head: RewardHead,
         num_actions: int,
         device: str,
+        value_head=None,
         horizon: int = 20,
         candidates: int = 512,
         iters: int = 3,
@@ -130,6 +133,7 @@ class RecurrentMPCAgent:
         self.encoder = encoder.to(device).eval()
         self.dynamics = dynamics.to(device).eval()
         self.reward_head = reward_head.to(device).eval()
+        self.value_head = value_head.to(device).eval() if value_head is not None else None
         self.num_actions = num_actions
         self.device = device
         self.horizon = horizon
@@ -143,6 +147,8 @@ class RecurrentMPCAgent:
 
     @classmethod
     def from_checkpoint(cls, path: str, device: str, **kwargs) -> "RecurrentMPCAgent":
+        from world_model.models import ValueHead
+
         ckpt = torch.load(path, map_location=device, weights_only=True)
         num_actions = int(ckpt["config"]["num_actions"])
         encoder = ConvEncoder()
@@ -151,7 +157,13 @@ class RecurrentMPCAgent:
         encoder.load_state_dict(ckpt["encoder"])
         dynamics.load_state_dict(ckpt["dynamics"])
         reward_head.load_state_dict(ckpt["reward_head"])
-        return cls(encoder, dynamics, reward_head, num_actions, device, **kwargs)
+        value_head = None
+        if "value_head" in ckpt:
+            value_head = ValueHead(state_dim=dynamics.state_dim)
+            value_head.load_state_dict(ckpt["value_head"])
+        return cls(
+            encoder, dynamics, reward_head, num_actions, device, value_head=value_head, **kwargs
+        )
 
     def reset(self) -> None:
         self._state = self.dynamics.initial_state(1, self.device)
@@ -165,6 +177,8 @@ class RecurrentMPCAgent:
             returns += (self.discount**t) * self.reward_head(s, actions[:, t])
             z_hat = self.dynamics.predict_next(s, actions[:, t])
             s = self.dynamics.update(z_hat, actions[:, t], s)
+        if self.value_head is not None:
+            returns += (self.discount ** actions.shape[1]) * self.value_head(s)
         return returns
 
     @torch.no_grad()

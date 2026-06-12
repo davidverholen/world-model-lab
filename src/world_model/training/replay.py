@@ -28,6 +28,7 @@ class ReplayBuffer:
         self.next_obs = np.zeros((capacity, *obs_shape), dtype=np.float32)
         self.actions = np.zeros(capacity, dtype=np.int64)
         self.rewards = np.zeros(capacity, dtype=np.float32)
+        self.returns = np.zeros(capacity, dtype=np.float32)
         self.dones = np.zeros(capacity, dtype=bool)
         self.size = 0
         self.pos = 0
@@ -55,6 +56,20 @@ class ReplayBuffer:
             "done": self.dones[idx],
         }
 
+    def compute_returns(self, gamma: float) -> None:
+        """Fill `returns` with discounted return-to-go, reset at episode ends.
+
+        Walks the (unwrapped) buffer backwards: G_i = r_i + gamma * G_{i+1}, restarting
+        at dones. The trailing partial episode (collection cut mid-episode) gets a
+        truncated return — a slight underestimate, acceptable as a value target.
+        """
+        g = 0.0
+        for i in range(self.size - 1, -1, -1):
+            if self.dones[i]:
+                g = 0.0
+            g = float(self.rewards[i]) + gamma * g
+            self.returns[i] = g
+
     def sample_sequences(self, batch_size: int, length: int) -> dict[str, np.ndarray]:
         """Sample time-contiguous windows for multi-step rollout training.
 
@@ -81,6 +96,7 @@ class ReplayBuffer:
             "obs": self.obs[idx],
             "action": self.actions[idx],
             "reward": self.rewards[idx],
+            "return": self.returns[idx],
             "next_obs": self.next_obs[starts + length - 1],
         }
 

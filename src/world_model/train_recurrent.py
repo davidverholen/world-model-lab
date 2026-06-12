@@ -11,6 +11,7 @@ Run: uv run python -m world_model.train_recurrent --env-id MiniGrid-DoorKey-5x5-
 """
 
 import argparse
+import copy
 
 import torch
 import torch.nn.functional as F
@@ -18,8 +19,9 @@ import torch.nn.functional as F
 from world_model.agents import RandomAgent
 from world_model.agents.mpc import RecurrentMPCAgent
 from world_model.envs import make_minigrid_env
-from world_model.models import ConvEncoder, RecurrentDynamics, RewardHead, SIGReg
+from world_model.models import ConvEncoder, RecurrentDynamics, RewardHead, SIGReg, ValueHead
 from world_model.models.reward import reward_loss
+from world_model.models.value import value_loss
 from world_model.training import ReplayBuffer, Transition
 
 
@@ -50,6 +52,7 @@ def train(
     encoder: ConvEncoder,
     dynamics: RecurrentDynamics,
     reward_head: RewardHead,
+    value_head: ValueHead,
     sigreg: SIGReg,
     opt: torch.optim.Optimizer,
     updates: int,
@@ -65,6 +68,7 @@ def train(
         obs_seq = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)  # (B, W)
         rewards = torch.as_tensor(batch["reward"], device=device)
+        returns = torch.as_tensor(batch["return"], device=device)
         final_obs = torch.as_tensor(batch["next_obs"], device=device)
 
         b, w = actions.shape
@@ -82,21 +86,23 @@ def train(
         # closed-loop 1-step losses + open-loop imagination losses share the rollout
         pred_loss = torch.zeros((), device=device)
         r_loss = torch.zeros((), device=device)
+        v_loss = torch.zeros((), device=device)
         s_open = s
         z_hat = None
         for k in range(burn_in, w):
             if z_hat is not None:  # open-loop: belief updated with imagined latent
                 s_open = dynamics.update(z_hat, actions[:, k - 1], s_open)
             r_loss = r_loss + reward_loss(reward_head(s_open, actions[:, k]), rewards[:, k])
+            v_loss = v_loss + value_loss(value_head(s_open), returns[:, k])
             z_hat = dynamics.predict_next(s_open, actions[:, k])
             pred_loss = pred_loss + F.mse_loss(z_hat, targets[:, k])
         n = w - burn_in
-        pred_loss, r_loss = pred_loss / n, r_loss / n
+        pred_loss, r_loss, v_loss = pred_loss / n, r_loss / n, v_loss / n
 
         if lam > 0:
-            loss = (1 - lam) * pred_loss + lam * sigreg(z_seq.flatten(0, 1)) + r_loss
+            loss = (1 - lam) * pred_loss + lam * sigreg(z_seq.flatten(0, 1)) + r_loss + v_loss
         else:
-            loss = pred_loss + r_loss
+            loss = pred_loss + r_loss + v_loss
 
         opt.zero_grad()
         loss.backward()
@@ -107,8 +113,41 @@ def train(
         if (step + 1) % 100 == 0:
             print(
                 f"  update {step + 1}: pred_loss={pred_loss.item():.5f} "
+                f"r_loss={r_loss.item():.5f} v_loss={v_loss.item():.5f} "
                 f"latent_std={z_final.std(dim=0).mean().item():.4f}"
             )
+
+
+def evaluate(
+    encoder, dynamics, reward_head, value_head, env_id: str, episodes: int, device: str
+) -> float:
+    """Greedy (eps=0) success rate of the current model; fresh env, fixed eval seeds."""
+    env = make_minigrid_env(env_id, fully_observable=False)
+    agent = RecurrentMPCAgent(
+        encoder,
+        dynamics,
+        reward_head,
+        int(env.action_space.n),
+        device,
+        value_head=value_head,
+        horizon=20,
+        candidates=512,
+        iters=2,
+        seed=123,
+    )
+    successes = 0
+    for ep in range(episodes):
+        obs, _ = env.reset(seed=10_000 + ep)
+        agent.reset()
+        done, reward = False, 0.0
+        while not done:
+            obs, reward, term, trunc, _ = env.step(agent.act(obs))
+            done = term or trunc
+        successes += int(reward > 0)
+    # leave modules in train mode for the next round (agent set them to eval)
+    for m in (encoder, dynamics, reward_head, value_head):
+        m.train()
+    return successes / episodes
 
 
 def main() -> None:
@@ -122,6 +161,8 @@ def main() -> None:
     parser.add_argument("--burn-in", type=int, default=8)
     parser.add_argument("--sigreg-weight", type=float, default=0.05)
     parser.add_argument("--epsilon", type=float, default=0.3, help="exploration in MPC rounds")
+    parser.add_argument("--gamma", type=float, default=0.98, help="return discount")
+    parser.add_argument("--eval-episodes", type=int, default=10, help="per-round eval")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--save", type=str, required=True)
     args = parser.parse_args()
@@ -134,16 +175,17 @@ def main() -> None:
     encoder = ConvEncoder().to(device)
     dynamics = RecurrentDynamics(num_actions=num_actions).to(device)
     reward_head = RewardHead(latent_dim=dynamics.state_dim, num_actions=num_actions).to(device)
+    value_head = ValueHead(state_dim=dynamics.state_dim).to(device)
     sigreg = SIGReg().to(device)
-    opt = torch.optim.Adam(
-        [*encoder.parameters(), *dynamics.parameters(), *reward_head.parameters()], lr=3e-4
-    )
+    modules = [encoder, dynamics, reward_head, value_head]
+    opt = torch.optim.Adam([p for m in modules for p in m.parameters()], lr=3e-4)
 
     # MPC rounds collect fewer steps (planning per env step is ~100x slower than
     # random) with a deliberately cheap planner — the data only needs goal bias.
     mpc_steps = max(10_000, args.steps_per_round // 3)
     total_capacity = args.steps_per_round + (args.rounds - 1) * mpc_steps
     buffer = ReplayBuffer(total_capacity, env.observation_space.shape, seed=args.seed)
+    best: dict = {"rate": None, "round": -1, "state": {}}
 
     for rnd in range(args.rounds):
         if rnd == 0:
@@ -156,22 +198,27 @@ def main() -> None:
                 reward_head,
                 num_actions,
                 device,
+                value_head=value_head,
                 epsilon=args.epsilon,
                 horizon=12,
                 candidates=128,
                 iters=1,
                 seed=args.seed + rnd,
             )
+            for m in modules:
+                m.train()  # agent construction sets eval; collection precedes training
             kind, steps = f"mpc(eps={args.epsilon})", mpc_steps
         print(f"round {rnd}: collecting {steps} steps with {kind} agent ...")
         rew, eps = collect_round(buffer, env, agent, steps, seed=args.seed + rnd)
         print(f"  -> {eps} episodes, {rew} reward events")
+        buffer.compute_returns(args.gamma)
         print(f"round {rnd}: training {args.updates_per_round} updates ...")
         train(
             buffer,
             encoder,
             dynamics,
             reward_head,
+            value_head,
             sigreg,
             opt,
             args.updates_per_round,
@@ -181,6 +228,29 @@ def main() -> None:
             args.sigreg_weight,
             device,
         )
+        # lesson from exp 0005: evaluate and snapshot EVERY round — round N+1
+        # training can degrade the model, and the best agent must not be lost
+        rate = evaluate(
+            encoder,
+            dynamics,
+            reward_head,
+            value_head,
+            args.env_id,
+            args.eval_episodes,
+            device,
+        )
+        print(f"round {rnd}: eval success rate {rate:.0%} ({args.eval_episodes} episodes)")
+        if best["rate"] is None or rate >= best["rate"]:
+            best = {
+                "rate": rate,
+                "round": rnd,
+                "state": {
+                    "encoder": copy.deepcopy(encoder.state_dict()),
+                    "dynamics": copy.deepcopy(dynamics.state_dict()),
+                    "reward_head": copy.deepcopy(reward_head.state_dict()),
+                    "value_head": copy.deepcopy(value_head.state_dict()),
+                },
+            }
 
     from pathlib import Path
 
@@ -189,14 +259,13 @@ def main() -> None:
     torch.save(
         {
             "recurrent": True,
-            "encoder": encoder.state_dict(),
-            "dynamics": dynamics.state_dict(),
-            "reward_head": reward_head.state_dict(),
+            **best["state"],
             "config": {**vars(args), "num_actions": num_actions},
+            "metrics": {"eval_success": best["rate"], "best_round": best["round"]},
         },
         path,
     )
-    print(f"checkpoint saved to {path}")
+    print(f"best checkpoint (round {best['round']}, {best['rate']:.0%}) saved to {path}")
 
 
 if __name__ == "__main__":

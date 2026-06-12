@@ -119,3 +119,37 @@ def test_recurrent_world_model_and_agent():
         assert 0 <= a < n
         obs, *_ = env.step(a)
     agent.reset()  # belief reset between episodes
+
+
+def test_returns_computation():
+    buf = ReplayBuffer(capacity=6, obs_shape=(1,), seed=0)
+    obs = np.zeros((1,), dtype=np.float32)
+    # episode 1: 3 steps, reward 1.0 at the end; episode 2: 3 steps, no reward
+    for r, d in [(0.0, False), (0.0, False), (1.0, True), (0.0, False), (0.0, False), (0.0, True)]:
+        buf.add(Transition(obs, 0, r, obs, d))
+    buf.compute_returns(gamma=0.5)
+    assert np.allclose(buf.returns[:6], [0.25, 0.5, 1.0, 0.0, 0.0, 0.0])
+
+
+def test_value_head_and_planner_bonus():
+    import torch as t
+
+    from world_model.agents import RecurrentMPCAgent
+    from world_model.models import RecurrentDynamics, RewardHead, ValueHead
+
+    dyn = RecurrentDynamics(num_actions=3, latent_dim=16, state_dim=32)
+    agent = RecurrentMPCAgent(
+        ConvEncoder(latent_dim=16),
+        dyn,
+        RewardHead(latent_dim=32, num_actions=3),
+        num_actions=3,
+        device="cpu",
+        value_head=ValueHead(state_dim=32),
+        horizon=2,
+        candidates=4,
+        iters=1,
+    )
+    s0 = dyn.initial_state(1, "cpu")
+    actions = t.randint(3, (4, 2))
+    returns = agent._imagined_returns(s0, actions)
+    assert returns.shape == (4,) and t.isfinite(returns).all()
