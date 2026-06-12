@@ -233,6 +233,12 @@ def main() -> None:
     parser.add_argument("--save", type=str, required=True)
     args = parser.parse_args()
 
+    if args.reset != "none" and args.ema_decay > 0:
+        # reviewer finding (2026-06-12): in-place reinit never reaches the EMA
+        # shadow that acting/eval/checkpoints use — the reset would be a silent
+        # no-op on behavior. Combine only after designing that interaction.
+        raise SystemExit("--reset and --ema-decay are mutually exclusive (see exp 0011 review)")
+
     torch.manual_seed(args.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     env = make_minigrid_env(args.env_id, fully_observable=False)
@@ -305,6 +311,7 @@ def main() -> None:
                 targets_to_reset += [dynamics.cell, dynamics.action_embed]
             for m in targets_to_reset:
                 reinit(m)
+            # single param group assumed: group[0]'s lr already carries later-lr-scale
             opt = torch.optim.Adam(
                 [p for m in modules for p in m.parameters()], lr=opt.param_groups[0]["lr"]
             )

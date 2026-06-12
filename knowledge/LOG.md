@@ -269,3 +269,23 @@ independent research not in their concept. Re-ranked: OpenAlex (truly open) as
 programmatic primary with anchor-paper citation-walking to compensate ranking;
 S2 anonymous as best-effort bonus. Project principle reinforced: the KB/process
 depends on no gated service (arXiv, ar5iv, OpenAlex all open).
+
+## [2026-06-12] curation | milestone: naive reset transfer fails — frontier confirmed (exp 0011)
+
+9 runs, 3 arms, all below ctrl: resetting "heads" includes next-latent = world-model
+amputation each round at 25x-too-low replay ratio (per-round amnesia). Bonus
+finding: hr arm's s1 round-0 60->20 under doubled early training = primacy bias
+reproduced in-setting (diagnosis confirmed, cure mis-mapped). Exp 0012
+pre-registered in the page: value/reward-only reset, once at round 3, 4x post-reset
+updates, shrink-perturb arm. Horizon rule active: no published work on this
+question — our pages are now the primary literature for it. uint8 buffers held
+6-wide at 3.7GB (paging fixed). retention.md fix-table updated.
+
+## [2026-06-12] review | exp 0011 reviewer pass: latent reset+EMA bug found, negative result verified clean
+
+Opus reviewer on the milestone diff: uint8 roundtrip provably exact, reinit
+coverage complete, optimizer rebuild correct — and one important latent bug:
+--reset never reaches the EMA shadow (acting weights), so reset+EMA combined
+would silently no-op. Checked all 9 exp-0011 checkpoint configs: ema_decay=0
+throughout -> negative result stands clean. Guard added (mutually exclusive
+flags); lr-rebuild fragility commented.

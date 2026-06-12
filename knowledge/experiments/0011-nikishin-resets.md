@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-12
 ---
 
-# 0011: Primacy-bias resets on DoorKey-6x6 (planned)
+# 0011: Naive reset transfer fails — the mapping was wrong, not the idea (run 2026-06-12)
 
 ## Hypothesis
 
@@ -38,11 +38,41 @@ Batch 1: a+b (6-wide); batch 2: c (3-wide). Comparator ctrl reused from exp 0010
 
 ## Result
 
-_pending_
+**All three arms refuted** (vs ctrl 20/60/40, mean 40%):
+
+| arm | bests (s0/s1/s2) | mean | signature |
+|---|---|---|---|
+| reset-heads, 1500 upd | 10/60/10 | 27% | post-reset rounds ≈ 0 everywhere; s1's 60% (round 0, pre-reset) never recovers |
+| reset-deep, 1500 upd | 10/60/10 | 27% | same, flatter |
+| reset-heads, 3000 upd | 10/20/40 | 23% | **s1 round-0 drops 60→20: doubling round-0 training deepens primacy bias BEFORE any reset** — Nikishin's core claim reproduced in our control variable |
+
+uint8 replay held 6-wide RAM at ~3.7 GB/process (no paging; ~45–55 min batches at
+75% CPU efficiency).
 
 ## Lesson
 
-_pending_
+1. **The naive transfer mis-mapped "last layers."** Our `heads` include the
+   next-latent prediction head — i.e. the world model itself. Nikishin resets
+   policy/value heads over *stable representations*; we amputated the dynamics
+   every round and (at replay ratio ~0.1–0.2, vs their ≥2) gave it no time to
+   regrow. Result: per-round amnesia, worse than no treatment.
+2. **The replay-ratio arm both refutes and confirms**: 2× updates didn't rescue
+   resets (still ≈25× below Nikishin's regime), but the s1 round-0 degradation
+   (60→20 from more early training) is direct in-setting evidence that primacy
+   bias is the right diagnosis — the disease is confirmed even as this cure fails.
+3. **Exp 0012 pre-registration (corrected mapping)**: (a) reset ONLY reward+value
+   heads, dynamics untouched; (b) reset ONCE at mid-training (round 3), not every
+   round; (c) post-reset round gets 4× updates (one-time cost, env-budget legal);
+   (d) consider shrink-and-perturb (soft reset) as the gentler arm. Falsifiable
+   bar unchanged: no >20pp crash + mean ≥55%.
+4. **Horizon-rule status**: scout finds no published work on reset/plasticity
+   mechanics for model-based latent world models under flywheel collection. Per
+   the research loop's transformed step 2, exps 0009–0012 are now the primary
+   literature for this question. The nearest-neighbor map (churn reduction,
+   continual backprop, frozen trunk, DreamerV3's critic-EMA-target) is the design
+   space; frozen-trunk (DINOv3 line) remains the structural escape hatch.
+
+## Links
 
 ## Links
 

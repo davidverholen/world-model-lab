@@ -54,7 +54,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [0008-doorkey6x6-vs-ppo](experiments/0008-doorkey6x6-vs-ppo.md) — flywheel fails to ignite on 6x6 (1 reward event in round 0); PPO ~37% > WM 10%; ignition + round-instability are the real blockers → exp 0009 (done)
 - [0009-ignition-mechanics](experiments/0009-ignition-mechanics.md) — ignition solved (6 examples → 60% after round 0); retention now the isolated bottleneck (60%→0% under continued training); parity with PPO, rung 2b open → exp 0010 stability (done)
 - [0010-retention-mechanics](experiments/0010-retention-mechanics.md) — clean 12-run negative: lr decay + EMA both fail (crash is directional interference = primacy bias); resets (Nikishin) are exp 0011 (done)
-- [0011-nikishin-resets](experiments/0011-nikishin-resets.md) — reset arms (heads/deep/high-replay-ratio) vs primacy bias (running)
+- [0011-nikishin-resets](experiments/0011-nikishin-resets.md) — naive reset transfer fails (9 runs, all arms < ctrl): mis-mapped "last layers" (we reset the world model itself); primacy-bias diagnosis confirmed in-setting; corrected mapping = exp 0012 (done)
 
 ## Wanted pages (linked but not yet written)
 
