@@ -32,7 +32,8 @@ smoothing: lr decay ×0.3 and EMA acting weights both failed (0010, 12 runs).
 | family | literature | ours |
 |---|---|---|
 | smoothing (lr decay, EMA) | not the recommended fix | **ruled out (0010)** |
-| **resets** (reinit late layers, keep replay) | Nikishin 2022, robust across SAC/SPR/DrQ; scales with replay ratio | **naive transfer FAILED (0011, 9 runs)** — mis-mapped: resetting our "heads" amputates the world model; replay ratio 25× too low. Corrected mapping = exp 0012; diagnosis (primacy bias) confirmed in-setting |
+| **resets** (reinit late layers, keep replay) | Nikishin 2022, robust across SAC/SPR/DrQ; scales with replay ratio | **DEAD in our regime** (5 variants, exps 0011/0012, all ≤ ctrl): both recipes assume high-UTD overfitting; our failure needed more fitting, not forgetting |
+| **UTD scaling** (more gradient steps, same env budget) | Qiao Fig-3 (agent-UTD helps MBPO) | **BIG WIN (0012): ×4 → 63% mean, beats PPO; 80% peak.** Crashes persist at higher amplitude → not the full fix |
 | churn reduction / NTK regularization | ICML 2025 (queued: 2506.00592) | untested |
 | continual backprop (selective reinit of dormant units) | Sutton lab (queued: 2306.13812) | untested |
 | frozen pretrained trunk (no plasticity needed) | DINO-WM / DINOv3 line | rung-3 candidate (immune by construction) |

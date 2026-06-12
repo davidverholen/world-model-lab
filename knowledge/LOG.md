@@ -399,3 +399,14 @@ implementable (segment at prediction-error spikes — boundaries for free);
 identified as the DEEP fix for exp-0005 horizon blindness and as the same
 binding problem as language-grounding. Cheap diagnostic probe pre-sketched
 (boundary alignment on DoorKey trajectories). 5 sources queued.
+
+## [2026-06-12] curation | milestone: UTD x4 — first PPO defeat at equal env budget (exp 0012)
+
+9 runs close the literature-recipe arc: resets conclusively dead (5 variants <=
+ctrl across 0011/0012 — both Nikishin and Qiao assume high-UTD overfitting; we
+were UNDER-trained); UTD x4 (no resets) = 63% mean / 80% peak vs PPO 37% and ctrl
+40% — bar (ii) met, rung 2b performance criterion cleared at equal env steps.
+Bar (i) no-crash still fails (80->30): interference persists at higher amplitude;
+trunk remains the only unprotected component. Exp 0013 pre-registered: UTD
+baseline + trunk-freeze arm (+optional round-0-at-x1 arm). retention.md fix table
+updated. No paid resources needed (~80-min desktop batches).
