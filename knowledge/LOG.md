@@ -410,3 +410,15 @@ Bar (i) no-crash still fails (80->30): interference persists at higher amplitude
 trunk remains the only unprotected component. Exp 0013 pre-registered: UTD
 baseline + trunk-freeze arm (+optional round-0-at-x1 arm). retention.md fix table
 updated. No paid resources needed (~80-min desktop batches).
+
+## [2026-06-12] curation | AUTONOMOUS MODE ACTIVATED (Dave, conditional)
+
+Standing instruction: if Dave doesn't respond after exp 0013 concludes, continue
+the research cycle autonomously (/research-cycle skill — identical loop, no
+per-iteration go). Stop gates, per Dave: (1) hard wall that survives the
+literature gate (no resolution found AND no further research to ingest — i.e.,
+the skill's 2-strike stall rule across ALL queued threads), (2) token exhaustion.
+All other guardrails unchanged: desktop-only spend, current-rung scope, honesty
+rules, milestone discipline, PAID-RESOURCE flags recorded but not acted on,
+owner:human pages get proposals only. Reports: milestone commits as journal +
+state-of-the-night LOG entry.
