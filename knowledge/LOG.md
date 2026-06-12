@@ -311,3 +311,8 @@ New rung 5b before real-world transfer: self-play + VPT-style action-labeled vid
 amended; 5 sources queued (ids to verify). Rationale: forces multi-modal/language
 integration without robotics hardware; resource-rich (VPT corpus, MineRL/MineDojo,
 published reference agents incl. Dreamer 4 offline diamonds).
+
+## [2026-06-12] curation | text-signal staircase added to ADR 0005 (Dave)
+
+Messenger/RTFM (text necessary) -> text-augmented Crafter (text helpful; metric =
+sample-efficiency delta) -> Minecraft tutorials. Steps i-ii run on current hardware.

@@ -119,3 +119,6 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] Voyager (Wang et al. 2023) — LLM-as-planner over Minecraft skills; the
       pragmatic fallback architecture
 - [ ] STEVE-1 — instruction-following Minecraft agent (text->behavior bridging)
+- [ ] RTFM: reading manuals to generalize to new dynamics (Zhong et al., FAIR ~2019)
+      + Messenger / EMMA (Hanjie et al. ~2021) — envs where reading is NECESSARY to
+      win; the cheap text-grounding testbeds (step i of the text staircase; ids to verify)

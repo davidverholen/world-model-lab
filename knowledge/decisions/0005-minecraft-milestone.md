@@ -35,6 +35,13 @@ research risk:
    not merely LLM-as-planner (Voyager direction) — though that is the pragmatic
    fallback.
 
+**Text-signal staircase (Dave, 2026-06-12):** de-risk language grounding on cheap
+envs first — (i) Messenger/RTFM, where reading the per-episode manual is
+*necessary* to win (clean grounding signal, MiniGrid-scale compute);
+(ii) text-augmented Crafter, where tutorials are helpful-but-not-necessary
+(metric: sample-efficiency delta with vs without text); (iii) Minecraft with real
+tutorials. Steps (i)–(ii) need no new hardware.
+
 "Successfully" (provisional, refine at rung entry): obtain a diamond at a published
 sample-efficiency tier, plus a breadth metric (MineDojo-style task suite subset).
 
