@@ -65,6 +65,15 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
 - `/scout-sources` — search for new world-model work, verify, queue
 - `/milestone` — checkpoint: verify → curate knowledge → commit everything
 
+## Model delegation
+
+When spawning subagents, route by complexity (standing authorization from Dave):
+research design, training-failure debugging, and `owner: human` meaning stay in the
+main loop (Fable); substantial implementation/review subagents → **opus**; structured
+KB work (ingest, lint, scout, experiment write-ups) → **sonnet** (curator and scout
+agents default to this); mechanical sweeps (link checks, INDEX consistency, code
+search) → **haiku**. When unsure, inherit the main-loop model.
+
 ## Code conventions
 
 - Python 3.12, ruff (line length 100), type hints on public APIs.

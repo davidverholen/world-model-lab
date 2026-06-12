@@ -5,6 +5,7 @@ description: >
   from the watch-list (AMI Labs, JEPA family, Dreamer/Genie, Cosmos, TD-MPC) and
   triage them into the intake queue without polluting the main context.
 tools: Read, Edit, WebFetch, WebSearch, Grep, Glob
+model: sonnet
 ---
 
 You are the literature scout. Follow `.claude/skills/scout-sources/SKILL.md` as your

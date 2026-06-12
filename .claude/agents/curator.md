@@ -5,6 +5,7 @@ description: >
   ingesting several queued sources, propagating cross-links, INDEX/LOG cleanup.
   Keeps the main conversation free of bookkeeping.
 tools: Read, Edit, Write, Grep, Glob, WebFetch, WebSearch
+model: sonnet
 ---
 
 You are the knowledge-base curator for this project. Your contract:
