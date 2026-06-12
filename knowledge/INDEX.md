@@ -13,6 +13,7 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [latent-collapse](concepts/latent-collapse.md) — the JEPA failure mode, fixes table, measurement pitfalls (draft)
 - [compute-strategy](concepts/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
 - [agent-architecture](concepts/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
+- [retention](concepts/retention.md) — plasticity loss/primacy bias/interference: fix families, literature↔our status (draft)
 
 ## Papers
 
@@ -20,6 +21,8 @@ process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sour
 - [lejepa-2025](papers/lejepa-2025.md) — provable JEPA objective (SIGReg); companion world-model theory paper (stub)
 - [dreamerv3-2023](papers/dreamerv3-2023.md) — reference world-model RL baseline, one config for 150+ tasks (stub)
 - [dreamer4-2025](papers/dreamer4-2025.md) — offline imagination training at scale, Minecraft diamonds (stub)
+- [nikishin-primacy-2022](papers/nikishin-primacy-2022.md) — primacy bias + reset protocol, implementation-grade (draft)
+- [lecun-2022-path](papers/lecun-2022-path.md) — the umbrella position paper; module↔our-layer mapping (draft, skim depth)
 
 ## Labs
 

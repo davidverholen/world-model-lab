@@ -182,3 +182,12 @@ batches page heavily (replay ~10GB/process -> uint8 storage queued); block-buffe
 logs look empty mid-run; laptop suspend pauses monitors (runs unaffected).
 Also today: agent-architecture diagram iterated to extension-safe form (no init
 directive, classDef styling).
+
+## [2026-06-12] ingest | Nikishin primacy bias (protocol depth) + LeCun path paper (skim) + retention concept page
+
+papers/nikishin-primacy-2022 (implementation-grade protocol; underpins running exp
+0011), papers/lecun-2022-path (skim depth, module<->our-layer mapping table; full
+read queued), concepts/retention (fix-family table: smoothing ruled out by 0010,
+resets running, churn/continual-backprop/frozen-trunk untested). DINOv3 queued with
+frozen-encoder framing. PROCESS gained the literature-first rule (Dave's request —
+flagged here since _schema is human-owned).

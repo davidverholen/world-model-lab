@@ -8,9 +8,8 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 
 ### Retention / plasticity / interference (exp 0009–0011 thread; found 2026-06-12, ids from search results)
 
-- [ ] arxiv:2205.07802 The Primacy Bias in Deep RL (Nikishin et al.) — periodic
-      last-layer resets + keep replay; code github.com/evgenii-nikishin/rl_with_resets.
-      **Most directly applicable to our 60%→0% crashes.**
+- [x] arxiv:2205.07802 Nikishin primacy bias — INGESTED 2026-06-12 →
+      papers/nikishin-primacy-2022.md (protocol depth)
 - [ ] arxiv:2411.04832 Plasticity Loss in Deep RL: A Survey (2025) — map of the field
 - [ ] arxiv:2303.07507 Loss of Plasticity in Continual Deep RL (Abbas et al.)
 - [ ] arxiv:2506.00592 Mitigating Plasticity Loss by Reducing Churn (ICML 2025) —
@@ -26,7 +25,8 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 - [ ] arxiv:2509.24527 Dreamer 4 — read fully (id verified)
 - [ ] arxiv:2511.08544 LeJEPA + code https://github.com/rbalestr-lab/lejepa (id verified)
 - [ ] arxiv:2605.26379 When Does LeJEPA Learn a World Model? (id verified; conditions under which JEPA recovers true environment structure)
-- [ ] openreview:lecun-path — LeCun's position paper; defines H-JEPA agenda
+- [~] openreview:lecun-path — INGESTED at skim depth 2026-06-12 →
+      papers/lecun-2022-path.md; full-PDF read still queued for promotion to current
 
 ## Medium (context and alternatives)
 

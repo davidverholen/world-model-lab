@@ -65,6 +65,15 @@ record in LOG.md (cheap, append-only), promote later if it recurs.
 - End: route any learning signals per the table above; append LOG.md entry if the
   session changed the wiki.
 
+## Literature-first rule (added 2026-06-12, Dave)
+
+Before designing an experiment that attacks a *known class* of problem (collapse,
+exploration, interference, ...), check QUEUE/scout for prior art and ingest the key
+source first — implement the published protocol, then deviate deliberately. Cheap
+diagnostic re-derivations are fine; full experiments against a wall the literature
+has already mapped are not. (Origin: exps 0009/0010 re-derived primacy bias before
+reading Nikishin; exp 0011 fetched the protocol first and was better for it.)
+
 ## Milestone checkpoint (skill: `/milestone`)
 
 A milestone is any state worth returning to: experiment concluded, rung exit
