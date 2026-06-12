@@ -8,7 +8,11 @@ description: >
   overnight", or similar standing instructions.
 ---
 
-# Autonomous research cycle
+# Research cycle
+
+This is the NORMAL research loop — identical whether supervised or autonomous.
+The only difference: in autonomous mode, do not await Dave's go between
+iterations (everything else, including every gate and guardrail, is unchanged).
 
 One iteration (repeat until a stop condition):
 
