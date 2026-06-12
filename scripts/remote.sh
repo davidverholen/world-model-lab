@@ -7,6 +7,9 @@
 #   scripts/remote.sh gpu              nvidia-smi on the desktop
 #   scripts/remote.sh run <cmd...>     push HEAD, sync remote checkout, run command there
 #                                      e.g. scripts/remote.sh run python -m world_model.collect
+#   scripts/remote.sh shell '<bash>'   like run, but raw bash: enables 'a & b & wait'
+#                                      for parallel seeds on the one mostly-idle GPU
+#   scripts/remote.sh kill             kill remote python (runs survive ssh disconnect!)
 #   scripts/remote.sh pull             copy remote runs/ back to ./runs/remote/
 #
 # Dispatches committed state only (HEAD) — uncommitted changes stay local on purpose;
