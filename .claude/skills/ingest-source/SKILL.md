@@ -26,12 +26,13 @@ Follow `knowledge/_schema/PROCESS.md` §1 (authoritative). Checklist:
 6. **Archive**: run `scripts/fetch_sources.sh` (idempotent) so the local PDF copy
    lands in `knowledge/sources/files/` for offline reading.
 
+7. **Venue**: record peer-review status in the SOURCES title column
+   ("(ICML 2022)" / "(preprint)") — keeps the registry manuscript-ready.
+
 Depth labels for `Read state`: abstract-only < skimmed (method sections fetched) <
 read. Full-text fetch route: `ar5iv.labs.arxiv.org/html/<id>` (abs pages give
-abstracts only). Pages below `read` stay `status: draft` at best.
+abstracts only). Pages below `read` stay `status: draft` at best. Manuscripts may
+cite only `read`-depth sources.
 
 Authority reminders: claims cite source ids; this page may not cite stubs/stale pages;
 never edit `owner: human` pages without proposing.
-
-7. **Venue**: record peer-review status in the SOURCES title column
-   ("(ICML 2022)" / "(preprint)") — keeps the registry manuscript-ready.
