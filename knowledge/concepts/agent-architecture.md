@@ -16,37 +16,39 @@ layer optimizes something different, on a different timescale, with a different
 algorithm:
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{
+  "primaryColor":"#475569","primaryTextColor":"#f8fafc","primaryBorderColor":"#94a3b8",
+  "lineColor":"#94a3b8","textColor":"#64748b",
+  "clusterBkg":"transparent","clusterBorder":"#64748b",
+  "edgeLabelBackground":"#475569","fontSize":"14px"}}}%%
 flowchart TB
-    subgraph L4["L4 - DATA FLYWHEEL: optimizes the data distribution (per round, ~15k env steps)"]
+    subgraph L4["L4 - DATA FLYWHEEL (per round)"]
         direction LR
-        collect["collect with eps-greedy MPC agent<br/>(round 0: random + adaptive ignition >=5 successes)"]
-        trainstep["train all modules on replay"]
-        evalstep["eval greedy, fixed seeds<br/>+ best-checkpoint guard"]
-        collect --> trainstep --> evalstep --> collect
+        collect["collect<br/>eps-greedy MPC"] --> trainstep["train on replay"] --> evalstep["eval + best-<br/>checkpoint guard"] --> collect
     end
 
-    subgraph L3["L3 - MODEL TRAINING: optimizes weights (Adam 3e-4, per update)"]
-        loss["joint loss = (1-lambda) multi-step latent prediction<br/>+ lambda SIGReg (anti-collapse, 0.05)<br/>+ reward loss (pos_weight 100)<br/>+ value loss (MC return-to-go, pos_weight 20)"]
-        tricks["success-window oversampling 25%<br/>grad-clip 10 - exp 0010: EMA shadow / lr decay"]
-        loss --- tricks
+    subgraph L3["L3 - TRAINING (Adam, per update)"]
+        direction LR
+        loss["prediction + SIGReg<br/>+ reward + value loss"] --- tricks["success oversampling<br/>EMA / lr-decay arms"]
     end
 
-    subgraph L2["L2 - BELIEF and MODEL: optimizes state estimation (per env step)"]
-        enc["ConvEncoder: 56x56 RGB to z (128)"]
-        gru["GRU belief s (256): closed-loop on real z,<br/>open-loop on imagined z-hat"]
-        heads["heads: next z-hat, reward r(s,a), value V(s)"]
-        enc --> gru --> heads
+    subgraph L2["L2 - BELIEF (per env step)"]
+        direction LR
+        enc["encoder<br/>RGB to z"] --> gru["GRU belief s"] --> heads["heads:<br/>z-hat, r, V"]
     end
 
-    subgraph L1["L1 - PLANNING: optimizes the action (CEM, per env step)"]
-        cem["sample 512 action sequences (H=20)<br/>imagine rollouts in latent space<br/>score: sum gamma^t r + gamma^H V(s_H)<br/>refit to elites x2-3, act, re-plan"]
+    subgraph L1["L1 - PLANNING (CEM, per action)"]
+        cem["imagine 512 futures, score<br/>sum gamma^t r + gamma^H V"]
     end
 
     L4 -->|replay windows| L3
-    L3 -->|weights or EMA shadow| L2
+    L3 -->|weights / EMA shadow| L2
     L2 -->|belief s_t| L1
-    L1 -->|actions / env steps| L4
+    L1 -->|actions| L4
 ```
+
+Full per-layer specifics (loss weights, planner params, ignition rules) are in the
+table below and the module docstrings.
 
 ## Which algorithm optimizes what
 
