@@ -42,7 +42,11 @@ icacls C:\ProgramData\ssh\administrators_authorized_keys /inheritance:r /grant "
 winget install --id Git.Git -e
 winget install --id astral-sh.uv -e
 
-# 4. NVIDIA driver >= 580 (CUDA 13 torch wheels require it); check with:
+# 4. Make Git Bash the SSH shell — REQUIRED: git push over SSH fails against
+#    cmd.exe (it doesn't strip git's single-quoted paths: ''repo.git'' errors)
+reg add "HKLM\SOFTWARE\OpenSSH" /v DefaultShell /t REG_SZ /d "C:\Program Files\Git\bin\bash.exe" /f
+
+# 5. NVIDIA driver >= 580 (CUDA 13 torch wheels require it); check with:
 nvidia-smi
 ```
 
@@ -75,8 +79,8 @@ the checkout on the remote at any time; `setup` rebuilds both.
 
 ## Notes / gotchas
 
-- Windows OpenSSH's default shell is cmd.exe; remote.sh only uses `cd X && ...`
-  chains, which work there. Don't add bash-isms to the remote side.
+- With Git Bash as the SSH shell (step 4), the remote side is POSIX — remote.sh's
+  command chains and git transport both work; plain cmd.exe would break `git push`.
 - If `uv` isn't found over SSH, run `uv tool update-shell` once on the box or use
   the full path; winget's link dir is normally on PATH for SSH sessions.
 - Keep the box's power plan on "High performance" so sleep doesn't kill long runs;

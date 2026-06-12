@@ -34,6 +34,8 @@ setup)
   git remote add desktop "$REMOTE:world-model.git" 2>/dev/null ||
     git remote set-url desktop "$REMOTE:world-model.git"
   git push desktop HEAD:refs/heads/master -f
+  # bare-init may default HEAD to 'main'; clones would check out nothing
+  ssh "$REMOTE" "git -C world-model.git symbolic-ref HEAD refs/heads/master"
   ssh "$REMOTE" "git clone world-model.git $REMOTE_DIR" 2>/dev/null ||
     ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin master && git reset --hard origin/master"
   ssh "$REMOTE" "cd $REMOTE_DIR && uv sync"
