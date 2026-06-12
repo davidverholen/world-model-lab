@@ -30,6 +30,12 @@ compilation (2026-06-12) and need verification at ingest time unless marked othe
 
 ## Medium (context and alternatives)
 
+- [ ] arxiv:2508.10104 DINOv3 (Meta, verified 2026-06-12) — 7B SSL vision backbone,
+      Gram anchoring for stable dense features + distilled small variants. Rung-3
+      hypothesis: frozen DINOv3-small encoder + learned belief/dynamics (à la
+      DINO-WM) — a frozen encoder is immune to primacy bias by construction
+      (connects to exp 0009–0011 retention thread).
+
 - [ ] arxiv:1811.04551 PlaNet (RSSM origin) / arxiv:2010.02193 DreamerV2
 - [ ] arxiv:2209.00588 IRIS (token-based WM) · arxiv:2405.12399 DIAMOND (diffusion WM)
 - [ ] arxiv:1911.08265 MuZero · arxiv:2310.16828 TD-MPC2 (value-equivalent line)
