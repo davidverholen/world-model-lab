@@ -14,6 +14,15 @@
    when *practice* improves (new technique, new gotcha); lint and milestone check
    this seam. Trigger = process drift, not knowledge growth.
 
+**Horizon (Dave, 2026-06-12):** this loop holds until we reach genuinely original
+territory — a blocking problem no published work solves (scout comes up empty on
+the specific question, not the general area). At that point step 2 transforms:
+"ingest the answer" becomes "map nearest neighbors, design the novel mechanism,
+pre-register, and treat our experiment pages as the primary literature." The rest
+of the loop is unchanged. Note: we may be near this edge already — reset-style
+retention fixes for *model-based* latent world models under continual collection
+appear unpublished; exp 0011 tests the transfer.
+
 The wiki only stays trustworthy if signals are curated, routed, and re-checked.
 Three recurring operations (Karpathy's ingest/query/lint, run under the whitepaper's
 curation model):

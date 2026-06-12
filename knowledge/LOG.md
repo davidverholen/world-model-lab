@@ -246,3 +246,10 @@ PROCESS.md gains "The research loop": experiment-verify <-> literature-first <->
 route-to-KB <-> skills-carry-procedure-not-knowledge. Point 4 sharpened from
 Dave's draft: maintenance trigger is process drift, not knowledge growth (thin
 skills + INDEX navigation make new knowledge reachable without skill edits).
+
+## [2026-06-12] curation | research-loop horizon defined (Dave)
+
+Process holds until a blocking problem has no published solution; then step 2
+transforms (nearest-neighbor mapping + novel mechanism + our pages as primary
+record). Noted: the model-based retention transfer (exp 0011) may already sit
+on that edge.
