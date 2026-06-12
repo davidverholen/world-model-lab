@@ -316,3 +316,12 @@ published reference agents incl. Dreamer 4 offline diamonds).
 
 Messenger/RTFM (text necessary) -> text-augmented Crafter (text helpful; metric =
 sample-efficiency delta) -> Minecraft tutorials. Steps i-ii run on current hardware.
+
+## [2026-06-12] curation | language-grounding concept page (Dave's binding/installation insight)
+
+New page: text->world-model = binding (shared embedding geometry) + installation
+(declarative -> dynamics belief). Three architectures: text-as-context (Dynalang),
+text-as-data (text-induced imagination training — possibly unexplored; wall
+protocol required before claiming), text-as-weights (Schmidhuber fast weights /
+model editing). Pre-registered prediction: context suffices at Messenger scale;
+data/weights needed at wiki scale. Linked into ADR 0005 + lineage + retention.
