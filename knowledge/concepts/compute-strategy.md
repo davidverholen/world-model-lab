@@ -91,6 +91,12 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   parallel seeds. PyTorch's partial answer (torch.compile/CUDA graphs) is UNTESTED
   on our stack — cheap experiment, do BEFORE any framework decision. JAX-native
   MiniGrid-likes exist too (XLand-MiniGrid, gymnax).
+  Step-2→3 gain estimate (2026-06-12, to be replaced by spike measurements):
+  ~2–10× for env-dominated workloads (tiny policy, huge batches) but ~1.5–3× for
+  OUR world-model-heavy training (model matmuls dominate; GRU-loop overhead is
+  torch.compile's target). Strategic: fusion is Craftax-specific — Atari (C++)
+  and Minecraft (Java) can never fuse, so the hybrid IS the ladder's lasting
+  pattern; a full port pays only under massive Craftax-native experiment volume.
 
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
