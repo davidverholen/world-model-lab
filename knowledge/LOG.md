@@ -69,3 +69,17 @@ ReplayBuffer.sample_sequences, --rollout-length. ROADMAP phase-1 complete + firs
 acting agent ticked. Lessons routed to exp page; "compounding rollout error" is now
 mentioned on 2 pages — concept-page candidate if it recurs. Next: DoorKey + memory
 (rung 2), PPO baseline comparison.
+
+## [2026-06-12] curation | milestone: recurrent world model — DoorKey negative result, flywheel signal
+
+Exp 0005 closed as an instructive negative: belief-state CEM-MPC 0/20 on DoorKey-5x5
+(hypothesis >=40% refuted), but the collect->train->collect flywheel showed its first
+life (random 8.5% -> round-0-model+eps-MPC 14.3% during collection) and the failure
+decomposed cleanly: (a) pure MPC cannot span DoorKey's ~25-step reward chain with
+horizon 20 -> value head needed (exp 0006, TD-MPC/Dreamer lineage answer); (b)
+continued training across rounds destabilized (pred_loss 0.46->0.59) -> per-round
+checkpoints/eval + optimizer handling next time. New infra committed: RecurrentDynamics
+GRU belief model, burn-in/open-loop sequence training, RecurrentMPCAgent,
+play --epsilon + recurrent checkpoint auto-detection, RGB partial-obs wrapper.
+Also: compute-strategy concept page (local vs 5070 Ti vs vast.ai prediction, prices
+checked 2026-06-12). Next: exp 0006 value head + per-round eval.

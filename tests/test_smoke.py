@@ -93,3 +93,29 @@ def test_sequence_sampling():
     assert batch["obs"].shape == (8, 4, 3, 4, 4)
     assert batch["action"].shape == (8, 4)
     assert batch["next_obs"].shape == (8, 3, 4, 4)
+
+
+def test_recurrent_world_model_and_agent():
+    from world_model.agents import RecurrentMPCAgent
+    from world_model.models import RecurrentDynamics, RewardHead
+
+    env = make_minigrid_env("MiniGrid-DoorKey-5x5-v0", fully_observable=False)
+    obs, _ = env.reset(seed=0)
+    assert obs.shape[0] == 3  # RGB partial view
+    n = int(env.action_space.n)
+    dyn = RecurrentDynamics(num_actions=n)
+    agent = RecurrentMPCAgent(
+        ConvEncoder(),
+        dyn,
+        RewardHead(latent_dim=dyn.state_dim, num_actions=n),
+        num_actions=n,
+        device="cpu",
+        horizon=3,
+        candidates=8,
+        iters=1,
+    )
+    for _ in range(3):
+        a = agent.act(obs)
+        assert 0 <= a < n
+        obs, *_ = env.step(a)
+    agent.reset()  # belief reset between episodes

@@ -11,7 +11,7 @@ observability is a deliberate later step (it is where world models start to matt
 
 import gymnasium as gym
 import numpy as np
-from minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper
+from minigrid.wrappers import ImgObsWrapper, RGBImgObsWrapper, RGBImgPartialObsWrapper
 
 
 class ChwFloatObs(gym.ObservationWrapper):
@@ -47,5 +47,8 @@ def make_minigrid_env(
     env = gym.make(env_id, **kwargs)
     if fully_observable:
         env = RGBImgObsWrapper(env, tile_size=tile_size)
+    else:
+        # egocentric 7x7-tile RGB view — pixels, like the fully observable path
+        env = RGBImgPartialObsWrapper(env, tile_size=tile_size)
     env = ImgObsWrapper(env)
     return ChwFloatObs(env)

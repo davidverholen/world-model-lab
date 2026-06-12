@@ -19,7 +19,7 @@ import time
 import numpy as np
 import torch
 
-from world_model.agents import MPCAgent, RandomAgent
+from world_model.agents import MPCAgent, RandomAgent, RecurrentMPCAgent
 from world_model.envs import make_minigrid_env
 
 
@@ -33,22 +33,37 @@ def main() -> None:
     parser.add_argument("--horizon", type=int, default=20, help="MPC imagination horizon")
     parser.add_argument("--candidates", type=int, default=1024, help="MPC imagined futures/step")
     parser.add_argument("--record", type=str, default=None, help="save GIF here instead of window")
+    parser.add_argument(
+        "--epsilon",
+        type=float,
+        default=0.0,
+        help="random-action fraction (recurrent agent only); breaks planner oscillation loops",
+    )
     args = parser.parse_args()
 
     render_mode = "rgb_array" if args.record else "human"
-    env = make_minigrid_env(args.env_id, render_mode=render_mode, tile_size=16)
 
     if args.checkpoint:
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        agent = MPCAgent.from_checkpoint(
+        ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+        recurrent = bool(ckpt.get("recurrent", False))
+        env = make_minigrid_env(
+            args.env_id, render_mode=render_mode, tile_size=16, fully_observable=not recurrent
+        )
+        cls = RecurrentMPCAgent if recurrent else MPCAgent
+        extra = {"epsilon": args.epsilon} if recurrent else {}
+        agent = cls.from_checkpoint(
             args.checkpoint,
             device,
             horizon=args.horizon,
             candidates=args.candidates,
             seed=args.seed,
+            **extra,
         )
-        print(f"world-model MPC agent from {args.checkpoint} (device={device})")
+        kind = "recurrent belief-state" if recurrent else "feedforward"
+        print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
     else:
+        env = make_minigrid_env(args.env_id, render_mode=render_mode, tile_size=16)
         agent = RandomAgent(env.action_space, seed=args.seed)
         print("random agent (pass --checkpoint to use a trained world model)")
 
@@ -57,6 +72,8 @@ def main() -> None:
     try:
         for episode in range(args.episodes):
             obs, _ = env.reset(seed=args.seed + episode)
+            if hasattr(agent, "reset"):
+                agent.reset()
             total_reward, steps, done = 0.0, 0, False
             while not done:
                 if args.record:
