@@ -169,3 +169,16 @@ per-layer failure->experiment diagnosis table. Scout (Dave's prompt): our retent
 problem IS the literature's "plasticity loss / primacy bias / churn" — 6 sources
 queued (Nikishin resets = top exp-0011 candidate: reset last layers, keep replay).
 QUEUE gained a themed retention section.
+
+## [2026-06-12] curation | milestone: retention 2x2 negative — primacy bias confirmed, resets next (exp 0010)
+
+Full factorial (ctrl/lr03/ema/both x 3 seeds, 2x 6-wide parallel batches): no arm
+prevents the post-round-0 crash; seed 1 crashes in ALL arms (deterministic
+interference, not noise); EMA damps peaks (60->40) without protecting them; lr
+decay kills late recovery. Conclusion: smoothing the weight trajectory can't fix
+directional interference — matches primacy-bias literature; exp 0011 = Nikishin
+resets (reinit heads each round, keep replay + oversampling). Ops lessons: 6-wide
+batches page heavily (replay ~10GB/process -> uint8 storage queued); block-buffered
+logs look empty mid-run; laptop suspend pauses monitors (runs unaffected).
+Also today: agent-architecture diagram iterated to extension-safe form (no init
+directive, classDef styling).
