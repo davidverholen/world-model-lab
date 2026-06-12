@@ -12,6 +12,9 @@ uv sync                                   # install (Python 3.12, PyTorch, MiniG
 uv run pytest -q                          # smoke tests
 uv run python -m world_model.collect      # collect random MiniGrid trajectories,
                                           # train a first latent predictor, watch it collapse
+uv run python -m world_model.collect --sigreg-weight 0.05   # ...and the fix (LeJEPA SIGReg)
+uv run python -m world_model.play          # watch an agent play in a live window
+uv run python -m world_model.play --record play.gif         # or record a GIF
 ```
 
 ## What's here

@@ -11,6 +11,7 @@ continuous/3D → real-world transfer). See `ROADMAP.md`.
 uv run pytest -q                          # tests
 uv run ruff check . && uv run ruff format .   # lint/format
 uv run python -m world_model.collect      # smoke pipeline: collect + train latent predictor
+uv run python -m world_model.play         # watch an agent play (window); --record out.gif
 ```
 
 uv-managed (Python 3.12, PyTorch).

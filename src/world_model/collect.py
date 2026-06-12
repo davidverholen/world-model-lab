@@ -38,9 +38,23 @@ def collect(buffer: ReplayBuffer, env, agent, steps: int) -> None:
         obs = env.reset()[0] if done else next_obs
 
 
+def _r2(pred: torch.Tensor, y: torch.Tensor) -> float:
+    ss_res = ((y - pred) ** 2).sum(dim=0)
+    ss_tot = ((y - y.mean(dim=0)) ** 2).sum(dim=0) + 1e-8
+    return float((1 - ss_res / ss_tot).mean())
+
+
 @torch.no_grad()
 def probe_agent_position(encoder, env, agent, steps: int, device: str, seed: int = 1) -> float:
-    """Held-out R^2 of ridge regression latent -> agent (x, y). Higher = latents know state."""
+    """Test R^2 of ridge regression latent -> agent (x, y), alpha cross-validated.
+
+    Protocol (exp 0003): 60/20/20 train/val/test split, ridge alpha selected on val
+    from a log grid, R^2 reported on test only. No standardization of latents — a
+    collapsed encoder's microscopic residual variation would be rescaled to full
+    amplitude and memorized in a small env (verified in exp 0002: R^2=1.0 for a fully
+    collapsed encoder). Raw scale lets amplitude matter, as it does for any real
+    downstream consumer.
+    """
     observations, positions = [], []
     obs, _ = env.reset(seed=seed)
     for _ in range(steps):
@@ -50,21 +64,48 @@ def probe_agent_position(encoder, env, agent, steps: int, device: str, seed: int
         if terminated or truncated:
             obs, _ = env.reset()
 
-    # No standardization: a collapsed encoder's microscopic residual variation would be
-    # rescaled to full amplitude and memorized in a small env (verified: R^2=1.0 for a
-    # fully collapsed encoder). Raw scale + unit ridge lets amplitude matter, as it
-    # does for any downstream consumer of the latents.
     z = encoder(torch.as_tensor(np.stack(observations), device=device)).cpu()
     z = torch.cat([z, torch.ones(len(z), 1)], dim=1)  # bias column
     y = torch.as_tensor(np.stack(positions))
 
-    split = int(0.8 * len(z))
-    ridge = 1.0 * torch.eye(z.shape[1])
-    w = torch.linalg.solve(z[:split].T @ z[:split] + ridge, z[:split].T @ y[:split])
-    pred = z[split:] @ w
-    ss_res = ((y[split:] - pred) ** 2).sum(dim=0)
-    ss_tot = ((y[split:] - y[split:].mean(dim=0)) ** 2).sum(dim=0) + 1e-8
-    return float((1 - ss_res / ss_tot).mean())
+    n = len(z)
+    i_train, i_val = int(0.6 * n), int(0.8 * n)
+    eye = torch.eye(z.shape[1])
+    best = (-torch.inf, None)
+    for alpha in [1e-2, 1e-1, 1.0, 1e1, 1e2]:
+        w = torch.linalg.solve(
+            z[:i_train].T @ z[:i_train] + alpha * eye, z[:i_train].T @ y[:i_train]
+        )
+        val_r2 = _r2(z[i_train:i_val] @ w, y[i_train:i_val])
+        if val_r2 > best[0]:
+            best = (val_r2, w)
+    return _r2(z[i_val:] @ best[1], y[i_val:])
+
+
+@torch.no_grad()
+def eval_dynamics(encoder, predictor, env, agent, steps: int, device: str, seed: int = 2) -> dict:
+    """Held-out latent dynamics quality vs the copy baseline (predict z' = z).
+
+    Returns MSEs normalized by latent variance. A predictor that hasn't learned
+    action-conditioned dynamics cannot beat the copy baseline; ratio < 1 means it did.
+    """
+    obs_l, act_l, next_l = [], [], []
+    obs, _ = env.reset(seed=seed)
+    for _ in range(steps):
+        action = agent.act(obs)
+        next_obs, _, terminated, truncated, _ = env.step(action)
+        obs_l.append(obs)
+        act_l.append(action)
+        next_l.append(next_obs)
+        obs = env.reset()[0] if terminated or truncated else next_obs
+
+    z = encoder(torch.as_tensor(np.stack(obs_l), device=device))
+    z_next = encoder(torch.as_tensor(np.stack(next_l), device=device))
+    z_pred = predictor(z, torch.as_tensor(np.array(act_l), device=device))
+    var = z_next.var(dim=0).mean() + 1e-12
+    model_mse = float(F.mse_loss(z_pred, z_next) / var)
+    copy_mse = float(F.mse_loss(z, z_next) / var)
+    return {"model": model_mse, "copy": copy_mse, "ratio": model_mse / (copy_mse + 1e-12)}
 
 
 def main() -> None:
@@ -75,8 +116,9 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--sigreg-weight", type=float, default=0.0, help="lambda; 0 disables")
     parser.add_argument("--sigreg-slices", type=int, default=512)
-    parser.add_argument("--probe-steps", type=int, default=500)
+    parser.add_argument("--probe-steps", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--save", type=str, default=None, help="path to save checkpoint (.pt)")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -119,8 +161,28 @@ def main() -> None:
             )
 
     r2 = probe_agent_position(encoder, env, agent, args.probe_steps, device)
-    print(f"probe R^2 (latent -> agent xy, held-out): {r2:.3f}")
-    print("interpretation: latent_std ~0 = collapse; probe R^2 ~1 = latents encode position")
+    dyn = eval_dynamics(encoder, predictor, env, agent, args.probe_steps, device)
+    print(f"probe R^2 (latent -> agent xy, test split, CV alpha): {r2:.3f}")
+    print(
+        f"dynamics (held-out, variance-normalized): model={dyn['model']:.3f} "
+        f"copy-baseline={dyn['copy']:.3f} ratio={dyn['ratio']:.3f} (<1 = learned dynamics)"
+    )
+
+    if args.save:
+        from pathlib import Path
+
+        path = Path(args.save)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "encoder": encoder.state_dict(),
+                "predictor": predictor.state_dict(),
+                "config": vars(args),
+                "metrics": {"probe_r2": r2, **dyn},
+            },
+            path,
+        )
+        print(f"checkpoint saved to {path}")
 
 
 if __name__ == "__main__":

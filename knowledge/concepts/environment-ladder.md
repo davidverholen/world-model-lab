@@ -16,7 +16,7 @@ difficulty so failures are attributable. Accepted in [[0003-environment-ladder]]
 
 | Rung | Environment | New difficulty | Exit criterion |
 |---|---|---|---|
-| 1 | MiniGrid Empty-5x5 / 8x8 | none — pipeline bring-up | latent predictor beats trivial baselines; no collapse |
+| 1 | MiniGrid Empty-5x5 / 8x8 | none — pipeline bring-up | ✅ **met 2026-06-12** ([[0003-probe-protocol-8x8]]: no collapse, dynamics 4–5× better than copy baseline, 3 seeds) |
 | 2 | MiniGrid DoorKey, partial view | sparse reward, partial observability, memory | model-based agent beats model-free baseline on sample efficiency |
 | 3 | Crafter | long horizon, many subgoals, procgen | nontrivial achievement count within 1M steps |
 | 4 | Atari 100k subset | pixels at scale, diverse dynamics | competitive with published WM agents on ≥3 games |

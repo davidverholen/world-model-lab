@@ -53,7 +53,11 @@ the encoder is deterministic, so its ~dozens of distinct inputs still map to dis
   any real downstream consumer;
 - in envs with few distinct observations, held-out probe splits share observations
   with training — treat probe numbers as sanity checks, not quality measures, until
-  the env is big/procedural enough.
+  the env is big/procedural enough;
+- exp 0003 (Empty-8x8, CV'd α, 2k samples, 3 seeds): linear-probe R² is still wildly
+  seed-dependent → demoted to diagnostic-only. **Primary metric is now the
+  dynamics-vs-copy ratio**: variance-normalized held-out MSE of f(z,a) vs the copy
+  baseline (z′=z). Consistent across seeds and measures what a world model is for.
 
 ## Open questions
 
