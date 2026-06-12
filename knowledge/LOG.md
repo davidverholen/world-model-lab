@@ -373,3 +373,14 @@ activated later): harvest -> record -> mandatory failure-specific search ->
 pre-register -> implement -> dispatch -> milestone; guardrails (scope, spend,
 2-strike stall rule, honesty, state-of-the-night report). PROCESS gained the
 per-iteration literature gate.
+
+## [2026-06-12] curation | training-asset registry + tier-1 VPT retention (Dave's availability insurance)
+
+New ASSETS.md registry (tiered retention: T1 now / T2 at rung-5b entry / T3 never-
+bulk). Tier-1 retained to desktop ~/minecraft-assets/ (~10GB, 1.28TB free): IDM 4x
+(the video->actions labeler — load-bearing for architecture 2b), all VPT
+foundation/fine-tuned/RL weights, contractor-data index JSONs, repo snapshot (MIT).
+Key finding: the 70k-h YouTube corpus was NEVER released (recipe only) —
+contractor data + IDM are the retainable substance. VPT id verified:
+arXiv:2206.11795. T2 (contractor subsets, MineRL, MineDojo dumps) deferred to
+rung-5b entry with availability re-check.

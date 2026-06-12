@@ -1,7 +1,8 @@
 # Knowledge Base Index
 
 One line per page. Updated on every ingest. Conventions: `_schema/SCHEMA.md`,
-process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sources/QUEUE.md`.
+process: `_schema/PROCESS.md`, raw sources: `sources/SOURCES.md`, backlog: `sources/QUEUE.md`,
+training assets: `sources/ASSETS.md`.
 
 ## Concepts
 
