@@ -27,3 +27,25 @@ Goal: find and *verify existence of* new material; ingestion is a separate step
 4. **Report** back: what's new, what it might change in our current pages (flag
    pages that may now be `stale` — don't mark them without checking), what to
    ingest first. LOG.md entry: `## [date] scout | <n> found, <m> queued`.
+
+## Hitting-a-wall protocol (deep search beyond WebSearch; added 2026-06-12)
+
+When a blocking problem needs exhaustive prior-art search (the research-loop
+horizon check), layer these:
+1. WebSearch — recency + news (what we do by default).
+2. **Semantic Scholar API** — the semantic engine + citation traversal:
+   `api.semanticscholar.org/graph/v1/paper/search?query=...` and
+   `/paper/arXiv:<id>/citations` / `/references`. Anonymous tier is congested;
+   use the free API key (env `S2_API_KEY`, header `x-api-key`) — apply at
+   semanticscholar.org/product/api.
+3. **OpenAlex** — metadata + citation graph, generous anonymous limits
+   (`api.openalex.org/works?search=...&mailto=...`); weak semantic ranking,
+   great for walking cited-by chains programmatically.
+4. Google Scholar — manual only (no API; ToS); best human tool for cited-by
+   exploration of a key paper.
+
+Local index (deferred, trigger recorded): building our own embeddings DB over
+external papers duplicates S2 for no curation gain. The version worth building
+later is semantic search over OUR corpus (knowledge/ pages + the
+sources/files/ PDF archive) once the KB outgrows INDEX-based navigation —
+revisit at ~150 pages or when "which of OUR pages covers X" misses start hurting.

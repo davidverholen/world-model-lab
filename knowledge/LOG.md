@@ -253,3 +253,11 @@ Process holds until a blocking problem has no published solution; then step 2
 transforms (nearest-neighbor mapping + novel mechanism + our pages as primary
 record). Noted: the model-based retention transfer (exp 0011) may already sit
 on that edge.
+
+## [2026-06-12] curation | deep-search protocol added to scout skill (Dave's G-Scholar question)
+
+Tested live: Semantic Scholar API = the right semantic+citation tool (anonymous
+tier congested; free key recommended -> env S2_API_KEY); OpenAlex = instant but
+weak ranking, good citation graphs; Google Scholar = manual-only (no API/ToS).
+Local embeddings index DEFERRED with trigger: build it over OUR corpus (pages +
+PDF archive) at ~150 pages, not over external papers (duplicates S2).
