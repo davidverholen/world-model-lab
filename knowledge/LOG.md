@@ -128,3 +128,14 @@ Escalation pre-registered in exp page: DoorKey-6x6/8x8 + earlier/smaller
 collection rounds (exp 0008); ladder-criterion split proposed for Dave's
 sign-off (owner: human). Infra: baselines/ppo as isolated uv project (sb3 caps
 gymnasium <1.3); first /sweep dogfood produced the results table directly.
+
+## [2026-06-12] curation | milestone: 6x6 ignition failure — the real blockers identified (exp 0008)
+
+Exp 0008 closed via pre-registered alternative (b): round-0 random collection drew
+1 reward event in 20k steps and the flywheel never ignited (best 10% vs PPO mean
+~37% at 110k; PPO breakthrough moved 60-80k on 5x5 -> 100k+ on 6x6). Second
+confirmed sighting of round-over-round training instability (round 6: 28%
+collection success -> 0% eval after retraining). Exp 0009 agenda: ignition
+(adaptive round 0, success-episode oversampling in replay, intrinsic signal) +
+stability (success-balanced sampling, lr schedule, EMA agent weights); world-model
+runs need >=2-3 seeds (round-0 luck is decisive). Rung 2b open; scoreboard PPO 2:1.
