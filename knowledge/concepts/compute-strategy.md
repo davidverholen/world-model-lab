@@ -46,11 +46,13 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   rung 3+) OR long-running (>~1 h ⇒ remote regardless, for thermal reasons)?
 - to make the desktop pay off for recurrent training: bigger batch×window,
   torch.compile / CUDA graphs to fuse the GRU loop — try when rung-2 training grows.
-- **latency-bound corollary (2026-06-12)**: since the GPU idles, N seeds can run as
-  N concurrent processes on ONE GPU (bottleneck: CPU cores for env loops) — a 3-seed
-  rung-2 sweep is ~1.5–2 h / ~$0.60 on a rented 4090, and renting an H100 for it
-  would cost ~10× for zero (possibly negative) speedup. "Best available GPU" is the
-  wrong axis below rung 3; sweep.py `--parallel N` is the planned enhancement.
+- **latency-bound corollary (2026-06-12, measured)**: since the GPU idles, N seeds
+  run as N concurrent processes on ONE GPU (bottleneck: CPU cores for env loops).
+  Measured: 3-seed DoorKey-6x6 sweep (7 rounds each) = **35 min wall** on the
+  5070 Ti, seeds within 80 s of each other (exp 0009) — contention ≈ nil at N=3.
+  Renting an H100 for this class would cost ~10× for zero (possibly negative)
+  speedup. "Best available GPU" is the wrong axis below rung 3; sweep.py
+  `--parallel N` is the planned enhancement.
 
 ## Key predictions (validate when first dispatching remotely)
 

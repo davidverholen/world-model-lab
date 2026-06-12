@@ -38,7 +38,8 @@ PPO comparator: exp 0008 sweeps (`runs/sweeps/exp0008-ppo/`), curves up to 110k.
 ## Result
 
 3 seeds in parallel on one GPU (~82% util, 49 °C — first use of `remote.sh shell`;
-wall ~2h vs ~4.5h sequential). Checkpoints: `runs/remote/doorkey6x6_ign_s{0,1,2}.pt`.
+**wall 35 min** by log timestamps, 12:04→12:39, seeds within 80 s of each other —
+parallel contention ≈ nil). Checkpoints: `runs/remote/doorkey6x6_ign_s{0,1,2}.pt`.
 
 | seed | ignition (events @ steps) | best eval (round) | final round | total steps |
 |---|---|---|---|---|

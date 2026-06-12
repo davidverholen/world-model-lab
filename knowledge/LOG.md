@@ -153,3 +153,10 @@ THE isolated bottleneck (3rd sighting, first clean). Best-checkpoint means: WM 4
 round 0, value target network, or frozen-trunk/head-only later rounds. Crafter
 source verified (abstract) during the wait. remote.sh gained shell+kill; killed
 runs survive ssh death on Windows — kill subcommand is the off switch.
+
+## [2026-06-12] curation | timing correction: exp 0009 parallel sweep was 35 min, not ~2h
+
+Log timestamps (12:04 launch -> 12:37-12:39 per-seed finish): 3 parallel seeds in
+35 min wall, contention nil. Estimate was 3.5x pessimistic (MPC collection per-step
+cost on the 5070 Ti overestimated). exp 0009 page + compute-strategy corrected;
+rung-2 sweeps are coffee-break scale.
