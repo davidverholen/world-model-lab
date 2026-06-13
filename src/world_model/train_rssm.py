@@ -96,6 +96,14 @@ def wm_train(
             )
 
 
+def _critic_loss(critic, beliefs, targets):
+    """Two-hot cross-entropy if the critic supports it (DreamerV3 distributional, bounded);
+    else plain MSE. Lets the same imagine_ac serve MiniGrid (ValueHead) and Crafter (TwoHot)."""
+    if hasattr(critic, "twohot_loss"):
+        return critic.twohot_loss(beliefs, targets)
+    return (critic(beliefs) - targets).pow(2).mean()
+
+
 def imagine_ac(
     buffer,
     encoder,
@@ -161,14 +169,14 @@ def imagine_ac(
         adv = (returns - v_tgt).flatten().detach()
         dist = Categorical(logits=actor(flat))
         actor_loss = -(dist.log_prob(a_s.flatten()) * adv).mean() - ent_coef * dist.entropy().mean()
-        critic_loss = (critic(flat) - returns.flatten().detach()).pow(2).mean()
+        critic_loss = _critic_loss(critic, flat, returns.flatten().detach())
         if beta_repval > 0:
             # DreamerV3 critic-on-replay (exp 0021): ground the critic in REAL returns so
             # the EMA target — and thus the actor's advantage baseline — can't drift with
             # the inflated imagined value. real_bel is detached, so grad flows to critic only.
             rb = real_bel.flatten(0, 1)
             rt = ret_real[:, :burn_in].t().reshape(-1).detach()
-            critic_loss = critic_loss + beta_repval * (critic(rb) - rt).pow(2).mean()
+            critic_loss = critic_loss + beta_repval * _critic_loss(critic, rb, rt)
         opt_ac.zero_grad()
         (actor_loss + critic_loss).backward()
         opt_ac.step()

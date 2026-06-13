@@ -891,3 +891,13 @@ replay (beta_repval 0.3) -- model exploitation (cf 0017/0018) at Crafter scale. 
 NOT dispatch a long run yet (would just exploit the model); harden the DreamerV3 recipe FIRST
 (symlog + two-hot distributional critic + percentile return-norm) -- the deferred step, now
 empirically justified by this run. crafter.md pipeline-status + what-next updated.
+
+## [2026-06-13] experiment | exp 0023 two-hot distributional critic — Crafter value bounded
+
+Value inflation on Crafter (imagined_return 21, critic_loss 35) attacked with DreamerV3 two-hot
+distributional critic (models/twohot.py: 255 symlog bins, two-hot CE; forward=symexp expectation,
+drop-in for ValueHead). imagine_ac gated via _critic_loss (twohot_loss if available else MSE) ->
+MiniGrid path byte-identical (21/21 tests), Crafter gets distributional loss. Local smoke: same
+config that gave MSE imagined_return 21 now gives 6.1->5.4 STABLE, critic_loss 2.5->2.2 -- blow-up
+gone. Eval flat in 2 noisy rounds (calibration-delays-ignition, cf 0021); climb test needs a long
+run -> dispatching overnight. Pages: experiments/0023.

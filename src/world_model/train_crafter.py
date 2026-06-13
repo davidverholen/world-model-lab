@@ -22,6 +22,7 @@ from world_model.envs import make_crafter_env
 from world_model.models import Actor, FrozenDinoEncoder, RewardHead, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.rssm import RSSM
+from world_model.models.twohot import TwoHotValueHead
 from world_model.train_rssm import imagine_ac, wm_train
 from world_model.training import ReplayBuffer, Transition
 
@@ -123,7 +124,7 @@ def main() -> None:
     val = ValueHead(state_dim=sd).to(device)
     cont = ContinueHead(state_dim=sd).to(device)
     actor = Actor(state_dim=sd, num_actions=n_act).to(device)
-    critic = ValueHead(state_dim=sd).to(device)
+    critic = TwoHotValueHead(state_dim=sd).to(device)  # bounded distributional critic (exp 0023)
     target_critic = copy.deepcopy(critic)
 
     wm_mods = [rssm, recon_head, rew, val, cont]  # enc frozen → excluded from the optimizer
