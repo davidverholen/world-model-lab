@@ -541,3 +541,14 @@ eval-rigor finding: teacher 80%(10 eps, seeds 10000+) vs 25-30%(20 eps, seeds 0-
 a fixed seed set. Verdict: go on-policy. Exp 0017 = imagination actor-critic
 (Dreamer-style; on-policy, no teacher — fixes all three failure modes, and it's the
 Crafter-path actor anyway). New code: Actor, ActorAgent, distill_actor.
+
+## [2026-06-13] milestone | exp 0017: imagination AC exploits the model — missing continue predictor
+
+Dreamer-style actor-critic flywheel built + ran (3 seeds, fast — actor-collection
+cheap). Clean negative: imagined_return 2.0/3.0/0.48 vs eval 0% all seeds = model
+exploitation. Root cause: we omitted Dreamer's CONTINUE PREDICTOR — imagination has
+no termination, so the actor farms goal reward across the un-terminated horizon
+(imagined return >> real max 1.0). Literature gate confirms (DreamerV2/3 discount/
+continue head). The rest works (WM, on-policy AC, fast actor-collection). Exp 0018:
+add continue predictor, train on replay dones, discount imagined returns by
+cumulative continue prob. Single-variable fix.

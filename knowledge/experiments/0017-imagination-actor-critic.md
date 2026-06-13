@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-13
 ---
 
-# 0017: Imagination actor-critic — the on-policy fast actor (planned)
+# 0017: Imagination actor-critic — model exploitation (missing continue predictor) (run 2026-06-13)
 
 ## Hypothesis
 
@@ -38,11 +38,36 @@ fix). Baseline: planner on same checkpoint/seeds; BC actor (exp 0016: ~0%).
 
 ## Result
 
-_pending_
+3 seeds, desktop (fast — actor-collection is ~free vs the old planner). **Model
+exploitation confirmed, all seeds:**
+
+| seed | imagined_return | eval_success |
+|---|---|---|
+| 0 | 2.057 | 0.00 |
+| 1 | 3.013 | 0.00 |
+| 2 | 0.483 | 0.00 |
+
+imagined_return of 2–3 is IMPOSSIBLE in a real DoorKey episode (max ~1.0, paid once
+on termination). The actor drives the world model into hallucinated high-reward
+latent regions and farms reward; eval 0% everywhere.
 
 ## Lesson
 
-_pending_
+**We omitted Dreamer's continue predictor.** Real DoorKey TERMINATES on goal; our
+imagination rolls H=15 steps with NO termination, so once the actor imagines a
+goal-like state it keeps collecting reward-head output for the remaining steps —
+imagined_return = the ~1.0 goal reward counted multiple times. Literature gate
+(DreamerV2/V3): a continue/discount predictor c(s)∈[0,1], trained on real done
+flags, weights imagined steps by the cumulative product of predicted continue
+probs — zeroing post-termination reward. This is the single clearest omission; the
+WM machinery, on-policy AC, and fast actor-collection all work.
+
+Exp 0018: add the continue predictor (one head, trained on dones, used to discount
+imagined λ-returns). Clean single-variable fix. (s2's <1 return suggests a possible
+secondary reward-head off-distribution issue — diagnose only if 0018 doesn't
+resolve it; one fix at a time.)
+
+## Links
 
 ## Links
 
