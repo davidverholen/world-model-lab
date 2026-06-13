@@ -47,7 +47,7 @@ def _crafter_viewer(world_px: int = 600):
 
     pygame.init()
     pygame.font.init()
-    panel_px = max(340, world_px // 3)
+    panel_px = max(360, int(world_px * 0.55))  # wide enough for the full title at big font
     font = pygame.font.SysFont("monospace", max(16, world_px // 42))
     big = pygame.font.SysFont("monospace", max(22, world_px // 28), bold=True)
     screen = pygame.display.set_mode((world_px + panel_px, world_px))
