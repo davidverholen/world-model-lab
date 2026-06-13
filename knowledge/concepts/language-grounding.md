@@ -23,6 +23,51 @@ our agent lacks entirely (formulated by Dave, 2026-06-12):
    Today all knowledge enters via gradients on experienced transitions; text
    demands knowledge that arrives before experience.
 
+## Language ≠ the subgoal gap; language ≠ a plugged-in LLM (Dave, 2026-06-13)
+
+Two refinements that set the order of operations:
+
+- **Language is not why the agent lacks "get the key" as a subgoal** — that is
+  [[hierarchy-and-credit]] (temporal abstraction). A rat/pre-verbal infant forms
+  "get the key" as a nameless behavioral unit; options/Director form subgoals as
+  nameless latent vectors. Language is the *separate* layer that LABELS those
+  abstractions so they can be received, composed, transferred. ⇒ **Order**:
+  grounded concepts + nameless events/subgoals form FIRST (in sensorimotor
+  experience); words ATTACH to that pre-existing structure. Language grounding
+  rides on top of the hierarchical actor — its subgoals/events are the attachment
+  points.
+- **Real language learning = learned binding to OUR latent geometry, not an LLM
+  bolted on.** An LLM's "key" is grounded in text statistics (neighbors lock/door
+  because of co-occurrence) → words connected to other words. Grounding we need =
+  "key" connected to THIS agent's latent of seeing/grabbing a key, learned in its
+  own belief space. Cannot be imported; specific to our model.
+
+## Verifying grounding is REAL (not a shortcut) — the falsifiability battery
+
+The hard part (Dave): how to check the word is connected to the internal model, not
+a spurious correlation. Tests, weakest → strongest:
+
+1. **Imagination match**: text "get the key" → latent rollout ends in a
+   key-possession belief that matches real experience (the "can imagine it" test).
+2. **Cross-modal retrieval/probe**: latent of the *word* "key" ≈ latent of *seeing*
+   a key in the shared geometry.
+3. **Referent swap (GOLD STANDARD)**: change the manual so the word points at a
+   different object ("get the GEM", gem now in key's role) — does behavior follow
+   the word's NEW referent? Rules out text-ignoring and memorization. This is
+   exactly why Messenger/RTFM shuffle word↔object assignments per episode (makes
+   grounding necessary AND testable). First grounding experiment should be built
+   around this.
+4. **Compositional zero-shot**: novel instruction combining known grounded words
+   executed without having seen the combination.
+5. **Modality transfer**: learn "key" from vision+action, then present it ONLY in
+   text — agent still acts correctly ⇒ word bound to concept, not to co-occurring
+   pixels.
+
+Where to test: develop + VERIFY grounding on cheap isolated envs (Messenger/RTFM,
+or a custom DoorKey-with-manual) — Crafter is where grounded language PAYS OFF
+(real tutorials, deep tree), not where it is first established. Same tier logic as
+[[hierarchy-and-credit]] and the compute-efficiency principle ([[compute-strategy]]).
+
 ## The three installation architectures (testable spectrum)
 
 | # | mechanism | "new model" lives in | nearest literature | cost |

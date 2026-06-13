@@ -500,3 +500,15 @@ bet IS an efficiency bet). For a home lab efficiency is the entire moat. Rules:
 minimum-SUFFICIENT-scale (compute analog of whitepaper's minimum-needed-context),
 measure slopes not endpoints, literature-first/pre-registration as efficiency gates.
 Added to compute-strategy.md + PROCESS.md research loop.
+
+## [2026-06-13] curation | language-grounding sharpened (Dave): order of operations + verification battery
+
+Two refinements: (1) language is NOT the cause of the missing "get the key" subgoal
+— temporal abstraction is; language LABELS pre-existing nameless abstractions, so
+grounding rides on top of the hierarchical actor (order: concepts/events first,
+words attach). (2) real language = learned binding to OUR latent geometry, not a
+plugged-in LLM (whose words are grounded in text stats, not this agent's
+experience). Added the grounding-verification battery (imagination match,
+cross-modal probe, REFERENT SWAP = gold standard / why Messenger-RTFM shuffle,
+compositional zero-shot, modality transfer). First grounding experiment = built
+around referent swap on a cheap env; Crafter is payoff not proving-ground.
