@@ -53,13 +53,18 @@ def _crafter_viewer(world_px: int = 600):
     screen = pygame.display.set_mode((world_px + panel_px, world_px))
     pygame.display.set_caption("Crafter — world-model agent")
     return {
-        "pygame": pygame, "screen": screen, "clock": pygame.time.Clock(),
-        "world_px": world_px, "panel_px": panel_px, "font": font, "big": big,
+        "pygame": pygame,
+        "screen": screen,
+        "clock": pygame.time.Clock(),
+        "world_px": world_px,
+        "panel_px": panel_px,
+        "font": font,
+        "big": big,
     }
 
 
-def _crafter_show(v, frame: np.ndarray, info: dict, events: list, title: str, fps: float) -> bool:
-    """Render world + HUD; return False if the window was closed."""
+def _crafter_show(v, frame, info: dict, achievements: set, events: list, title, fps) -> bool:
+    """Render world + HUD (inventory, achievements checklist, event stream)."""
     pg, screen, wpx = v["pygame"], v["screen"], v["world_px"]
     surf = pg.surfarray.make_surface(frame.swapaxes(0, 1))
     if surf.get_width() != wpx:
@@ -83,7 +88,11 @@ def _crafter_show(v, frame: np.ndarray, info: dict, events: list, title: str, fp
         if inv.get(k, 0):
             line(f"  {k:13} {inv[k]}")
     y[0] += 14
-    line("EVENTS", color=(150, 255, 180))
+    line(f"ACHIEVEMENTS ({len(achievements)})", color=(255, 215, 120))
+    for k in sorted(achievements):
+        line(f"  * {k}", color=(255, 230, 160))
+    y[0] += 14
+    line("EVENTS", color=(150, 255, 180))  # chronological; later: world events too
     for ev in events[-40:]:
         line("  " + ev, color=(190, 255, 190) if ev[0] == "+" else (255, 190, 190))
     pg.display.flip()
@@ -190,7 +199,8 @@ def main() -> None:
             if hasattr(agent, "reset"):
                 agent.reset()
             total_reward, steps, done = 0.0, 0, False
-            unlocked: set[str] = set()
+            unlocked: set[str] = set()  # distinct achievements (for the ach=N count)
+            counts: dict[str, int] = {}  # last-seen achievement counts (to detect each occurrence)
             events: list[str] = []
             while not done:
                 if args.record:
@@ -200,7 +210,9 @@ def main() -> None:
                         f"ep {episode + 1}/{args.episodes}  r={total_reward:.1f}  "
                         f"ach={len(unlocked)}  t={steps}"
                     )
-                    if not _crafter_show(viewer, env.render(), info, events, title, args.fps):
+                    if not _crafter_show(
+                        viewer, env.render(), info, unlocked, events, title, args.fps
+                    ):
                         raise KeyboardInterrupt
                 else:
                     time.sleep(1.0 / args.fps)
@@ -208,10 +220,14 @@ def main() -> None:
                 total_reward += float(reward)
                 steps += 1
                 done = terminated or truncated
-                if crafter:  # log achievement unlocks (+ death) as events
-                    new = {k for k, v in info.get("achievements", {}).items() if v > 0} - unlocked
-                    events += [f"+ {k} (t{steps})" for k in sorted(new)]
-                    unlocked |= new
+                if crafter:
+                    # ACHIEVEMENTS = distinct milestones (unique); EVENTS = every occurrence
+                    # (counts increment, e.g. wake_up each night). Extensible to world events.
+                    for k, v in info.get("achievements", {}).items():
+                        if v > counts.get(k, 0):
+                            unlocked.add(k)
+                            events.append(f"+ {k} (t{steps})")
+                    counts = dict(info.get("achievements", {}))
                     if terminated:
                         events.append(f"x died (t{steps})")
             if crafter:
