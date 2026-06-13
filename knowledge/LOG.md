@@ -826,3 +826,18 @@ real envs cannot be JAX-fused (Atari C++, Minecraft Java, real world), so the pa
 speedup exists only at the Crafter rung; after that the question is moot. Triggers (none
 current): TPU access, sample-hungry pivot, env-stepping >=30% wall-clock. Even then: surgical
 (per-experiment JAX env/agent via dlpack hybrid), not a stack rewrite. JEPA/WM stays PyTorch.
+
+## [2026-06-13] milestone | rung-3 first contact — Crafter env wrapper
+
+ADR 0006 accepted -> built the Crafter env wrapper (src/world_model/envs/crafter.py): a
+gymnasium adapter over old-gym crafter.Env emitting CHW float32 obs in [0,1] like the
+MiniGrid wrapper (same encoder/agents/training consume it unchanged). done split into
+terminated (death, info.discount==0) vs truncated (length); seeded reset rebuilds the env
+for reproducible eval worlds (~0.02s); info.achievements (22-dict) is the score basis.
+crafter 1.8.3 added (light deps, no second CUDA framework). Smoke test added (19/19 pass).
+Hello-Crafter random rollout: 283 steps to death, 1/22 achievements (wake_up), reward ~0.1
+-- the expected random floor; env+reward+achievement+death/timeout all flow. New page
+environments/crafter.md (incl. the Crafter->Minecraft proxy->target transfer relationship
+Dave asked about: method+frozen-encoder transfer, WM weights do not; JAX corollary). INDEX
++ environment-ladder additive pointer. Next: 64x64 encoder (frozen DINO/JEPA per lean) +
+port the calibrated imagination loop; harden DreamerV3 recipe here (denser rewards).

@@ -252,6 +252,26 @@ def test_actor_agent_acts():
     assert 0 <= a < n
 
 
+def test_crafter_env_runs():
+    from world_model.envs import make_crafter_env
+
+    env = make_crafter_env(seed=0)
+    assert env.action_space.n == 17
+    obs, info = env.reset(seed=0)
+    assert obs.shape == (3, 64, 64) and obs.dtype == np.float32
+    assert obs.min() >= 0.0 and obs.max() <= 1.0
+    for _ in range(8):
+        obs, r, terminated, truncated, info = env.step(env.action_space.sample())
+        assert obs.shape == (3, 64, 64)
+        if terminated or truncated:
+            obs, info = env.reset()
+    assert "achievements" in info  # the 22-achievement dict (Crafter score basis)
+    # seeded reset is reproducible (eval reproducibility)
+    o1, _ = make_crafter_env(seed=7).reset(seed=7)
+    o2, _ = make_crafter_env(seed=7).reset(seed=7)
+    assert np.array_equal(o1, o2)
+
+
 def test_rssm_obs_and_img_steps():
     import torch as t
     from torch.distributions import kl_divergence

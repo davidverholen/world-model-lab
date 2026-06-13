@@ -30,6 +30,14 @@ The ladder *is* the project roadmap (see ROADMAP.md at repo root). It keeps expe
 scope honest: no rung-skipping; a technique that needs rung-4 compute to show value
 doesn't belong in rung-1 experiments.
 
+**Rung 3 → 4/5b is proxy → real target** (added 2026-06-13, full writeup in [[crafter]]):
+Crafter is a *fast Minecraft-shaped proxy* (it exists because real Minecraft is too slow to
+iterate on). Across the gap, the **method/recipe** and the **frozen encoder** transfer (the
+encoder literally — it's game-agnostic; [[frozen-encoder-lean]]); **world-model weights do
+not** (game-specific, retrained). New signals (VPT video, MineDojo wiki/tutorials) switch on
+at Minecraft. Corollary: real envs can't be JAX-fused, so Crafter is the *last* rung where the
+Craftax speedup could even apply.
+
 ## Links
 
 [[minigrid]] · [[gymnasium]] · [[world-models]] · [[0003-environment-ladder]]

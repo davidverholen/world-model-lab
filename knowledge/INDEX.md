@@ -54,6 +54,7 @@ calls these elaborate).
 ## Environments
 
 - [minigrid](environments/minigrid.md) — rungs 1–2: fast gridworlds, our wrapper notes (draft)
+- [crafter](environments/crafter.md) — rung 3: survival/tech-tree, our wrapper + first contact + Minecraft-proxy role (draft)
 - [gymnasium](environments/gymnasium.md) — the env API everything targets (draft)
 
 ## Decisions (ADRs)
