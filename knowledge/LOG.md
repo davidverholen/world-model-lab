@@ -947,3 +947,15 @@ patch tokens give the where-signal and s0 learned to walk + craft. Seed-dependen
 reward exploitation is unfixed (imagined_return 8-22) and tips s1 into collapse. BOTH levers
 matter -> exp 0025 combines patch tokens + two-hot reward head, 3 seeds. PROCESS WIN: the
 behavior QA gate caught the s0/s1 split that aggregate eval masked. Pages: 0024, INDEX.
+
+## [2026-06-13] curation | why Crafter onboards easier than DoorKey + plateau is a scaling story (Dave)
+
+Recorded an honest decomposition on crafter.md of why Crafter feels easier than the DoorKey
+struggle: (1) reward DENSITY (built-in achievement curriculum vs DoorKey single sparse goal --
+biggest factor), (2) frozen pretrained encoder (skips the from-scratch representation instability
+that was half the DoorKey fight), (3) our algorithmic improvements (prevent failures, not the main
+ease driver). Plus Dave correcting an over-dramatic "DoorKey wall returns" framing: the plateau
+is NOT a fundamental wall -- (a) current ~3 plateau = the exploitation BUG (0025 fixes), (b)
+mid-tree = mostly COMPUTE SCALING (DreamerV3 reaches it at ~1M steps; we are ~10x under-trained),
+(c) only deepest chains might want hierarchy, as an efficiency lever. For a compute-efficiency lab
+efficient scaling IS the research. Discipline: MEASURE the scaling slope once 0025 lands.

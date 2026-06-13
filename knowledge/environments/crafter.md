@@ -77,6 +77,28 @@ updates). First local-GPU run (rounds 0→1): eval_reward 0.10→**1.10**, achie
 plain-MSE critic + critic-on-replay (β_repval 0.3). This is model exploitation resurfacing
 (cf. 0017/0018) — a long run now would just exploit the model.
 
+## Why Crafter onboards easier than DoorKey — and what the plateau really is (Dave, 2026-06-13)
+
+Crafter feels far easier than the MiniGrid DoorKey key→door→goal struggle. Honest decomposition,
+biggest first: (1) **reward density** — Crafter has a built-in 22-achievement reward curriculum
+(signal everywhere, early), vs DoorKey's single sparse terminal reward (the hardest credit-
+assignment shape; ignition was the whole battle); (2) **frozen pretrained encoder** — DINOv2
+skips the from-scratch representation-learning instability (drift/primacy/[[retention]]) that was
+half the DoorKey fight, and gives navigation-grade features (exp 0024); (3) **our algorithmic
+improvements** (RSSM/critic-on-replay/two-hot) — necessary to *prevent failures*, but not the
+main "ease" driver.
+
+**The plateau is NOT a fundamental wall (Dave's correction to an over-dramatic "DoorKey returns"
+framing).** Three layers: (a) the *current* ~3-achievement plateau is the *exploitation bug*
+(stationary / drink-at-cap / mk_iron_sword), an artificial cap → exp 0025; (b) the *mid-tree*
+(stone→iron→crafting) is largely **compute scaling + tuning** — DreamerV3 reaches it with ~1M
+steps + bigger model; we're at ~100k with a small model, i.e. ~10× under-trained; (c) only the
+*deepest* chains (diamond) *might* want hierarchy, and even then as an **efficiency lever**, not a
+hard necessity. For a compute-efficiency lab this is good news: **efficient scaling IS the
+research** (climb the tree at a better capability/FLOP slope than brute force). Discipline:
+**measure the scaling slope** (does 2×/4× steps climb? — cheap experiment once 0025 lands) rather
+than assume compute-bound vs algorithm-bound. See [[compute-strategy]].
+
 ## What's next
 
 - **Harden the DreamerV3 recipe (the now-empirically-justified fix):** symlog + **two-hot
