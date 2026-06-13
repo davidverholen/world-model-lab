@@ -984,3 +984,16 @@ ROADMAP was stale (stopped ~exp 0008). Rewrote to reflect the journey: rungs 1-2
 with the frozen-encoder + calibrated-imagination + value-hardening + behavior-QA progress
 and the next steps (consistent navigation, scaling slope, hierarchy). Depersonalized for
 the public repo (no identity/hardware leaks; proper KB links). Phases map to ladder rungs.
+
+## [2026-06-14] scout+queue | does our grounding testbed already exist? — CrafText/RTFM/SILG/LDD
+
+The maintainer asked whether a custom Crafter-with-tutorials env exists or we should build it. Checked
+the literature first (frontier-claim protocol). Found: CrafText (2505.11962, Craftax instruction-
+following — "Crafter+language" exists, but instructions not read-to-learn-dynamics, and JAX/Craftax
+per ADR-0006 wall); RTFM (right read-to-learn-dynamics paradigm, toy scale); Messenger (referent-swap
+gold standard); SILG (2110.10661, unified grounded-language-game benchmark); LDD (2210.00066, method).
+KEY DISTINCTION recorded: instruction-following (text=goal) vs reading-to-learn-DYNAMICS (text=rules;
+our installation interest). LIKELY GAP (UNVERIFIED, needs deep protocol): rich-env read-to-learn-
+dynamics. Recommendation: literature-first — ingest this cluster BEFORE building any custom env
+(gives task designs + baselines + decides reuse-vs-build). Queued under a new QUEUE subsection. No
+build started.

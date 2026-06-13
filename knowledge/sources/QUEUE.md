@@ -200,6 +200,28 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
 - [ ] arxiv:2308.01399 Dynalang (id now confirmed) — language as predicted modality
 - [ ] arxiv:2407.13466 LIMT · arxiv:2509.21797 MoWM · arxiv:2604.02097 LatentUM —
       conditioning variants
+
+### Grounded-language GAME ENVIRONMENTS (the "does our testbed already exist?" check, 2026-06-14)
+KEY DISTINCTION: instruction-following (text = a GOAL/command) vs reading-to-learn-DYNAMICS
+(text = the rules; our "installation" interest). Read this cluster BEFORE building any custom
+grounding env — they give task designs + baselines, and decide reuse-vs-build. ids from search,
+verify at ingest.
+- [ ] arxiv:2505.11962 **CrafText** (AIRI, ACL 2025; github AIRI-Institute/CrafText) — goal-
+      conditioned **Craftax** instruction-following (3924 instructions). "Crafter+language"
+      ALREADY EXISTS — but instruction-following, not read-to-learn-dynamics, AND it's JAX/Craftax
+      (ADR-0006 interop wall). Read to confirm it is NOT our installation testbed.
+- [ ] **RTFM** (Zhong et al., ICLR 2020; id ~1910.08210 to verify) — read-manual-to-generalize-to-
+      new-DYNAMICS; the RIGHT paradigm for us but TOY grid scale. Our sketch = "RTFM-ify Crafter".
+- [ ] **Messenger / EMMA** (Hanjie et al., ICML 2021; id ~2101.07393 to verify) — referent-swap
+      built in (gold-standard grounding test); also under the lineage section above.
+- [ ] arxiv:2110.10661 **SILG** (NeurIPS 2021) — unified benchmark wrapping RTFM/Messenger/NetHack/
+      ALFWorld under one interface; the map of the grounded-language-game space.
+- [ ] arxiv:2210.00066 **Language Dynamics Distillation** — pretrain to predict dynamics from
+      language-annotated demos, then RL; a METHOD directly on the read-to-learn-dynamics target.
+- LIKELY GAP (UNVERIFIED — needs the deep wall protocol, not just 2 searches): a RICH (Crafter-
+      class) reading-to-learn-DYNAMICS env. CrafText covers rich+instructions; RTFM covers
+      dynamics+toy. The intersection (rich + dynamics) is the candidate gap → "Crafter-with-manuals"
+      DEVELOPMENT testbed (referent-swap + tutorial-reveals-hidden-recipe), real Minecraft for DEPLOY.
 ### Generated video as experience (architecture 2b)
 - [ ] arxiv:2603.28489 Video Generation Models as World Models survey (2026) —
       map of the area; + awesome-list github.com/ziqihuangg/Awesome-From-Video-Generation-to-World-Model
