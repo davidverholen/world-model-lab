@@ -552,3 +552,15 @@ no termination, so the actor farms goal reward across the un-terminated horizon
 continue head). The rest works (WM, on-policy AC, fast actor-collection). Exp 0018:
 add continue predictor, train on replay dones, discount imagined returns by
 cumulative continue prob. Single-variable fix.
+
+## [2026-06-13] curation | generative-vs-predictive concept page (Dave, LeCun vs Xing debate)
+
+Sharpening: generative-vs-latent (what you produce) and hallucination/exploitation
+(intrinsic to optimizing any learned model) are ORTHOGONAL axes. Empirical anchor:
+exp 0017 proves latent-only imagination ALSO hallucinates (no decoder, still farmed
+fake reward) → verification mandatory regardless. Generation isn't needed to ground
+words (contrastive/CLIP suffices) but IS needed to imagine experience from text
+(arch 2b); the latent→decode→re-encode round-trip's only honest justification is
+knowledge import. Unifying principle "real outweighs imagined" links trust-weighted
+replay + continue predictor + corroboration. Roadmap: LeCun-pure rungs 1-4,
+generative/Xing layer at 5b gated by verification.

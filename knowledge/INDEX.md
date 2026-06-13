@@ -18,6 +18,7 @@ training assets: `sources/ASSETS.md`.
 - [retention](concepts/retention.md) — plasticity loss/primacy bias/interference: fix families, literature↔our status (draft)
 - [intellectual-lineage](concepts/intellectual-lineage.md) — 80 years of background in 4 threads: mental models, predictive brain, LeCun's arc, model-based RL; our flywheel = Dyna (draft, unverified ids)
 - [hierarchy-and-credit](concepts/hierarchy-and-credit.md) — flat value (have it) vs emergent compositional subgoals (need it for Crafter); the actor should be hierarchical (draft)
+- [generative-vs-predictive](concepts/generative-vs-predictive.md) — LeCun vs Xing: latent-abstract vs generative-full are one axis; hallucination is a SEPARATE intrinsic axis (exp 0017 proves latent imagination also hallucinates); generation = knowledge import, not better prediction (draft)
 - [language-grounding](concepts/language-grounding.md) — binding + installation: 3 architectures for text→world-model (context/data/weights); the text-staircase design space (draft)
 - [temporal-abstraction](concepts/temporal-abstraction.md) — events-not-ticks: Robbins/Bergson critique × options/H-JEPA/event-segmentation; the deep horizon fix (draft)
 
