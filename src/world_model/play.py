@@ -24,6 +24,27 @@ from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_minigrid_env
 
 
+def _crafter_viewer(size: int = 384):
+    """Open a live pygame window for Crafter (its env renders frames, not an auto window)."""
+    import pygame
+
+    pygame.init()
+    screen = pygame.display.set_mode((size, size))
+    pygame.display.set_caption("Crafter — world-model agent")
+    return pygame, screen, pygame.time.Clock(), size
+
+
+def _crafter_show(viewer, frame_64: np.ndarray, fps: float) -> bool:
+    """Blit an upscaled frame; return False if the window was closed."""
+    pygame, screen, clock, size = viewer
+    k = max(1, size // frame_64.shape[0])
+    up = np.repeat(np.repeat(frame_64, k, axis=0), k, axis=1)
+    screen.blit(pygame.surfarray.make_surface(up.swapaxes(0, 1)), (0, 0))
+    pygame.display.flip()
+    clock.tick(fps)
+    return not any(e.type == pygame.QUIT for e in pygame.event.get())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-id", default="MiniGrid-Empty-8x8-v0")
@@ -53,9 +74,6 @@ def main() -> None:
         if crafter:
             from world_model.envs import make_crafter_env
 
-            if not args.record:  # Crafter renders to frames, not a live pygame window
-                args.record = "crafter_play.gif"
-                print(f"(Crafter has no live window — recording a GIF to {args.record})")
             env = make_crafter_env(length=500)
             agent = RSSMActorAgent.from_checkpoint(
                 args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
@@ -86,8 +104,13 @@ def main() -> None:
                 cls = RecurrentMPCAgent if recurrent else MPCAgent
                 extra = {"epsilon": args.epsilon} if recurrent else {}
                 agent = cls.from_checkpoint(
-                    args.checkpoint, device, horizon=args.horizon,
-                    candidates=args.candidates, iters=args.iters, seed=args.seed, **extra,
+                    args.checkpoint,
+                    device,
+                    horizon=args.horizon,
+                    candidates=args.candidates,
+                    iters=args.iters,
+                    seed=args.seed,
+                    **extra,
                 )
                 kind = "recurrent belief-state" if recurrent else "feedforward"
                 print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
@@ -98,6 +121,7 @@ def main() -> None:
 
     frames: list[np.ndarray] = []
     successes = 0
+    viewer = _crafter_viewer() if (crafter and not args.record) else None  # live Crafter window
     try:
         for episode in range(args.episodes):
             obs, _ = env.reset(seed=args.seed + episode)
@@ -110,6 +134,9 @@ def main() -> None:
                     if crafter:  # 64->256 nearest-neighbour so pixel-art is watchable
                         frame = np.repeat(np.repeat(frame, 4, axis=0), 4, axis=1)
                     frames.append(frame)
+                elif viewer is not None:  # live Crafter window
+                    if not _crafter_show(viewer, env.render(), args.fps):
+                        raise KeyboardInterrupt
                 else:
                     time.sleep(1.0 / args.fps)
                 obs, reward, terminated, truncated, info = env.step(agent.act(obs))
@@ -127,13 +154,14 @@ def main() -> None:
                 successes += int(success)
                 outcome = "reached goal" if success else "timed out"
                 print(
-                    f"episode {episode + 1}: {outcome} in {steps} steps, "
-                    f"reward={total_reward:.2f}"
+                    f"episode {episode + 1}: {outcome} in {steps} steps, reward={total_reward:.2f}"
                 )
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
         env.close()
+        if viewer is not None:
+            viewer[0].quit()
 
     if not crafter:
         print(f"success rate: {successes}/{args.episodes}")
