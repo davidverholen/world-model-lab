@@ -521,3 +521,12 @@ installation, trust-weighted imagination, self-generated hypotheses) — problem
 solves, dependency order, status, test env. Explicitly records the separations that
 keep blurring (#3 subgoals != #4 language; #4 grounding != plugged LLM; #5
 installation != #4 grounding). owner:human (a roadmap-level artifact).
+
+## [2026-06-13] curation | run profiled; acceleration verdict (Dave)
+
+profile_run.py: training 79% (launch-bound), MPC collection 16%, eval 4%, env 0.4%.
+Verdict: faster env is pointless (0.4%); no big easy wins (TF32 1.02x, bf16 1.23x,
+compile 1.33x but CUDA-graph capture fights our freeze/reset optimizer rebuilds).
+Already fleet-efficient via 6-wide parallelism. Shipped TF32 default + --amp opt-in
+(off by default for fp32 comparability); deferred torch.compile to the actor/Crafter
+phase (bigger models, no reset/freeze pattern). compute-strategy.md updated.

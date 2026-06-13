@@ -96,6 +96,26 @@ work AND what we research.
   experiment that can't change your mind), cheapest-env-that-reveals-the-effect,
   parallel seeds on idle GPU, uint8 replay, best-checkpoint guard.
 
+## Run profile — where the time actually goes (measured 2026-06-13, scripts/profile_run.py)
+
+A standard UTD run (~30 min) breaks down as:
+
+| % | component | note |
+|---|---|---|
+| **79%** | training (42k GRU-loop updates) | **the only worthwhile target** — launch-bound (TF32 gives 1.02× ⇒ not matmul-bound) |
+| 16% | MPC collection planning | GPU model-evals per env step |
+| 4% | eval (full planner) | |
+| **0.4%** | env stepping | **a compiled/JAX MiniGrid would save ~nothing — question closed** |
+
+Acceleration verdict (Dave's "reasonable effort only"): no big easy wins; we're
+already fleet-efficient via 6-wide parallelism (launch-bound runs overlap, GPU ~85%).
+Measured levers on the training step: TF32 1.02× (enabled anyway, free), bf16 1.23×,
+torch.compile reduce-overhead 1.33× **but CUDA-graph capture conflicts with our
+freeze/reset optimizer rebuilds** → not worth the fragility now. **Shipped:** TF32
+on by default + `--amp` (bf16) opt-in flag (OFF by default to keep fp32 retention
+results comparable; use for long actor/Crafter runs). **Deferred:** torch.compile
+until the actor work brings bigger models and drops the reset/freeze pattern.
+
 ## Crafter-phase rental mapping (asked by Dave 2026-06-12)
 
 - Actor *development* (MiniGrid-scale iterations): rental buys ~nothing

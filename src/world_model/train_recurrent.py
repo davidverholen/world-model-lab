@@ -64,8 +64,10 @@ def train(
     device: str,
     success_frac: float = 0.0,
     ema: tuple[list, list, float] | None = None,  # (online_modules, ema_modules, decay)
+    amp: bool = False,
 ) -> None:
     no_act = dynamics.no_action
+    autocast = torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp and device == "cuda")
     for step in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         obs_seq = torch.as_tensor(batch["obs"], device=device)
@@ -75,37 +77,38 @@ def train(
         final_obs = torch.as_tensor(batch["next_obs"], device=device)
 
         b, w = actions.shape
-        z_seq = encoder(obs_seq.flatten(0, 1)).unflatten(0, (b, w))
-        z_final = encoder(final_obs)
-        targets = torch.cat([z_seq[:, 1:], z_final.unsqueeze(1)], dim=1)  # (B, W, D)
+        with autocast:  # no-op unless --amp (bf16 forward; params stay fp32)
+            z_seq = encoder(obs_seq.flatten(0, 1)).unflatten(0, (b, w))
+            z_final = encoder(final_obs)
+            targets = torch.cat([z_seq[:, 1:], z_final.unsqueeze(1)], dim=1)  # (B, W, D)
 
-        # burn-in: build belief closed-loop from real latents
-        s = dynamics.initial_state(b, device)
-        prev_a = torch.full((b,), no_act, dtype=torch.long, device=device)
-        for k in range(burn_in):
-            s = dynamics.update(z_seq[:, k], prev_a, s)
-            prev_a = actions[:, k]
+            # burn-in: build belief closed-loop from real latents
+            s = dynamics.initial_state(b, device)
+            prev_a = torch.full((b,), no_act, dtype=torch.long, device=device)
+            for k in range(burn_in):
+                s = dynamics.update(z_seq[:, k], prev_a, s)
+                prev_a = actions[:, k]
 
-        # closed-loop 1-step losses + open-loop imagination losses share the rollout
-        pred_loss = torch.zeros((), device=device)
-        r_loss = torch.zeros((), device=device)
-        v_loss = torch.zeros((), device=device)
-        s_open = s
-        z_hat = None
-        for k in range(burn_in, w):
-            if z_hat is not None:  # open-loop: belief updated with imagined latent
-                s_open = dynamics.update(z_hat, actions[:, k - 1], s_open)
-            r_loss = r_loss + reward_loss(reward_head(s_open, actions[:, k]), rewards[:, k])
-            v_loss = v_loss + value_loss(value_head(s_open), returns[:, k])
-            z_hat = dynamics.predict_next(s_open, actions[:, k])
-            pred_loss = pred_loss + F.mse_loss(z_hat, targets[:, k])
-        n = w - burn_in
-        pred_loss, r_loss, v_loss = pred_loss / n, r_loss / n, v_loss / n
+            # closed-loop 1-step losses + open-loop imagination losses share the rollout
+            pred_loss = torch.zeros((), device=device)
+            r_loss = torch.zeros((), device=device)
+            v_loss = torch.zeros((), device=device)
+            s_open = s
+            z_hat = None
+            for k in range(burn_in, w):
+                if z_hat is not None:  # open-loop: belief updated with imagined latent
+                    s_open = dynamics.update(z_hat, actions[:, k - 1], s_open)
+                r_loss = r_loss + reward_loss(reward_head(s_open, actions[:, k]), rewards[:, k])
+                v_loss = v_loss + value_loss(value_head(s_open), returns[:, k])
+                z_hat = dynamics.predict_next(s_open, actions[:, k])
+                pred_loss = pred_loss + F.mse_loss(z_hat, targets[:, k])
+            n = w - burn_in
+            pred_loss, r_loss, v_loss = pred_loss / n, r_loss / n, v_loss / n
 
-        if lam > 0:
-            loss = (1 - lam) * pred_loss + lam * sigreg(z_seq.flatten(0, 1)) + r_loss + v_loss
-        else:
-            loss = pred_loss + r_loss + v_loss
+            if lam > 0:
+                loss = (1 - lam) * pred_loss + lam * sigreg(z_seq.flatten(0, 1)) + r_loss + v_loss
+            else:
+                loss = pred_loss + r_loss + v_loss
 
         opt.zero_grad()
         loss.backward()
@@ -292,8 +295,18 @@ def main() -> None:
     parser.add_argument("--gamma", type=float, default=0.98, help="return discount")
     parser.add_argument("--eval-episodes", type=int, default=10, help="per-round eval")
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--amp",
+        action="store_true",
+        help="bf16 autocast on the training forward (~1.2x; profile_run.py). OFF by "
+        "default to keep fp32 results comparable — use for long actor/Crafter runs",
+    )
     parser.add_argument("--save", type=str, required=True)
     args = parser.parse_args()
+
+    # TF32 for any fp32 matmuls — free, harmless (our train step is launch-bound so
+    # the gain is ~nil today, but good hygiene as models grow). See compute-strategy.
+    torch.set_float32_matmul_precision("high")
 
     if args.reset != "none" and args.ema_decay > 0:
         # reviewer finding (2026-06-12): in-place reinit never reaches the EMA
@@ -425,6 +438,7 @@ def main() -> None:
             device,
             success_frac=args.success_frac,
             ema=(modules, ema_modules, args.ema_decay) if ema_modules else None,
+            amp=args.amp,
         )
         if rnd == 0 and args.later_lr_scale != 1.0:
             for group in opt.param_groups:
