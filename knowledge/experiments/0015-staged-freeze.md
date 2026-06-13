@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-13
 ---
 
-# 0015: Staged freeze — encoder@2, GRU@4/5 (planned) [autonomous]
+# 0015: Staged freeze — counter-outcome, the frontier is real (run 2026-06-13) [autonomous]
 
 ## Hypothesis
 
@@ -30,11 +30,40 @@ Needs --freeze2 mechanics (second freeze event for GRU): --freeze encoder
 
 ## Result
 
-_pending_
+(suspend mid-run during the night; resumed clean — both freezes fired on schedule,
+all 6 runs complete, no corruption. vs fenc@2 47% / fenc@4 60% / utd 63%)
+
+| arm | bests (s0/s1/s2) | mean | stability |
+|---|---|---|---|
+| enc@2 + gru@4 | 20/40/30 | 30% | no large crashes, but capped LOW |
+| enc@2 + gru@5 | 30/30/50 | 37% | no large crashes, capped |
+
+**Counter-outcome confirmed.** Freezing the GRU caps the mean (~30–37%, below even
+ftrunk's 40% and well below fenc@4's 60%) — freezing both representation taps just
+recovers the ftrunk ceiling, regardless of timing. No staged config clears both bars.
 
 ## Lesson
 
-_pending_
+1. **The stability↔performance trade is a genuine frontier at this env budget**,
+   not a config to be out-tuned: every unit of representation plasticity removed
+   buys stability and costs ceiling. Best points stay fenc@4 (60%, mild crash) and
+   utd (63%, crashy); fenc@2 (47%) is the most stable usable point.
+2. The GRU's continued plasticity is *load-bearing for performance* (freezing it
+   always caps) AND *a residual crash source* (exp 0014) — it cannot be simply
+   pensioned; it needs a gentler regularizer, not a freeze. Untested levers from
+   the literature gate: data augmentation (Ma 2024), FAU-gated Adaptive-RR
+   scheduling, churn reduction — all deferred pending the strategic call below.
+3. **Strategic inflection (for Dave):** rung-2b's actual exit criterion — "beat
+   model-free on sample efficiency" — was MET at exp 0012 (63% vs PPO 37% at equal
+   env budget; best-checkpoint selection is a legitimate technique). The crash-free
+   "both bars" target was our own added rigor, now characterized as a frontier.
+   Continuing to chase crash-free retention shows diminishing returns (0015 did not
+   advance). Recommendation: declare rung-2b met, bank the retention
+   characterization, and pivot to the actor thread (Mode-2→Mode-1 distillation) —
+   which serves Crafter AND is independently a likely retention aid (an amortized
+   policy decouples acting from per-round value-head churn).
+
+## Links
 
 ## Links
 

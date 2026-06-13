@@ -64,7 +64,7 @@ training assets: `sources/ASSETS.md`.
 - [0012-utd-and-targeted-resets](experiments/0012-utd-and-targeted-resets.md) — UTD ×4 wins: 63% mean, first PPO defeat at equal env budget (80% peak); resets conclusively dead; stability bar still open → 0013 trunk-freeze (done)
 - [0013-trunk-freeze](experiments/0013-trunk-freeze.md) — BREAKTHROUGH: encoder freeze stops all crashes (6/6 seeds); interference = encoder drift; GRU must stay plastic; ceiling unconverged → 0014 freeze-round sweep (done)
 - [0014-freeze-round-sweep](experiments/0014-freeze-round-sweep.md) — frontier mapped: 40/47/53/60/63% across freeze timings; residual crashes = GRU drift → staged freeze (done)
-- [0015-staged-freeze](experiments/0015-staged-freeze.md) — staged pension: encoder@2 + GRU@4/5; both bars targeted (running)
+- [0015-staged-freeze](experiments/0015-staged-freeze.md) — counter-outcome: GRU freeze caps at 30–37%; stability↔performance is a real frontier; rung-2b MET at 0012, pivot to actor recommended (done)
 
 ## Wanted pages (linked but not yet written)
 

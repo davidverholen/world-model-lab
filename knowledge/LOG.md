@@ -461,3 +461,14 @@ Decision queued for Dave: if 0015 clears both bars -> rung-2b closure proposal
 (ladder is owner:human) + pivot to the actor thread. If it caps like ftrunk ->
 budget-tier extension + PPO re-baseline proposal instead.
 No paid resources used or needed. No stop gates approached.
+
+## [2026-06-13] curation | milestone: staged freeze counter-outcome — frontier confirmed (exp 0015) [autonomous, pre-Dave-return]
+
+g4/g5 staged enc+GRU freeze caps at 30-37% (< ftrunk 40% < fenc@4 60% < utd 63%):
+freezing the GRU always recovers the ftrunk ceiling. Stability<->performance is a
+genuine frontier at this budget, not out-tunable. Desktop suspended mid-run
+overnight, resumed clean (both freezes fired, no corruption). KEY STRATEGIC NOTE:
+rung-2b exit criterion (beat model-free on sample efficiency) was already MET at
+exp 0012 (63% vs PPO 37%); crash-free "both bars" was self-imposed extra rigor,
+now characterized. Recommendation logged for Dave: declare 2b met, pivot to actor
+thread. Autonomous mode PAUSED — Dave returned. Awaiting his strategic call.
