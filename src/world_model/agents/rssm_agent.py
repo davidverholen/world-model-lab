@@ -33,6 +33,20 @@ class RSSMActorAgent:
         self.rng = torch.Generator(device="cpu").manual_seed(seed)
         self.reset()
 
+    @classmethod
+    def from_checkpoint(cls, path, device, *, epsilon: float = 0.0, seed: int = 0, **_ignored):
+        """Rebuild the agent from a train_rssm checkpoint ({rssm_agent, encoder, rssm,
+        actor, config}). Reactive policy — ignores planner kwargs (horizon/candidates)."""
+        ckpt = torch.load(path, map_location="cpu", weights_only=True)
+        n = int(ckpt["config"]["num_actions"])
+        enc = ConvEncoder()
+        enc.load_state_dict(ckpt["encoder"])
+        rssm = RSSM(embed_dim=enc.latent_dim, num_actions=n)
+        rssm.load_state_dict(ckpt["rssm"])
+        actor = Actor(state_dim=rssm.state_dim, num_actions=n)
+        actor.load_state_dict(ckpt["actor"])
+        return cls(enc, rssm, actor, n, device, epsilon=epsilon, seed=seed)
+
     def reset(self) -> None:
         self._state = self.rssm.initial(1, self.device)
         self._prev_action = torch.full((1,), self.rssm.no_action, device=self.device)

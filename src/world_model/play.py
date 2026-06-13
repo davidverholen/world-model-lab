@@ -20,6 +20,7 @@ import numpy as np
 import torch
 
 from world_model.agents import MPCAgent, RandomAgent, RecurrentMPCAgent
+from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_minigrid_env
 
 
@@ -47,31 +48,38 @@ def main() -> None:
     if args.checkpoint:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+        rssm_agent = bool(ckpt.get("rssm_agent", False))
         recurrent = bool(ckpt.get("recurrent", False))
+        partial = rssm_agent or recurrent  # both use the partial RGB view (not fully observable)
         # tile_size must match training: it changes the agent's OBSERVATIONS (not the
         # GIF render). A 16-vs-8 mismatch here silently cost 60pp success in exp 0006.
-        env = make_minigrid_env(
-            args.env_id, render_mode=render_mode, fully_observable=not recurrent
-        )
+        env = make_minigrid_env(args.env_id, render_mode=render_mode, fully_observable=not partial)
         expected = ckpt.get("config", {}).get("obs_shape")
         if expected is not None and tuple(env.observation_space.shape) != tuple(expected):
             raise SystemExit(
                 f"observation shape mismatch: env {env.observation_space.shape} vs "
                 f"checkpoint {tuple(expected)} — check env-id/tile_size against training"
             )
-        cls = RecurrentMPCAgent if recurrent else MPCAgent
-        extra = {"epsilon": args.epsilon} if recurrent else {}
-        agent = cls.from_checkpoint(
-            args.checkpoint,
-            device,
-            horizon=args.horizon,
-            candidates=args.candidates,
-            iters=args.iters,
-            seed=args.seed,
-            **extra,
-        )
-        kind = "recurrent belief-state" if recurrent else "feedforward"
-        print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
+        if rssm_agent:
+            # reactive policy over the RSSM belief (exp 0019) — no MPC planning
+            agent = RSSMActorAgent.from_checkpoint(
+                args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
+            )
+            print(f"world-model reactive RSSM agent from {args.checkpoint} (device={device})")
+        else:
+            cls = RecurrentMPCAgent if recurrent else MPCAgent
+            extra = {"epsilon": args.epsilon} if recurrent else {}
+            agent = cls.from_checkpoint(
+                args.checkpoint,
+                device,
+                horizon=args.horizon,
+                candidates=args.candidates,
+                iters=args.iters,
+                seed=args.seed,
+                **extra,
+            )
+            kind = "recurrent belief-state" if recurrent else "feedforward"
+            print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
     else:
         env = make_minigrid_env(args.env_id, render_mode=render_mode)
         agent = RandomAgent(env.action_space, seed=args.seed)

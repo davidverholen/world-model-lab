@@ -69,6 +69,31 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] arxiv:2512.10942 VL-JEPA (Dec 2025) — vision-language JEPA; lower priority
       (language enters our roadmap only with mission-conditioned MiniGrid tasks)
 
+## Teams to watch (world-model lines worth tracking; added 2026-06-13)
+
+Not papers — research groups Eric Xing flagged in the DataCamp podcast "Will World
+Models Bring us AGI?" (youtube VNyLNZunv9E) as holding a view of world models close
+to his own (simulator of actionable possibilities, not video generation). Track for
+releases; ingest specific outputs as they land.
+
+- [ ] **Demis Hassabis / Google DeepMind** — Xing reports "almost perfect alignment"
+      with Hassabis (conv. ~Mar 2026) on what a world model and a virtual cell are,
+      and a "grounded but sophisticated" view of how to build AND test them. Xing
+      expects "something fancier and disruptive in the next few months"; says
+      DeepMind's public releases trail their internal work by months-to-years.
+      Watch: Genie line (2402.15391 + Genie 2/3 blogs, already queued under Medium),
+      virtual-cell work. The Hassabis-alignment quote also worth a line on
+      concepts/ or design/ once a concrete artifact exists.
+- [ ] **Fan-Yun Sun / Moonlake AI** — ex-Stanford SAIL (Holodeck, LayoutVLM); now
+      co-founder/CEO of Moonlake, a stealth-ish world-model startup (Chris Manning,
+      Ian Goodfellow in the orbit). Thesis: causal world models should be
+      multimodal, interactive, and EFFICIENT — structure + causality over blind
+      scaling; flags physical/spatial glitches (floating solids, interpenetration)
+      as the failure mode. Aligns with our generative-vs-predictive +
+      Causal-JEPA (2602.11389) threads. Source to ingest first:
+      Latent Space "Moonlake" episode (latent.space/p/moonlake). Watch for first
+      model release.
+
 ## Background / lineage (no rush; see concepts/intellectual-lineage.md; ids unverified)
 
 - [ ] Sutton 1991, "Dyna, an Integrated Architecture for Learning, Planning, and
@@ -139,6 +164,26 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] arxiv:2603.28489 Video Generation Models as World Models survey (2026) —
       map of the area; + awesome-list github.com/ziqihuangg/Awesome-From-Video-Generation-to-World-Model
 - [ ] arxiv:2509.23958 RL with Inverse Rewards for WM post-training
+
+### LLM-as-latent-backbone (PAN / GLP — Eric Xing; queued 2026-06-13 after the PAN discussion)
+- [ ] arxiv:2511.09057 PAN: A World Model for General, Interactable, Long-Horizon
+      Simulation — Generative Latent Prediction (GLP): vision encoder → latents,
+      LLM backbone (Qwen2.5-VL-7B) as the latent DYNAMICS model conditioned on
+      language actions, multi-granular diffusion decoder → video. The published
+      answer to "how do you wire an LLM into a latent world model" — further than
+      our sketch. INGEST QUESTION to settle: does PAN show (a) only static
+      pretrained knowledge baked into the backbone, or (b) TEST-TIME acquisition —
+      read a novel tutorial, form new latents, act differently? (b) is our edge
+      case (text->new-representations); if PAN demonstrates it, roadmap changes.
+      Also: text-through-the-visual-channel (read signs/menus as pixels) as input
+      unification — relevant to our language-grounding staircase. Pairs with
+      concepts/generative-vs-predictive.md (PAN sits BETWEEN pure-JEPA non-generative
+      latent and pixel-generation; names the midpoint "GLP") and design/architecture-strategy.md.
+- [ ] arxiv:2507.05169 Critiques of World Models (Xing et al., Jul 2025) — the
+      theoretical position paper behind PAN; argues FOR a generative decoder
+      (validate predictions against real observations) vs JEPA's non-generative
+      stance. Read as the pair to PAN; the explicit counter-argument to LeCun on
+      our generative-vs-predictive axis.
 ### Trust gate (synthetic-experience weighting)
 - [ ] arxiv:2104.04174 Learning to Reweight Imaginary Transitions — the ancestor
 - [ ] arxiv:2506.09270 Uncertainty Prioritized Experience Replay (RLC 2025)

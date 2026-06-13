@@ -682,3 +682,51 @@ model-exploitation at L4. Renumber rippled to one cross-ref: capability-map "4 �
 optimization layers" (the (L1)/(L2) maps in lecun-2022-path are stable, untouched).
 FLAGGED (separate, not fixed): lecun-2022-path:38 calls stochastic latents "future" —
 now built (RSSM, 0019); that page wants a refresh too.
+
+## [2026-06-13] queue | PAN / GLP (Eric Xing) — LLM-as-latent-backbone
+
+Queued two papers after a discussion sparked by Dave watching an Eric Xing talk:
+PAN (arxiv:2511.09057) and its position paper "Critiques of World Models"
+(arxiv:2507.05169), under a new QUEUE subsection "LLM-as-latent-backbone (PAN/GLP)".
+Why they matter to us: PAN's Generative Latent Prediction (encoder→latents, an LLM
+backbone as the latent dynamics model conditioned on language actions, diffusion
+decoder→video) is the published answer to the LLM↔latent integration we'd only
+sketched — and Xing argues FOR a generative decoder, the explicit counter to JEPA on
+our generative-vs-predictive axis. Logged the key ingest question so it isn't lost:
+does PAN show only (a) static pretrained knowledge in the backbone, or (b) test-time
+acquisition (read a novel tutorial → new latents → changed behavior)? (b) is our edge
+case; if PAN demonstrates it the roadmap shifts. No wiki page cites these yet (queue
+only). Pairs flagged: concepts/generative-vs-predictive, design/architecture-strategy.
+
+## [2026-06-13] queue | Teams to watch — Hassabis/DeepMind + Fan-Yun Sun/Moonlake
+
+Added a new QUEUE subsection "Teams to watch" after Dave asked who Xing credits in the
+DataCamp podcast "Will World Models Bring us AGI?" (youtube VNyLNZunv9E). Transcript-
+confirmed: Xing names **Demis Hassabis / DeepMind** as near-perfectly aligned on what a
+world model (and virtual cell) is and how to build/test it, and expects "something
+fancier and disruptive in the next few months" (public releases trail internal work).
+Second lead surfaced in the same discussion: **Fan-Yun Sun / Moonlake AI** (ex-Stanford
+SAIL; Manning/Goodfellow orbit) — causal, multimodal, interactive, EFFICIENT world
+models over blind scaling; aligns with our generative-vs-predictive + Causal-JEPA
+threads. Both are groups-to-track, not papers; ingest specific outputs as they land.
+First-ingest pointers logged (Genie line for DeepMind; latent.space/p/moonlake for
+Moonlake).
+
+## [2026-06-13] milestone+curation | exp 0019 RSSM — eval off zero (partial win)
+
+Exp 0019 (RSSM stochastic latents) closed as a **partial success**, 3 seeds DoorKey-6x6,
+commit b8fdb62. Eval rose off zero for the first time on the imagination line: best
+s0=0.00, s1=0.55, s2=0.35 (both winners peak round 5, regress round 6). s1 checkpoint
+reproduces 10/20 under play (new reactive RSSM agent path in play.py + RSSMActorAgent.
+from_checkpoint). Key finding written to experiments/0019: **RSSM fixed policy quality,
+not value calibration** — imagined_return stayed inflated 0.7–4.3 (hypothesis predicted
+≤1.0; refuted), the SAME range as exploited 0017/0018, yet now coexists with real
+competence. Stochasticity stops collapse onto one fake trajectory (relative action
+ordering tracks reality) without bounding the absolute value scale. Two open problems:
+peak-then-collapse round 6 (retention signature; freeze-round 2 insufficient → next
+fork a) and seed variance (s0 never ignited). Process lesson recorded: a smoke confirms
+mechanism wiring, not steady-state behaviour — the earlier "imagined_return ~0.1, killed"
+claim was a premature smoke-test promotion (inflation re-emerges after 4k×7 AC updates).
+Pages: experiments/0019 Result+Lesson filled (pre-registered hypothesis left intact).
+Code: play.py + agents/rssm_agent.py (watchable checkpoints). Next: fork (a), the
+round-6 collapse, via retention/plasticity levers.

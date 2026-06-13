@@ -20,3 +20,6 @@ events.out.tfevents.*
 knowledge/sources/files/
 .env.remote
 .publish-check.local
+
+# Local-only, never-committed working context.
+.local/
