@@ -879,3 +879,15 @@ IDENTICAL to the v1 uncached run (0.393/0.1687/0.096) -- same embeddings, same t
 encoded at collection. Float-buffer roundtrip test added. Embeddings are ~8x smaller than the
 image buffer too. Makes a full-scale desktop Crafter run feasible. Next: first real run +
 harden DreamerV3 recipe.
+
+## [2026-06-13] validation | first Crafter learning signal + value inflation surfaced
+
+Local-GPU validation of the full train_crafter pipeline (cached frozen DINO + RSSM + critic-
+on-replay), rounds 0->1 in 75s on the throttled laptop: eval_reward 0.10->1.10, achievements
+1->2 -- LEARNS above the random floor; cache works (no OOM, training not DINO-bound). BUT value
+inflation resurfaced at Crafter scale: imagined_return 9.95->21.67, critic_loss 14->35 (vs ~1
+calibrated on MiniGrid). Denser/larger-scale rewards overwhelm plain-MSE critic + critic-on-
+replay (beta_repval 0.3) -- model exploitation (cf 0017/0018) at Crafter scale. Decision: do
+NOT dispatch a long run yet (would just exploit the model); harden the DreamerV3 recipe FIRST
+(symlog + two-hot distributional critic + percentile return-norm) -- the deferred step, now
+empirically justified by this run. crafter.md pipeline-status + what-next updated.

@@ -64,15 +64,27 @@ the gap is specific:
 Compute-smart by design: debug expensive capabilities on the fast env, deploy on the slow
 real one; the frozen encoder is the thread tying the rungs together.
 
+## Pipeline status (2026-06-13)
+
+Built and **learning**. Frozen DINOv2-S encoder (VALIDATED, [[0022-frozen-dino-probe]]) +
+the calibrated RSSM imagination loop (RSSM + critic-on-replay) wired in `train_crafter.py`,
+with an embedding cache (store DINO embeddings in replay, zero encoder forwards in WM
+updates). First local-GPU run (rounds 0→1): eval_reward 0.10→**1.10**, achievements
+1→**2** — above the random floor (1/22, reward ~0.1).
+
+**Open problem — value inflation at Crafter scale:** `imagined_return` 9.95→21.67,
+`critic_loss` 14→35 (vs ~1 calibrated on MiniGrid). Denser/larger-scale rewards overwhelm
+plain-MSE critic + critic-on-replay (β_repval 0.3). This is model exploitation resurfacing
+(cf. 0017/0018) — a long run now would just exploit the model.
+
 ## What's next
 
-- **Encoder for 64×64:** frozen **DINOv2-S** + small learned dynamics — VALIDATED
-  ([[0022-frozen-dino-probe]]: linear probe on frozen DINO features predicts in-view
-  materials at 0.98 vs 0.80 baseline; transfer to pixel-art confirmed). Build the
-  FrozenDinoEncoder module next ([[frozen-encoder-lean]]).
-- **Port the calibrated imagination loop** (RSSM + critic-on-replay) to Crafter.
-- **Harden the DreamerV3 recipe HERE** (two-hot critic, symlog, percentile return-norm) —
-  deferred from MiniGrid because Crafter's denser, multi-scale rewards actually exercise it.
+- **Harden the DreamerV3 recipe (the now-empirically-justified fix):** symlog + **two-hot
+  distributional critic** (bounded — can't regress to 21 the way MSE does) + **percentile
+  return-normalization** (advantage scale). Deferred from MiniGrid precisely because
+  Crafter's dense rewards exercise it; the run above is the evidence it's needed.
+- **Then** the first real (longer) desktop run, once the value scale is controlled.
+- Later: spatial patch tokens (vs CLS) for finer detail; hierarchy for the deep tech tree.
 
 ## Links
 
