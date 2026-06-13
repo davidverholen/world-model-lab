@@ -44,12 +44,12 @@ free 63% (violent crashes). No single point yet clears BOTH bars.
    plasticity buys ~5pp mean and costs stability. fenc@4 ≈ UTD's mean with far
    milder damage.
 2. **Residual instability is GRU drift** (f3-s1 crashed with encoder frozen;
-   ftrunk never crashed). Two plasticity taps, two pensions needed.
+   ftrunk never crashed). Two plasticity taps, two freezes needed.
 3. Literature gate (2026-06-13): progressive bottom-up freezing is established in
    supervised/SSL training (FreezeOut 1706.04983; LayerLock 2509.10156 — masked
    VIDEO models, JEPA-adjacent; "early layers converge first") — our staged
    variant in flywheel RL is uncovered; principle imported.
-4. Exp 0015 (pre-registered): **staged pension** — encoder@2 + GRU@{4|5}, heads
+4. [[0015-staged-freeze]] (pre-registered): **staged freeze** — encoder@2 + GRU@{4|5}, heads
    always free, UTD ×4. Both bars in one config is the explicit target.
 
 ## Links

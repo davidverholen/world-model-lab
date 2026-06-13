@@ -36,17 +36,25 @@ smoothing: lr decay ×0.3 and EMA acting weights both failed (0010, 12 runs).
 | **UTD scaling** (more gradient steps, same env budget) | Qiao Fig-3 (agent-UTD helps MBPO) | **BIG WIN (0012): ×4 → 63% mean, beats PPO; 80% peak.** Crashes persist at higher amplitude → not the full fix |
 | churn reduction / NTK regularization | ICML 2025 (queued: 2506.00592) | untested |
 | continual backprop (selective reinit of dormant units) | Sutton lab (queued: 2306.13812) | untested |
-| **frozen encoder** (earn it, then pin it) | DINO-WM / DINOv3 line (pretrained variant) | **STABILITY SOLVED (0013): encoder freeze @r2 stops all crashes, 6/6 seeds; GRU must stay plastic.** Interference = encoder drift. Ceiling question → 0014 freeze-round sweep |
+| **frozen encoder** (earn it, then pin it) | DINO-WM / DINOv3 line (pretrained variant); Ma 2024 (frozen pretrained encoders suffice) | **STABILITY SOLVED (0013): encoder freeze @r2 stops all crashes, 6/6 seeds; GRU must stay plastic.** Interference = encoder drift. 0014 mapped the freeze-timing frontier (40/47/53/60/63% across ftrunk/fenc@2/@3/@4/free); 0015: also freezing the GRU caps at the trunk ceiling (30-37%) — **stability↔performance is a genuine frontier at this budget**, not out-tunable |
 
 ## Open questions
 
-- Does the reset recipe transfer from model-free TD agents to our model-based
-  MC-value setup? (exp 0011 answers)
-- Is the encoder or the heads the locus of interference here? (0011's heads-vs-deep
-  arms answer indirectly; a frozen-encoder arm would answer directly)
+- ~~Does the reset recipe transfer from model-free TD agents to our model-based
+  MC-value setup?~~ → **ANSWERED (0011/0012):** no — both Nikishin and Qiao recipes
+  assume high-UTD *overfitting*; our regime was *under*-trained (UTD ×4, not resets,
+  was the win). See [[qiao-model-primacy-2023]].
+- ~~Is the encoder or the heads the locus of interference here?~~ → **ANSWERED (0013):**
+  the encoder. Freezing it @r2 stops all crashes; the GRU must stay plastic.
+- **Still open:** the stability↔performance ceiling — crash-free freeze configs cap
+  below the UTD-×4 peak (rung-2b was MET at 0012 anyway: 63% vs PPO 37%). Untested
+  levers: churn/NTK regularization, continual backprop, and [[dreaming]]'s
+  latent-dream-augmentation (a cheap candidate retention regularizer).
 
 ## Links
 
-[[nikishin-primacy-2022]] · [[0009-ignition-mechanics]] · [[0010-retention-mechanics]] ·
-[[0011-nikishin-resets]] · [[agent-architecture]] · [[latent-collapse]] (the *other*
+[[nikishin-primacy-2022]] · [[qiao-model-primacy-2023]] · [[ma-plasticity-2024]] ·
+[[0009-ignition-mechanics]] · [[0010-retention-mechanics]] · [[0011-nikishin-resets]] ·
+[[0012-utd-and-targeted-resets]] · [[0013-trunk-freeze]] · [[0014-freeze-round-sweep]] ·
+[[0015-staged-freeze]] · [[agent-architecture]] · [[latent-collapse]] (the *other*
 representation pathology — collapse is too little change, interference is too much)

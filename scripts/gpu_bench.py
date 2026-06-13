@@ -6,7 +6,7 @@ Two workloads bracketing our use cases:
   closer to real updates/sec
 
 Run on any machine: uv run python scripts/gpu_bench.py
-Results belong in knowledge/concepts/compute-strategy.md.
+Results belong in knowledge/design/compute-strategy.md.
 """
 
 import time

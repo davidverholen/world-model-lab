@@ -1,7 +1,7 @@
 # Roadmap: autonomous game-playing world-model agents
 
 The project climbs the environment ladder (authoritative version with exit criteria:
-[knowledge/concepts/environment-ladder.md](knowledge/concepts/environment-ladder.md),
+[knowledge/design/environment-ladder.md](knowledge/design/environment-ladder.md),
 ADR [0003](knowledge/decisions/0003-environment-ladder.md)).
 
 ## Phase 1 — Pipeline bring-up (now)

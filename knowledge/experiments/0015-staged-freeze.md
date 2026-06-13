@@ -11,7 +11,7 @@ last_reviewed: 2026-06-13
 
 ## Hypothesis
 
-Two drift sources, two pensions: freezing the encoder at round 2 (proven
+Two drift sources, two freezes: freezing the encoder at round 2 (proven
 crash-stopper, exp 0013) and the GRU later (after it exploits mid-quality data;
 exp 0014 showed GRU drift causes the residual crashes) yields a config that
 clears BOTH bars: mean ≥55% AND no >20pp post-(first-)freeze crash. Bottom-up
@@ -50,7 +50,7 @@ recovers the ftrunk ceiling, regardless of timing. No staged config clears both 
    utd (63%, crashy); fenc@2 (47%) is the most stable usable point.
 2. The GRU's continued plasticity is *load-bearing for performance* (freezing it
    always caps) AND *a residual crash source* (exp 0014) — it cannot be simply
-   pensioned; it needs a gentler regularizer, not a freeze. Untested levers from
+   frozen outright; it needs a gentler regularizer, not a hard freeze. Untested levers from
    the literature gate: data augmentation (Ma 2024), FAU-gated Adaptive-RR
    scheduling, churn reduction — all deferred pending the strategic call below.
 3. **Strategic inflection (for Dave):** rung-2b's actual exit criterion — "beat

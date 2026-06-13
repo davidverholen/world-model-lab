@@ -122,7 +122,9 @@ on synthetic data — another distribution-shift source the flywheel lessons app
 ## Links
 
 [[0005-minecraft-milestone]] · [[intellectual-lineage]] · [[retention]] ·
-[[jepa]] · [[agent-architecture]]
+[[jepa]] · [[agent-architecture]] · [[hierarchy-and-credit]] · [[temporal-abstraction]]
+(grounding rides on top of the hierarchical actor — its subgoals/events are the
+attachment points words bind to)
 
 ## Word associations: an "association matrix" IS a word embedding (Dave, 2026-06-13)
 

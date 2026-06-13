@@ -59,7 +59,7 @@ table below and the module docstrings.
 |---|---|---|---|---|
 | L1 planning | CEM (sampling) | discounted imagined return | per action | horizon blindness → value head (0005→0006); argmax oscillation (0004) |
 | L2 belief/model | — (forward pass) | state estimation | per step | obs-scale mismatch (0006); collapse w/o SIGReg (0001) |
-| L3 training | Adam on joint loss | model+heads fit | per update | **catastrophic interference (0009/0010, open)**; reward starvation (0004); compounding rollout error (0004) |
+| L3 training | Adam on joint loss | model+heads fit | per update | **catastrophic interference (0009/0010 → localized to encoder drift, stopped by encoder-freeze @r2, 0013; stability↔perf frontier 0014/0015)**; reward starvation (0004); compounding rollout error (0004) |
 | L4 flywheel | greedy data loop | data quality | per round | ignition (0008→0009, solved); instability amplification (0005) |
 
 ## Why it matters here

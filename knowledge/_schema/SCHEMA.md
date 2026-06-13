@@ -16,7 +16,8 @@ operated under the context-architecture model from the whitepaper — see
 
 | Directory | Page type | Naming |
 |---|---|---|
-| `concepts/` | One page per concept (architecture, technique, idea) | `kebab-case.md`, noun phrase |
+| `concepts/` | One page per **field** concept (technique, architecture family, phenomenon) — knowledge that holds independent of this project | `kebab-case.md`, noun phrase |
+| `design/` | This project's own synthesis — system description, roadmaps, operating strategy (our architecture, capability map, env ladder, compute strategy). `scope: local`; ADRs in `decisions/` record the frozen calls these elaborate | `kebab-case.md`, noun phrase |
 | `papers/` | One page per ingested paper | `<firstauthor-or-name>-<year>.md` |
 | `labs/` | Research groups and their agendas | `<lab-name>.md` |
 | `environments/` | RL environments / benchmarks we can train in | `<env-name>.md` |

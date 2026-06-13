@@ -6,16 +6,15 @@ training assets: `sources/ASSETS.md`.
 
 ## Concepts
 
-- [capability-map](concepts/capability-map.md) — the distinct capabilities (world-model/credit/hierarchy/grounding/installation/imagination/hypotheses), what each solves, dependency order; the anti-conflation index (current)
+Field knowledge — techniques, architecture families, and phenomena that hold
+independent of this project. (Our own design/strategy artifacts live under Design &
+strategy, below.)
+
 - [world-models](concepts/world-models.md) — root page: what world models are, the four families, why they're our bet (draft)
 - [jepa](concepts/jepa.md) — latent-prediction architectures I-JEPA→V-JEPA 2→LeJEPA; collapse problem and fixes (draft)
 - [imagination-training](concepts/imagination-training.md) — Dreamer lineage: RSSM, actor-critic in imagination, Dreamer 4 offline (draft)
 - [value-equivalent-planning](concepts/value-equivalent-planning.md) — MuZero/TD-MPC2: model only what decisions need (draft)
-- [environment-ladder](concepts/environment-ladder.md) — our staged env progression with exit criteria (current)
 - [latent-collapse](concepts/latent-collapse.md) — the JEPA failure mode, fixes table, measurement pitfalls (draft)
-- [compute-strategy](concepts/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
-- [architecture-strategy](concepts/architecture-strategy.md) — modes (configurator) + the real decision is the INTERFACE not model-count + reusable pretrained components (Minecraft WM); decide empirically at rung 3/5b (draft)
-- [agent-architecture](concepts/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
 - [retention](concepts/retention.md) — plasticity loss/primacy bias/interference: fix families, literature↔our status (draft)
 - [intellectual-lineage](concepts/intellectual-lineage.md) — 80 years of background in 4 threads: mental models, predictive brain, LeCun's arc, model-based RL; our flywheel = Dyna (draft, unverified ids)
 - [hierarchy-and-credit](concepts/hierarchy-and-credit.md) — flat value (have it) vs emergent compositional subgoals (need it for Crafter); the actor should be hierarchical (draft)
@@ -23,6 +22,18 @@ training assets: `sources/ASSETS.md`.
 - [generative-vs-predictive](concepts/generative-vs-predictive.md) — LeCun vs Xing: latent-abstract vs generative-full are one axis; hallucination is a SEPARATE intrinsic axis (exp 0017 proves latent imagination also hallucinates); generation = knowledge import, not better prediction (draft)
 - [language-grounding](concepts/language-grounding.md) — binding + installation: 3 architectures for text→world-model (context/data/weights); the text-staircase design space (draft)
 - [temporal-abstraction](concepts/temporal-abstraction.md) — events-not-ticks: Robbins/Bergson critique × options/H-JEPA/event-segmentation; the deep horizon fix (draft)
+
+## Design & strategy
+
+This project's own synthesis — system description, roadmaps, and operating strategy
+(distinct from the field-knowledge concepts above; ADRs in Decisions record the frozen
+calls these elaborate).
+
+- [capability-map](design/capability-map.md) — the distinct capabilities (world-model/credit/hierarchy/grounding/installation/imagination/hypotheses), what each solves, dependency order; the anti-conflation index (current)
+- [agent-architecture](design/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
+- [architecture-strategy](design/architecture-strategy.md) — modes (configurator) + the real decision is the INTERFACE not model-count + reusable pretrained components (Minecraft WM); decide empirically at rung 3/5b (draft)
+- [environment-ladder](design/environment-ladder.md) — our staged env progression with exit criteria; living spec for ADR 0003 (current)
+- [compute-strategy](design/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
 
 ## Papers
 
@@ -70,9 +81,10 @@ training assets: `sources/ASSETS.md`.
 - [0013-trunk-freeze](experiments/0013-trunk-freeze.md) — BREAKTHROUGH: encoder freeze stops all crashes (6/6 seeds); interference = encoder drift; GRU must stay plastic; ceiling unconverged → 0014 freeze-round sweep (done)
 - [0014-freeze-round-sweep](experiments/0014-freeze-round-sweep.md) — frontier mapped: 40/47/53/60/63% across freeze timings; residual crashes = GRU drift → staged freeze (done)
 - [0015-staged-freeze](experiments/0015-staged-freeze.md) — counter-outcome: GRU freeze caps at 30–37%; stability↔performance is a real frontier; rung-2b MET at 0012, pivot to actor recommended (done)
-- [0017-imagination-actor-critic](experiments/0017-imagination-actor-critic.md) — Dreamer AC built; model exploitation (imagined_return 2-3 vs eval 0) — missing continue predictor → 0018 (done)
-- [0018-continue-predictor](experiments/0018-continue-predictor.md) — add Dreamer continue predictor to stop imagination reward-farming (running)
 - [0016-actor-distillation](experiments/0016-actor-distillation.md) — BC planner-distillation fails (O(εT²) compounding error + stochastic teacher); eval-variance surprise (80%→25-30% on fresh seeds); on-policy needed → 0017 imagination actor-critic (done)
+- [0017-imagination-actor-critic](experiments/0017-imagination-actor-critic.md) — Dreamer AC built; model exploitation (imagined_return 2-3 vs eval 0) — missing continue predictor → 0018 (done)
+- [0018-continue-predictor](experiments/0018-continue-predictor.md) — continue predictor partially tames exploitation (s0 2.06→1.13) but actor exploits other off-distribution errors; deterministic WM can't imagine the 25-step chain → stochastic latents; fork (deepen vs DAgger) (done, partial)
+- [0019-stochastic-latents](experiments/0019-stochastic-latents.md) — RSSM stochastic latents (Gaussian prior/posterior, KL+recon, img_step AC); smoke shows imagined_return SANE (~0.1 vs 0017/0018's 2-5) — exploitation killed (running)
 
 ## Wanted pages (linked but not yet written)
 

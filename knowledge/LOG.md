@@ -620,3 +620,47 @@ recommend cheap H=5 check then DAgger. Also: language-grounding gains word-assoc
 section — association matrix = word embedding (Levy-Goldberg, queued); don't rebuild
 as metadata (import + bind to grounded latent); associations enable TRANSITIVE
 grounding (smelt↔furnace bridges ungrounded tutorial words to experience).
+
+## [2026-06-13] lint | full-KB curation sweep | 11 issues, 9 fixed, 2 flagged
+
+Full sweep (53 pages; no >90-day staleness — KB is ~1 day old). Concept clusters
+audited for duplication/contradiction via 3 parallel readers (architecture /
+imagination / grounding-hierarchy): **no contradictions; clean abstraction-level
+separation** — the rapid 06-12/13 brainstorm pages do not duplicate each other
+(agent-architecture=descriptive, architecture-strategy=design, capability-map=roadmap;
+generative-vs-predictive=philosophy anchor, dreaming=testable retention regularizer).
+Link graph re-closed: every wikilink resolves except the registered wanted page
+world-models-1803.10122; only remaining orphan is the meta-ADR 0002 (acceptable).
+Fixed: INDEX (added 0019, corrected 0018 running→done-partial, reordered 0016);
+retention.md (fix-table stopped at 0013 → extended with 0014/0015 frontier + Ma 2024;
+both "open questions" answered by 0011-0013; added 7 missing links incl. orphaned
+[[ma-plasticity-2024]] and [[dreaming]]); agent-architecture L3 interference "(open)"
+→ localized-to-encoder/0013; orphan inbound links for 0019 (from 0018), 0015 (from
+0014), [[ijepa-2023]] (from jepa); language-grounding Links gained
+[[hierarchy-and-credit]]/[[temporal-abstraction]]. FLAGGED for Dave (owner:human, no
+silent rewrite): (1) "pension" terminology in exps 0014/0015 — reconstructed as a
+deliberate metaphor from the [autonomous]-run agent ("pension off" = retire a network
+component = freeze it permanently; encoder + GRU are the "two plasticity taps / drift
+sources" each needing to be pensioned). Coherent but obscure; keep-or-normalize is
+Dave's call. (2)
+capability-map world-modeling status says "rungs 1-2 / SIGReg" — predates the
+0017-0019 imagination thread, may want an exp-range refresh.
+
+## [2026-06-13] curation | structural: new design/ directory (Dave-approved plan)
+
+Resolved a shelving seam Dave spotted: `concepts/` conflated field-knowledge
+explainers ("what is X") with this project's own design/strategy artifacts ("OUR X"),
+so titles like "capability-map" mismatched the generic-concept expectation. The
+`scope: local|shared` flag was meant to carry this distinction but isn't visible when
+browsing by directory. Fix: new top-level `knowledge/design/` for project synthesis.
+`git mv`'d 5 unambiguous pages out of concepts/ → design/ (capability-map,
+agent-architecture, architecture-strategy, compute-strategy, environment-ladder);
+wikilinks survived (basename-resolved), 6 path-based refs updated (INDEX ×5 → new
+"Design & strategy" section, ROADMAP, sweep SKILL, gpu_bench.py, CLAUDE.md). SCHEMA.md
+(owner:human) directory table gained a `design/` row and `concepts/` was narrowed to
+"field concept". Hybrid pages (retention, temporal-abstraction, generative-vs-predictive,
+hierarchy-and-credit, language-grounding, dreaming) deliberately LEFT in concepts/ —
+reclassifying them is a separate judgment call (deferred). environment-ladder keeps its
+ADR-0003 (frozen decision) + design-page (living spec) split. Also resolved flag (1)
+above: "pension" wording normalized to "freeze/frozen" across exps 0014/0015 (Dave
+approved a clearer word). Link graph re-verified closed post-move.

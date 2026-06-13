@@ -22,7 +22,7 @@ Diagnostic forks if it doesn't fully work: (a) imagined_return ≤1 but eval sti
 → off-distribution problem (the actor reaches goal in imagination but not reality;
 world-model accuracy / exploration, not termination); (b) imagined_return
 over-suppressed (too low) → continue head conflates truncation with termination
-(known: our buffer stores done = term OR trunc; Dreamer separates them) → exp 0019
+(known: our buffer stores done = term OR trunc; Dreamer separates them) → [[0019-stochastic-latents]]
 separates them.
 
 ## Setup

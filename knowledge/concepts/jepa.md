@@ -17,7 +17,7 @@ the embedding of a visible part — never reconstructing pixels. The claim
 (leaf textures, noise); latent-space prediction lets the model keep only what is
 predictable and semantically relevant.
 
-Lineage: I-JEPA (images, masked-block prediction, arxiv:2301.08243) → V-JEPA (video,
+Lineage: [[ijepa-2023]] (images, masked-block prediction, arxiv:2301.08243) → V-JEPA (video,
 arxiv:2404.08471) → V-JEPA 2 (1M hours of video; action-conditioned variant V-JEPA 2-AC
 does zero-shot robot pick-and-place, arxiv:2506.09985) → LeJEPA (theory-grounded
 training objective, ~50 lines, arxiv:2511.08544).
