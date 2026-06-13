@@ -585,3 +585,13 @@ pretrained Minecraft WM as a frozen module — backed by knowledge-import+comput
 our own encoder-freeze finding (components want different lifecycles). Decide
 joint-vs-staged empirically at rung 3/5b. Flagged: FULL read of lecun-2022-path is
 now design-critical (Dave re-derived its modular architecture 3x tonight).
+
+## [2026-06-13] curation | generative-vs-predictive: does imagination need generative AI? (Dave)
+
+Goals-divergence with LeCun (control-accuracy vs human-like-cognition). Sharpened:
+imagination != pixel generation (exp 0017 imagines latent, no decoder); generative
+is PRACTICALLY valuable for knowledge-import/tutorials + interpretability, and
+STRUCTURALLY for 3D occlusion/amodal-completion (object permanence) — the strongest
+real case. Corrected over-attribution (3D-hard != generative-key; DreamerV3 does 3D
+latent). Resolution: latent core + optional generative module per mode; testable
+(text->latent direct vs render-and-re-encode at Messenger scale).

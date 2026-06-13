@@ -101,3 +101,38 @@ Schmidhuber curiosity — [[intellectual-lineage]]). Consequences:
 The machinery that SUPPRESSES bad imagination (continue predictor, trust-weighting,
 corroboration) is the SAME machinery that, pointed at plausible-unexplored regions,
 CULTIVATES good imagination. Suppression and creativity are one mechanism, two aims.
+
+## Does imagination need generative AI? (Dave, 2026-06-13 — goals-divergence with LeCun)
+
+The divergence is about GOALS, not correctness: LeCun optimizes control/prediction
+accuracy (generation = liability); Dave optimizes human-like cognition/gaming
+(imagination, tutorials, creativity). His "no generation" is right for his goal, not
+a law.
+
+Sharpening "imagination requires generative AI":
+- **Counterexample (live):** exp 0017 IMAGINES (forward latent rollouts) with NO
+  decoder/pixels. Imagination = forward simulation in *some* representation; it does
+  not fundamentally need pixel generation. For the agent's own planning, latent
+  suffices (LeCun right).
+- **Generative is PRACTICALLY needed for two of Dave's goals**, not fundamentally:
+  (a) **knowledge import / tutorials** — text→pixels is solved (Sora/SD), text→our-
+  latent is not; routing through pixels borrows a solved generative model to turn
+  language into experience (= arch 2b). (b) **interpretability** — a decoder lets us
+  SEE what the agent imagines; we could not see 0017's hallucinated reward-states.
+- **The genuinely structural case = 3D occlusion → amodal completion.** In 3D the
+  agent must model the UNSEEN (behind it, inside the chest) = object permanence
+  (Spelke, [[intellectual-lineage]]). Pure forward-prediction of the *visible* latent
+  may not represent the *occluded*; "imagine the complete scene including unseen
+  parts" is reconstruction-flavored — the strongest real argument for a generative-ish
+  capability.
+- **Correction:** don't over-attribute "3D hard → generative is the key." 3D hardness
+  is mostly partial-obs + spatial memory + long horizon + exploration; DreamerV3 plays
+  3D Minecraft with LATENT imagination. Generative is one line (Genie 3), not the
+  established key; amodal completion is the part that actually points at it.
+
+**Resolution:** not LeCun-vs-generative — **LeCun latent core + optional generative
+MODULE** for specific modes (tutorial-import, occlusion/amodal, interpretability),
+mode-switched by the configurator ([[architecture-strategy]]). Compatible, not
+either/or. And **testable**: can we map text→belief-latent DIRECTLY (LeCun-pure), or
+must we render→re-encode (generative)? Cheap test at Messenger/RTFM scale — earn the
+generative module with evidence rather than assume it.
