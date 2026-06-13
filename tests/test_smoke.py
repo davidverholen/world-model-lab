@@ -272,6 +272,27 @@ def test_crafter_env_runs():
     assert np.array_equal(o1, o2)
 
 
+def test_frozen_dino_encoder_optional():
+    # Guarded: skips on fresh-clone/offline (DINOv2 pulled via torch.hub). Keeps the fast
+    # suite green without network, but exercises the frozen encoder when the backbone is cached.
+    import pytest
+
+    try:
+        from world_model.models import FrozenDinoEncoder
+
+        enc = FrozenDinoEncoder()
+    except Exception as e:  # noqa: BLE001 — any load failure (no net / no cache) → skip
+        pytest.skip(f"DINOv2 backbone unavailable ({type(e).__name__}); skipping")
+    import torch as t
+
+    enc.train()  # frozen backbone must stay in eval
+    assert not enc.backbone.training
+    obs = t.rand(2, 3, 64, 64)
+    z = enc(obs)
+    assert z.shape == (2, enc.latent_dim) and not z.requires_grad
+    assert t.isfinite(z).all()
+
+
 def test_rssm_obs_and_img_steps():
     import torch as t
     from torch.distributions import kl_divergence
