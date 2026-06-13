@@ -929,3 +929,21 @@ reward-head inflation, NOT primarily representation. => reward-head fix (symlog/
 predictor) jumps to top priority (kill spurious action value -> remove spam incentive -> free
 exploration), likely + stronger entropy. exp 0024 (patch tokens) still a clean representation-axis
 test; keep it running. Movement is not broken (random agent moves; actions pass through).
+
+## [2026-06-13] experiment | exp 0024 patch tokens — navigation unlocked (seed-dependent); overturns the null
+
+DINO patch tokens (cls+patch) vs the 0023 plateau. Aggregate looked like a wash (best reward
+s0 2.47, s1 1.60) BUT behavior_report revealed a huge split: s0 MOVES (moved_frac 0.12, span
+17.7 tiles, move_actions 0.42) and builds a TABLE (place_table -- real tech-tree progress);
+s1 collapsed to the 0023 stationary policy (do:0.96, moves 0
+## [2026-06-13] experiment | exp 0024 patch tokens — navigation unlocked (seed-dependent); overturns the null
+
+DINO patch tokens (cls+patch) vs the 0023 plateau. Aggregate looked like a wash (best reward
+s0 2.47, s1 1.60) BUT behavior_report revealed a huge split: s0 MOVES (moved_frac 0.12, span
+17.7 tiles, 42pct movement) and builds a TABLE (place_table -- real tech-tree progress); s1
+collapsed to the 0023 stationary policy (do:0.96, moves 0pct). => Representation IS part of the
+bottleneck (overturns pre-reg null): global CLS cannot localize resources to navigate; spatial
+patch tokens give the where-signal and s0 learned to walk + craft. Seed-dependent because the
+reward exploitation is unfixed (imagined_return 8-22) and tips s1 into collapse. BOTH levers
+matter -> exp 0025 combines patch tokens + two-hot reward head, 3 seeds. PROCESS WIN: the
+behavior QA gate caught the s0/s1 split that aggregate eval masked. Pages: 0024, INDEX.
