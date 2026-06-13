@@ -82,7 +82,9 @@ def wm_train(
             v_l = v_l + value_loss(value_head(belief), returns[:, k])
             c_l = c_l + F.binary_cross_entropy_with_logits(continue_head(belief), 1.0 - dones[:, k])
             prev_a = actions[:, k]
-        loss = (recon + kl + r_l + v_l + c_l) / w + lam * sigreg(embed.flatten(0, 1))
+        loss = (recon + kl + r_l + v_l + c_l) / w
+        if lam > 0:  # frozen encoder (exp 0022) can't collapse → SIGReg unnecessary, pass lam=0
+            loss = loss + lam * sigreg(embed.flatten(0, 1))
         opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_([p for g in opt.param_groups for p in g["params"]], 100.0)

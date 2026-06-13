@@ -853,3 +853,16 @@ VALIDATED as the Crafter encoder, no fine-tuning. Greenlights DINO-WM-style buil
 DINOv2 + small RSSM dynamics). Frozen => drop SIGReg, cache embeddings in replay, immune to
 primacy/drift. Pages: experiments/0022, crafter.md encoder bullet, INDEX (also caught up
 0019-0021 statuses). Next: FrozenDinoEncoder module + wire into the RSSM flywheel for Crafter.
+
+## [2026-06-13] milestone | frozen DINO + RSSM imagination loop wired on Crafter (train_crafter v1)
+
+Wired the validated frozen DINOv2 encoder (exp 0022) into the calibrated RSSM imagination
+loop (0019/0021) for Crafter: new src/world_model/train_crafter.py reuses wm_train/imagine_ac/
+critic-on-replay unchanged, swaps in FrozenDinoEncoder (embed_dim 384, frozen -> excluded from
+opt), make_crafter_env (17 actions), and an achievement/reward eval. SIGReg dropped (frozen
+cant collapse; guarded wm_train with lam>0). v1 encodes in the training loop (correctness
+first); embedding caching (encode once at collection, skip encoder in WM updates) is the next
+optimization and is needed before a full-scale run. Tiny CPU smoke: full flywheel runs end to
+end, imagined_return sane (0.10/0.18 = calibrated, critic-on-replay carries to Crafter), ckpt
+saved. MiniGrid train_rssm untouched (lam>0 guard preserves it). Next: embedding cache -> first
+real desktop Crafter run; then harden DreamerV3 recipe (two-hot/symlog/percentile-norm).
