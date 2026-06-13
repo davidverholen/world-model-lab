@@ -564,3 +564,13 @@ words (contrastive/CLIP suffices) but IS needed to imagine experience from text
 knowledge import. Unifying principle "real outweighs imagined" links trust-weighted
 replay + continue predictor + corroboration. Roadmap: LeCun-pure rungs 1-4,
 generative/Xing layer at 5b gated by verification.
+
+## [2026-06-13] curation | imagination-as-novelty (Dave): hallucination is the raw material of ideas
+
+Reframe added to generative-vs-predictive: an original idea = a hallucination that
+survives verification (variation+selection = creativity; Popper/Campbell/Dennett/
+Schmidhuber). Value is in what survives, not the generation (exp-0017 bad-idea
+killed by 0018 = refutation). Creativity-safety tradeoff: never-hallucinating =
+uncreative; target = regulated imagination (entropy/curiosity + verify). Closure:
+agent creativity loop ≡ our research loop; capability #7 is this internalized.
+Suppression and creativity are ONE mechanism, two aims.

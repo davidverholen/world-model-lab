@@ -23,7 +23,7 @@ different capability). Keep them separate; build in dependency order.
 | 4 | **language grounding** | bind words to THIS agent's internal latent concepts (learned, not an LLM) | 1 (+ 3 for event-level attachment) | queued (Messenger/RTFM verify; rung 3+/5b) — [[language-grounding]] |
 | 5 | **language installation** (learning from tutorials) | turn declarative text into a dynamics belief WITHOUT experiencing it | 4 | rung 5b — [[language-grounding]] |
 | 6 | **trust-weighted imagination** | learn safely from synthetic/generated experience (corroboration gate) | 4 (+ trust gate) | rung 5b (arch 2b) — [[language-grounding]] |
-| 7 | **self-generated hypotheses** | generate + validate own ideas; directed exploration | most of the above | horizon — [[language-grounding]] §horizon |
+| 7 | **self-generated hypotheses** (creativity) | generate + validate own ideas; directed exploration. An idea = a hallucination that survives verification (variation+selection); the agent loop ≡ the research loop | most of the above + regulated imagination | horizon — [[generative-vs-predictive]] §novelty, [[language-grounding]] §horizon |
 
 ## The separation that keeps getting blurred
 

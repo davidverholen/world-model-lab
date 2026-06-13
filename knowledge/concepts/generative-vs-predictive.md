@@ -74,3 +74,30 @@ dies on.
 [[language-grounding]] · [[capability-map]] · [[temporal-abstraction]] ·
 [[world-models]] · [[jepa]] · [[0017-imagination-actor-critic]] ·
 [[0018-continue-predictor]] · [[lecun-2022-path]]
+
+## Imagination as the source of novelty (Dave, 2026-06-13)
+
+The reframe: an original idea IS a hallucination that survived verification.
+Imagination = blind variation; reality-testing = selection; creativity = the loop
+(Popper conjecture/refutation; Campbell blind-variation-selective-retention; Dennett;
+Schmidhuber curiosity — [[intellectual-lineage]]). Consequences:
+
+- **Value is in what survives, not in the generation.** Most imagination is
+  degenerate (exp 0017 reward-farming = a *bad idea*, killed by the continue
+  predictor 0018 = its *refutation*). Human "creativity" is survivorship — we forget
+  the thousands of stupid imagined chains. So "hallucination → ideas" holds ONLY
+  because a brutal selection filter runs behind it.
+- **Creativity–safety tradeoff:** a perfectly-calibrated never-hallucinating agent
+  is perfectly UNCREATIVE (can only reproduce experience). Full suppression is the
+  wrong target. Right target = REGULATED imagination: channel toward
+  plausible-unexplored (entropy bonus — we have one in the actor; curiosity;
+  Plan2Explore) + verify by acting. LeCun's exact-prediction pole is safe;
+  free-association is delusional; creativity is the verified middle.
+- **The closure:** the agent's creativity loop ≡ our research loop (conjecture =
+  imagined claim, refutation = experiment). The lab and the mind run the same
+  variation-under-selection algorithm. Capability #7 (self-generated hypotheses,
+  [[capability-map]]) is this, internalized — and is what "autonomous" finally means.
+
+The machinery that SUPPRESSES bad imagination (continue predictor, trust-weighting,
+corroboration) is the SAME machinery that, pointed at plausible-unexplored regions,
+CULTIVATES good imagination. Suppression and creativity are one mechanism, two aims.
