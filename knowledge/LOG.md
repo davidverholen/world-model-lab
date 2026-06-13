@@ -442,3 +442,22 @@ COMPLEMENT our encoder-drift result (different pathology — dormancy vs drift �
 same prescription: stop training the encoder once competent). Critic-bottleneck
 mechanism is TD-specific (our MC values dodge it). Imports queued for exp 0015:
 FAU per-module logging, Adaptive-RR scheduling atop our UTD finding.
+
+## [2026-06-13] STATE OF THE NIGHT [autonomous]
+
+Threads advanced since Dave's last message:
+- exp 0013 CLOSED: interference localized to the ENCODER (freeze @r2 -> 6/6 seeds
+  crash-free; GRU must stay plastic; warm arm confirms round-0 primacy dodgeable).
+  Milestone 70ff51d.
+- Literature gates run: Ma ICLR24 ingested (tension resolved — frozen encoders
+  legitimized; FAU + Adaptive-RR levers queued); progressive-freezing literature
+  imported (FreezeOut/LayerLock principle).
+- exp 0014 CLOSED: freeze-timing frontier mapped (40/47/53/60/63% across
+  ftrunk/fenc@2/@3/@4/free); residual crashes = GRU drift. Milestone 6833495.
+- exp 0015 RUNNING: staged freeze (enc@2+gru@4, enc@2+gru@5), both bars targeted;
+  --freeze2 mechanics shipped + smoke-verified.
+
+Decision queued for Dave: if 0015 clears both bars -> rung-2b closure proposal
+(ladder is owner:human) + pivot to the actor thread. If it caps like ftrunk ->
+budget-tier extension + PPO re-baseline proposal instead.
+No paid resources used or needed. No stop gates approached.
