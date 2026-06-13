@@ -7,12 +7,12 @@ verified: false
 last_reviewed: 2026-06-14
 ---
 
-# Spec: a read-to-learn-dynamics grounding benchmark (working name: **CrafterManual**)
+# Spec: **crafter-rtfm** — a read-to-learn-dynamics grounding benchmark
 
 Origin: world-model project (rung-3 / language-grounding thread). This document is the
-seed spec for a **separate, standalone, pip-installable benchmark repository**. The
-world-model project is one *consumer*; the env must be framework-agnostic. Working name
-`CrafterManual` (alts: Crafter-RTFM, ReadCraft) — pick on repo creation.
+seed spec for a **separate, standalone, pip-installable benchmark repository** named
+**`crafter-rtfm`** (Crafter + the RTFM "read the manual to learn the dynamics" paradigm).
+The world-model project is one *consumer*; the env must be framework-agnostic.
 
 ## 0. GATE — do this before writing any env code
 
@@ -122,8 +122,8 @@ obs mode (pixel default; optional symbolic for cheap ablations).
 
 ## 9. Packaging
 
-Standalone repo; `pip`-installable; MIT/Apache; gymnasium-registered ids
-(`CrafterManual-R1-v0`, …); CI with the P1 validation gate as a test; README with the
+Standalone repo `crafter-rtfm`; `pip`-installable; MIT/Apache; gymnasium-registered ids
+(`CrafterRTFM-R1-v0`, …); CI with the P1 validation gate as a test; README with the
 harness usage and the grounding metric front-and-centre. Depersonalized / public-ready.
 
 ## Links (this project)
