@@ -14,6 +14,13 @@
    when *practice* improves (new technique, new gotcha); lint and milestone check
    this seam. Trigger = process drift, not knowledge growth.
 
+**Compute efficiency is the operating constraint (Dave, 2026-06-13):** as a home
+lab we compete only on doing more with less. Every experiment: spend the *minimum
+sufficient* compute — the smallest scale at which the tested effect can appear, no
+more — and prefer measuring efficiency *slopes* across cheap→medium scales over
+single expensive endpoints. Literature-first and pre-registration are efficiency
+gates (they delete wasted runs). Full rationale: [[compute-strategy]].
+
 **Horizon (Dave, 2026-06-12):** this loop holds until we reach genuinely original
 territory — a blocking problem no published work solves (scout comes up empty on
 the specific question, not the general area). **A frontier claim requires the

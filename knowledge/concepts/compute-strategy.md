@@ -65,6 +65,37 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   projected > **~1 h** on the laptop (lowered from 4 h after the thermal
   measurement — long runs throttle AND cook the chassis).
 
+## Compute efficiency as the lab's strategy (Dave, 2026-06-13)
+
+Stated principle, generalized from the architecture-testing tier ladder
+([[hierarchy-and-credit]]) and a DeepMind talk's claim that for AGI compute
+efficiency may matter more than architecture.
+
+**The claim, refined**: architecture and compute-efficiency are not orthogonal —
+the architectures that matter are the ones with a better capability-per-FLOP
+*slope* (transformers vs LSTMs; world models' ~10–100× sample efficiency vs
+model-free). Our world-model bet IS a compute-efficiency bet. So "efficiency >
+architecture" really means "judge architectures by their efficiency curve."
+
+**For a home lab this is the entire moat.** We cannot out-scale big labs. The only
+available research positions are (a) compute-efficiency contributions (more with
+less — exactly what the field says matters) and (b) questions big labs aren't
+asking (our niche frontier). Both are efficiency plays. Efficiency governs how we
+work AND what we research.
+
+**Operating rules:**
+- *Minimum SUFFICIENT scale* (not minimum scale): identify the smallest scale at
+  which the tested effect CAN appear, pay exactly that. Too cheap = never see it
+  (cf. tier-2 can't show skill reuse). This is the compute analog of the
+  whitepaper's "minimum needed context".
+- *Measure slopes, not endpoints*: prefer "does A have a better efficiency slope
+  across small→medium envs?" over "does A win at full scale?" — measurable cheaply
+  and extrapolable (scaling-laws style). The tier ladder is a scaling curve.
+- Already-embodied tactics that ARE efficiency: literature-first (a $0 search
+  replaces a $50 sweep), pre-registration with counter-outcomes (never run an
+  experiment that can't change your mind), cheapest-env-that-reveals-the-effect,
+  parallel seeds on idle GPU, uint8 replay, best-checkpoint guard.
+
 ## Crafter-phase rental mapping (asked by Dave 2026-06-12)
 
 - Actor *development* (MiniGrid-scale iterations): rental buys ~nothing

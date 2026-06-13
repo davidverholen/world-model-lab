@@ -491,3 +491,12 @@ mechanism debugging (fast loop); (2) MiniGrid KeyCorridor/ObstructedMaze/MultiRo
 = cheap flat-vs-hierarchical credit A/B (negative = cheap kill, positive =
 necessary-not-sufficient); (3) Crafter = the decisive skill-reuse claim. Principle:
 cheapest env that reveals the effect; never debug architecture on Crafter.
+
+## [2026-06-13] curation | compute efficiency elevated to stated operating principle (Dave)
+
+Generalized the tier-ladder into a lab strategy: architecture and compute-efficiency
+are the same axis (judge architectures by capability-per-FLOP slope; our world-model
+bet IS an efficiency bet). For a home lab efficiency is the entire moat. Rules:
+minimum-SUFFICIENT-scale (compute analog of whitepaper's minimum-needed-context),
+measure slopes not endpoints, literature-first/pre-registration as efficiency gates.
+Added to compute-strategy.md + PROCESS.md research loop.
