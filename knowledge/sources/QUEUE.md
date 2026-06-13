@@ -187,3 +187,6 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
       generalization" (Patterns 2021; verified 2026-06-13) — dreams as
       anti-overfitting data augmentation; ties dreaming to our primacy-bias/retention
       thread; backs concepts/dreaming.md
+- [ ] Levy & Goldberg 2014, "Neural Word Embedding as Implicit Matrix Factorization"
+      (NeurIPS) — word2vec ≈ factorizing a shifted-PMI co-occurrence matrix; backs
+      "association matrix = embedding" (language-grounding §associations); id to verify

@@ -123,3 +123,26 @@ on synthetic data — another distribution-shift source the flywheel lessons app
 
 [[0005-minecraft-milestone]] · [[intellectual-lineage]] · [[retention]] ·
 [[jepa]] · [[agent-architecture]]
+
+## Word associations: an "association matrix" IS a word embedding (Dave, 2026-06-13)
+
+Dave: humans have associations with words; the word itself "lands in latent space".
+Proposed associated-words-as-metadata, or an association matrix — "not sure it
+scales." Sharpening:
+
+- Two kinds of meaning: **grounded** (word↔world: "key"↔percept — capability #4) and
+  **associative** (word↔word: "key"↔"lock"↔"open"). Humans have both.
+- **An association matrix IS a word embedding.** Distributional semantics: word2vec/
+  GloVe implicitly factorize a (shifted-PMI) co-occurrence matrix (Levy & Goldberg
+  2014). So don't rebuild it as metadata (Dave's "doesn't scale" instinct is right —
+  the scalable form is the dense embedding VECTOR = compressed associations). Import
+  it free from a pretrained text embedding/LLM.
+- Architectural move: take the associative structure for free; BIND it to OUR grounded
+  latent (contrastive/CLIP/VL-JEPA) — because an LLM's associations are word↔word
+  (ungrounded), and we need word↔our-experience.
+- **Why associations are central to tutorials — transitive grounding:** they let a
+  NEVER-grounded word reach experience via a grounded neighbor. Agent grounded
+  "furnace" from play; tutorial says "smelt"; the association smelt↔furnace bridges
+  the ungrounded word to grounded experience. Associations are the bridge that makes
+  tutorial words connect to the agent's world even for unfamiliar words. ⇒ grounding
+  is two-hop: word ↔ (embedding/associations) ↔ grounded concepts.

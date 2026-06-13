@@ -607,3 +607,16 @@ persistence/object-permanence; render on demand only), demoting last night's
 continuous-amodal-generative claim (Dave's correction); text→latent solved by
 composition text→video→encoder (seams: domain video-gen, encoder robustness to
 generated frames, trust-gate). Hoel queued.
+
+## [2026-06-13] milestone+curation | exp 0018 partial (deeper exploitation) + word-associations
+
+Exp 0018: continue predictor partially tamed exploitation (s0 2.06->1.13) but s1
+worsened (5.4) and eval still ~0 — actor exploits OTHER off-distribution model
+inaccuracies; root = deterministic WM can't imagine the 25-step chain (compounding
+error), no honest success gradient. Lack Dreamer's stochastic latents. Fork logged
+for Dave: (a) deepen (stochastic latents / H=5 / uncertainty penalty) vs (b) DAgger
+on-policy distillation (reuse working planner, sidesteps imagination exploitation) —
+recommend cheap H=5 check then DAgger. Also: language-grounding gains word-association
+section — association matrix = word embedding (Levy-Goldberg, queued); don't rebuild
+as metadata (import + bind to grounded latent); associations enable TRANSITIVE
+grounding (smelt↔furnace bridges ungrounded tutorial words to experience).
