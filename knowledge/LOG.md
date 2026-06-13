@@ -472,3 +472,14 @@ rung-2b exit criterion (beat model-free on sample efficiency) was already MET at
 exp 0012 (63% vs PPO 37%); crash-free "both bars" was self-imposed extra rigor,
 now characterized. Recommendation logged for Dave: declare 2b met, pivot to actor
 thread. Autonomous mode PAUSED — Dave returned. Awaiting his strategic call.
+
+## [2026-06-13] curation | hierarchy-and-credit concept page (Dave brainstorm) + rung-2b MET accepted
+
+Dave's credit-assignment question routed to a new concept page: flat value head
+already does implicit local credit (exp-0004 monotonic value gradient = 63%), but
+explicit reusable subgoals need hierarchy (H-JEPA/options). Conditional-subgoal
+constraint -> unsupervised discovery (bottlenecks/Director/empowerment), never
+hardcoded. KEY DESIGN DIRECTION: the Mode-1 actor we distill should be hierarchical
+(manager-worker), unifying actor + hierarchy + temporal-abstraction + language
+threads. 5 sources queued (Director, FuN, Option-Critic, empowerment, DIAYN).
+Dave accepted rung-2b as MET (63% > PPO 37%, stable) — pivot to actor confirmed.

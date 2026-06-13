@@ -169,3 +169,15 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
       data-augmentation-as-plasticity-preserver are untested levers for us
 - [ ] arxiv:2504.17490 Plasticine benchmark · arxiv:2410.07994 Neuroplastic
       Expansion — plasticity tooling/methods (lower priority)
+
+## Hierarchy / subgoal emergence (Dave's credit-assignment brainstorm 2026-06-13; ids to verify)
+- [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
+      noted under temporal-abstraction) — manager-worker subgoals INSIDE a Dreamer
+      world model; the most direct fit for a hierarchical actor
+- [ ] Vezhnevets et al. 2017, FeUdal Networks (FuN) — the feudal manager-worker
+      origin for deep RL
+- [ ] Bacon et al. 2017, The Option-Critic Architecture — end-to-end option discovery
+- [ ] empowerment / intrinsic motivation: Klyubin 2005 (empowerment), Mohamed &
+      Rezende 2015 (variational empowerment) — key-possession as objectively valuable
+- [ ] Eysenbach et al. 2019, DIAYN (diversity is all you need) — unsupervised skill
+      discovery, skills as latent-conditioned policies
