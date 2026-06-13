@@ -93,7 +93,9 @@ def _crafter_show(v, frame, info: dict, achievements: set, events: list, title, 
         line(f"  * {k}", color=(255, 230, 160))
     y[0] += 14
     line("EVENTS", color=(150, 255, 180))  # chronological; later: world events too
-    for ev in events[-40:]:
+    line_h = v["font"].get_height() + 4
+    fit = max(1, (wpx - y[0]) // line_h)  # only the most RECENT events that fit the panel height
+    for ev in events[-fit:]:
         line("  " + ev, color=(190, 255, 190) if ev[0] == "+" else (255, 190, 190))
     pg.display.flip()
     v["clock"].tick(fps)
