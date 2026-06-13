@@ -40,22 +40,21 @@ _INV_KEYS = [
 ]
 
 
-def _crafter_viewer(world_px: int = 600, panel_px: int = 340):
-    """Live pygame window: world render on the left + an HUD panel (inventory + event log)."""
+def _crafter_viewer(world_px: int = 600):
+    """Live pygame window: world a square of world_px, an HUD panel appended on the right.
+    Font + panel scale with the window so they stay readable at large --window-size."""
     import pygame
 
     pygame.init()
     pygame.font.init()
+    panel_px = max(340, world_px // 3)
+    font = pygame.font.SysFont("monospace", max(16, world_px // 42))
+    big = pygame.font.SysFont("monospace", max(22, world_px // 28), bold=True)
     screen = pygame.display.set_mode((world_px + panel_px, world_px))
     pygame.display.set_caption("Crafter — world-model agent")
     return {
-        "pygame": pygame,
-        "screen": screen,
-        "clock": pygame.time.Clock(),
-        "world_px": world_px,
-        "panel_px": panel_px,
-        "font": pygame.font.SysFont("monospace", 16),
-        "big": pygame.font.SysFont("monospace", 22, bold=True),
+        "pygame": pygame, "screen": screen, "clock": pygame.time.Clock(),
+        "world_px": world_px, "panel_px": panel_px, "font": font, "big": big,
     }
 
 
@@ -67,22 +66,25 @@ def _crafter_show(v, frame: np.ndarray, info: dict, events: list, title: str, fp
         surf = pg.transform.smoothscale(surf, (wpx, wpx))
     screen.blit(surf, (0, 0))
     screen.fill((18, 18, 22), (wpx, 0, v["panel_px"], wpx))
-    y = [12]
+    pad = max(14, wpx // 60)
+    y = [pad]
 
     def line(text, fnt=v["font"], color=(220, 220, 220)):
-        screen.blit(fnt.render(text, True, color), (wpx + 14, y[0]))
-        y[0] += fnt.get_height() + 3
+        if y[0] > wpx - fnt.get_height():  # don't draw past the bottom of the panel
+            return
+        screen.blit(fnt.render(text, True, color), (wpx + pad, y[0]))
+        y[0] += fnt.get_height() + 4
 
     line(title, v["big"], (255, 255, 255))
-    y[0] += 8
+    y[0] += 10
     line("INVENTORY", color=(140, 190, 255))
     inv = info.get("inventory", {})
     for k in _INV_KEYS:
         if inv.get(k, 0):
             line(f"  {k:13} {inv[k]}")
-    y[0] += 10
+    y[0] += 14
     line("EVENTS", color=(150, 255, 180))
-    for ev in events[-16:]:
+    for ev in events[-40:]:
         line("  " + ev, color=(190, 255, 190) if ev[0] == "+" else (255, 190, 190))
     pg.display.flip()
     v["clock"].tick(fps)
