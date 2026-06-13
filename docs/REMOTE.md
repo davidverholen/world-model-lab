@@ -101,3 +101,12 @@ the checkout on the remote at any time; `setup` rebuilds both.
   run your VPN/Tailscale as a service so it survives logout.
 - GPU monitoring over ssh: `nvidia-smi dmon -s pucm` (zero install) or `uvx nvitop`
   (full TUI, renders fine through Git Bash; gpustat does not — verified).
+- **sdist-build encoding (Windows cp1252):** packages with no wheel build from sdist;
+  if their `setup.py` reads a UTF-8 file (README) with the platform default encoding it
+  crashes on Windows (`UnicodeDecodeError: 'charmap'`). Fix: `PYTHONUTF8=1` before
+  `uv sync` (remote.sh exports it). Hit with `crafter` (2026-06-13).
+- **torch.hub parallel race:** launching N seeds at once that each call
+  `torch.hub.load(...)` (e.g. the DINOv2 encoder) races on extracting the repo zip into
+  the shared `~/.cache/torch/hub` — one wins, the rest hit `FileNotFoundError` mid-extract.
+  Warm the cache first (run one seed, or a `python -c "import torch; torch.hub.load(...)"`)
+  before the parallel loop; thereafter all seeds hit the cache. Hit with exp 0023 (2 seeds).
