@@ -237,3 +237,16 @@ def test_freeze_keeps_params_constant():
     opt.step()
     after = list(enc.parameters())
     assert all(t.equal(b, a) for b, a in zip(before, after, strict=True))
+
+
+def test_actor_agent_acts():
+    from world_model.agents.actor_agent import ActorAgent
+    from world_model.models import Actor, RecurrentDynamics
+
+    env = make_minigrid_env("MiniGrid-DoorKey-5x5-v0", fully_observable=False)
+    n = int(env.action_space.n)
+    dyn = RecurrentDynamics(num_actions=n)
+    agent = ActorAgent(ConvEncoder(), dyn, Actor(state_dim=dyn.state_dim, num_actions=n), n, "cpu")
+    obs, _ = env.reset(seed=0)
+    a = agent.act(obs)
+    assert 0 <= a < n
