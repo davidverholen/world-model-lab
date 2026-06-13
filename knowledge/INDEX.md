@@ -14,6 +14,7 @@ training assets: `sources/ASSETS.md`.
 - [environment-ladder](concepts/environment-ladder.md) — our staged env progression with exit criteria (current)
 - [latent-collapse](concepts/latent-collapse.md) — the JEPA failure mode, fixes table, measurement pitfalls (draft)
 - [compute-strategy](concepts/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
+- [architecture-strategy](concepts/architecture-strategy.md) — modes (configurator) + the real decision is the INTERFACE not model-count + reusable pretrained components (Minecraft WM); decide empirically at rung 3/5b (draft)
 - [agent-architecture](concepts/agent-architecture.md) — OUR system as 4 optimization layers (mermaid), per-layer failure/diagnosis table (current)
 - [retention](concepts/retention.md) — plasticity loss/primacy bias/interference: fix families, literature↔our status (draft)
 - [intellectual-lineage](concepts/intellectual-lineage.md) — 80 years of background in 4 threads: mental models, predictive brain, LeCun's arc, model-based RL; our flywheel = Dyna (draft, unverified ids)

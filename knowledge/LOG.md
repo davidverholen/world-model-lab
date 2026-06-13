@@ -574,3 +574,14 @@ killed by 0018 = refutation). Creativity-safety tradeoff: never-hallucinating =
 uncreative; target = regulated imagination (entropy/curiosity + verify). Closure:
 agent creativity loop ≡ our research loop; capability #7 is this internalized.
 Suppression and creativity are ONE mechanism, two aims.
+
+## [2026-06-13] curation | architecture-strategy concept page (Dave): modes, interfaces, reusable components
+
+Design brainstorm routed. Key reframes: (1) external-learning is a MODE (source +
+verification regime), not the default loop = LeCun's configurator; (2) monolithic-
+vs-modular is the wrong axis — the real decision is the stable INTERFACE
+(belief-state), which makes module-count reversible/per-component; (3) reuse a
+pretrained Minecraft WM as a frozen module — backed by knowledge-import+compute AND
+our own encoder-freeze finding (components want different lifecycles). Decide
+joint-vs-staged empirically at rung 3/5b. Flagged: FULL read of lecun-2022-path is
+now design-critical (Dave re-derived its modular architecture 3x tonight).
