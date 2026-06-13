@@ -746,3 +746,19 @@ layer. Pages: experiments/0020 Result+Lesson (status REFUTED); pre-reg hypothesi
 Caveats logged not chased: only aggressive α tested; 0019's 0.55→0 may be partly eval
 variance. Code already committed d03eeba (the --ac-reset flag); this entry records the
 outcome. Live logs worked this run (PYTHONUNBUFFERED in the dispatched commit).
+
+## [2026-06-13] scout+queue+curation | value-calibration toolkit; exp 0021 critic-on-replay
+
+After exp 0020 redirected us to value miscalibration, Dave asked to accelerate by reusing
+established learnings. Lit sweep (4 searches) mapped the published toolkit for inflated
+imagined value / model exploitation — THE central MBRL failure mode, not exotic:
+b1 DreamerV3 **critic-on-replay** (β_repval 0.3, critic grounded in real returns) ·
+b2 MBPO short *branched* rollouts (1906.08253) · b3 DreamerV3 percentile return-norm +
+two-hot critic · b4 MOPO/MOReL/CBOP uncertainty pessimism. New QUEUE subsection
+"Value calibration / model exploitation" (MBPO, MOPO, MOReL, CBOP queued; ids from search,
+verify at ingest). **Curation fix:** papers/dreamerv3-2023.md had MISSED the critic-on-replay
+detail (had two-hot/EMA-target/replay-ratio but not β_repval) — added the bullet; that was
+the load-bearing fact for our fix. Pre-registered + implemented exp 0021 (b1): `--repval`
+flag in train_rssm, critic also regressed on real burn-in returns (reuses beliefs already
+computed; real_bel detached → grad to critic only). Flag defaults off → baseline ≡ 0019.
+Prediction: imagined_return falls 2–4 → ~1 and ignition broadens. Smoke-confirmed wiring.

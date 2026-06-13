@@ -31,6 +31,11 @@ general-purpose world-model RL algorithm and our designated baseline.
   1 nat (free bits) — prevents both collapse and over-regularization. Unimix 1%.
 - **Imagination actor-critic**: horizon 15, λ=0.95, γ=0.997, entropy 3e-4 fixed;
   return normalization by inter-percentile range Per(95)−Per(5), only scale-down.
+- **Critic-on-replay (anti-overoptimism)**: the *actor* trains on imagined rollouts
+  only, but the *critic* trains on BOTH imagined (β_val 1) AND real replay trajectories
+  (β_repval 0.3) — grounding the value estimate in real returns so the policy cannot
+  chase a purely hallucinated value. This is DreamerV3's direct answer to model
+  exploitation; reused in our exp 0021 (the cheap "lite DAgger"). [[0021-critic-on-replay]]
 - **Stability kit relevant to our [[retention]] thread**: critic EMA *target*
   (decay 0.98, regularize critic toward it — NOT acting-EMA like our failed 0010
   arm!), return-scale EMA 0.99, grad clip, no schedules/decay/dropout anywhere.

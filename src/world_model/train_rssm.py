@@ -113,20 +113,25 @@ def imagine_ac(
     lam,
     ent_coef,
     device,
+    beta_repval=0.0,
 ):
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
         batch = buffer.sample_sequences(seq_batch, window)
         obs = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
+        ret_real = torch.as_tensor(batch["return"], device=device)  # real MC returns
         b, w = actions.shape
         with torch.no_grad():
             embed = encoder(obs.flatten(0, 1)).unflatten(0, (b, w))
             state = rssm.initial(b, device)
             prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+            real_bels = []  # beliefs over REAL states (for the replay-grounded critic, b1)
             for k in range(burn_in):
                 state, _, _ = rssm.obs_step(state, prev_a, embed[:, k])
+                real_bels.append(rssm.belief(state))
                 prev_a = actions[:, k]
+            real_bel = torch.stack(real_bels)  # (burn_in,b,S), detached
             beliefs, acts, rews, conts = [], [], [], []
             s = state
             for _t in range(horizon):
@@ -155,6 +160,13 @@ def imagine_ac(
         dist = Categorical(logits=actor(flat))
         actor_loss = -(dist.log_prob(a_s.flatten()) * adv).mean() - ent_coef * dist.entropy().mean()
         critic_loss = (critic(flat) - returns.flatten().detach()).pow(2).mean()
+        if beta_repval > 0:
+            # DreamerV3 critic-on-replay (exp 0021): ground the critic in REAL returns so
+            # the EMA target — and thus the actor's advantage baseline — can't drift with
+            # the inflated imagined value. real_bel is detached, so grad flows to critic only.
+            rb = real_bel.flatten(0, 1)
+            rt = ret_real[:, :burn_in].t().reshape(-1).detach()
+            critic_loss = critic_loss + beta_repval * (critic(rb) - rt).pow(2).mean()
         opt_ac.zero_grad()
         (actor_loss + critic_loss).backward()
         opt_ac.step()
@@ -205,6 +217,13 @@ def main() -> None:
         "(Nikishin/Qiao primacy fix on the behaviour layer) — attacks the round-6 collapse",
     )
     p.add_argument("--ac-reset-alpha", type=float, default=0.5)
+    p.add_argument(
+        "--repval",
+        type=float,
+        default=0.0,
+        help="exp 0021: critic-on-replay weight (DreamerV3 beta_repval=0.3) — also trains "
+        "the critic on REAL returns to ground the actor's value baseline vs inflated imagination",
+    )
     p.add_argument("--epsilon", type=float, default=0.3)
     p.add_argument("--gamma", type=float, default=0.98)
     p.add_argument("--lam", type=float, default=0.95)
@@ -322,6 +341,7 @@ def main() -> None:
             args.lam,
             args.ent_coef,
             device,
+            beta_repval=args.repval,
         )
         rate = evaluate(enc, rssm, actor, args.env_id, args.eval_episodes, device)
         print(

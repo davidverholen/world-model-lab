@@ -94,6 +94,28 @@ releases; ingest specific outputs as they land.
       Latent Space "Moonlake" episode (latent.space/p/moonlake). Watch for first
       model release.
 
+## Value calibration / model exploitation (exp 0019–0021 thread; scouted 2026-06-13, ids from search results — verify at ingest)
+
+The published toolkit for the inflated-imagined-value failure mode (our 0019/0020
+finding: RSSM fixed policy quality, not value calibration). Cheapest-first; b1 already
+implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinventing.
+
+- [ ] arxiv:1906.08253 MBPO "When to Trust Your Model" (Janner 2019) — short rollouts
+      BRANCHED from real replay states; decouples model horizon from task horizon,
+      limits compounding error. Our fork-b2 (shorten horizon 15→~5 + branch). Has a
+      monotonic-improvement bound. HIGH priority — the canonical short-rollout result.
+- [ ] arxiv:2005.13239 MOPO: Model-based Offline Policy Optimization — penalize reward
+      by model uncertainty (lower-bound the true return). Fork-b4 pessimism lever.
+- [ ] MOReL (Kidambi et al. 2020; id to verify) — pessimistic MDP, companion to MOPO.
+- [ ] CBOP: Conservative Bayesian Model-Based Value Expansion (ICLR 2023; ssanner.github.io
+      /papers/iclr23_cbop.pdf; arxiv id to verify) — adaptively weights model rollouts
+      by posterior uncertainty; the calibrated version of value expansion.
+- [ ] (already queued) arxiv:2412.14312 "Stealing That Free Lunch" — Dyna-style limits;
+      read alongside this thread (the skeptic's case for why imagination value misleads).
+- NOTE DreamerV3 (papers/dreamerv3-2023.md, INGESTED) is the primary source for b1
+      (critic-on-replay β_repval 0.3) + b3 (percentile return-norm, two-hot critic) —
+      page corrected 2026-06-13 to capture the replay-critic detail it had missed.
+
 ## Background / lineage (no rush; see concepts/intellectual-lineage.md; ids unverified)
 
 - [ ] Sutton 1991, "Dyna, an Integrated Architecture for Learning, Planning, and
