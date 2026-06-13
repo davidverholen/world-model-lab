@@ -914,3 +914,18 @@ stable vs MSE 35) but imagined_return stayed inflated/noisy (s0 20->5-10 self-ca
 Best reward s0 2.10@r6, s1 1.97@r2. Next (reordered by data): exp 0024 DINO patch tokens (richer
 spatial features for navigation/gathering, attack the plateau) BEFORE the reward-head fix, since
 the plateau (not value) is the headline blocker. Pages: experiments/0023 Result+Lesson, INDEX.
+
+## [2026-06-13] diagnostic | exp 0023 agent is STATIONARY — reward-head exploitation (Dave spotted it)
+
+Dave noticed in the live viewer the player never moves relative to the (egocentric-scrolling)
+world. Quantified: 3 episodes, unique_tiles=1, player_pos bbox_span=(0,0) -- the agent NEVER
+changes position. Action histogram: do (chop adjacent), mk_iron_sword spammed 38-48x/ep (a no-op:
+no iron), sleep, place_plant. All 3 achievements are reachable without moving (wood/table/plant
+from spawn). The mk_iron_sword spam = MODEL EXPLOITATION: the reward head over-predicts reward
+for that useless action in imagination -> THIS is the inflated imagined_return (17-31); the
+actor maximizes broken imagined reward by spamming the fake-rewarding action instead of exploring.
+RE-PRIORITIZES the plateau diagnosis: it is a degenerate non-exploratory policy driven by
+reward-head inflation, NOT primarily representation. => reward-head fix (symlog/two-hot REWARD
+predictor) jumps to top priority (kill spurious action value -> remove spam incentive -> free
+exploration), likely + stronger entropy. exp 0024 (patch tokens) still a clean representation-axis
+test; keep it running. Movement is not broken (random agent moves; actions pass through).
