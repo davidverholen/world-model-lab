@@ -149,6 +149,32 @@ until the actor work brings bigger models and drops the reset/freeze pattern.
   and Minecraft (Java) can never fuse, so the hybrid IS the ladder's lasting
   pattern; a full port pays only under massive Craftax-native experiment volume.
 
+## JAX rewrite — consolidated revisit triggers (Dave asked 2026-06-13; extends [[0001-pytorch-over-jax]])
+
+Standing answer to "should we ever rewrite to JAX?": **not now, and the advantage
+SHRINKS as we climb.** JAX's one decisive lever is end-to-end on-GPU parallel-env
+throughput (vmap over 1000s of envs) — which only pays when env-stepping is the wall.
+We are model-based / sample-efficient (~1e6 steps, GPU-bound training is the wall, env
+stepping measured at **0.4%** above), so we don't need it; and the ladder moves AWAY
+from JAX's sweet spot — **real envs can't be JAX-fused: Atari is C++, Minecraft is Java,
+the real world isn't code.** JAX-reimplemented envs (Craftax/Brax/Gymnax) are the ONLY
+place the speedup exists, i.e. just the Crafter rung. After Crafter the question is moot.
+
+Revisit triggers (any one, none current):
+1. **TPU access** appears — changes the whole calculus.
+2. **Sample-hungry pivot** — model-based efficiency stalls and we fall back to scale, or
+   we adopt population-based / massive-exploration methods needing 1e8–1e9 steps.
+3. **Env-stepping profiles as ≥~30% wall-clock** at our scale (the [[0006-crafter-vs-craftax]]
+   escape trigger).
+
+Even then: **surgical, not wholesale** — spin up a JAX env (or a JAX agent) for that one
+experiment via the dlpack hybrid / a `craftax/` sub-project (see Crafter-phase rental
+mapping above), keeping the JEPA/world-model research stack in PyTorch. Framework choice
+is bifurcated by workload, not fashion: hyperscale parallel model-free RL → JAX; our
+representation-learning + pretrained-encoder + model-based profile → PyTorch (also where
+DINOv3 / V-JEPA, our [[frozen-encoder-lean]] dependency, live). JAX is ascendant in its
+niche, not a dying bet — we're just not in that niche.
+
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
 Buy trigger: Crafter-scale runs keep the 5070 Ti >90% utilized for multi-hour

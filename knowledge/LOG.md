@@ -817,3 +817,12 @@ the only revisit trigger as heavy parallel-env training; (3) we want pixel obs (
 encoder thesis), and Craftax fast mode is symbolic. Craftax kept as documented escape hatch
 with a measured trigger (env-stepping >=~30% wall-clock, or sample-hungry pivot). Next:
 Crafter env wrapper behind the MiniGrid interface -> hello-Crafter baseline.
+
+## [2026-06-13] curation | JAX rewrite revisit-triggers consolidated (Dave asked)
+
+Added a consolidated "JAX rewrite revisit triggers" subsection to design/compute-strategy.md
+(extends ADR 0001; cross-links ADR 0006). Key framing: JAX advantage SHRINKS up the ladder —
+real envs cannot be JAX-fused (Atari C++, Minecraft Java, real world), so the parallel-env
+speedup exists only at the Crafter rung; after that the question is moot. Triggers (none
+current): TPU access, sample-hungry pivot, env-stepping >=30% wall-clock. Even then: surgical
+(per-experiment JAX env/agent via dlpack hybrid), not a stack rewrite. JEPA/WM stays PyTorch.
