@@ -512,3 +512,12 @@ experience). Added the grounding-verification battery (imagination match,
 cross-modal probe, REFERENT SWAP = gold standard / why Messenger-RTFM shuffle,
 compositional zero-shot, modality transfer). First grounding experiment = built
 around referent swap on a cheap env; Crafter is payoff not proving-ground.
+
+## [2026-06-13] curation | capability-map page — locking the capability separation (Dave)
+
+Consolidation: single orientation index of the 7 distinct capabilities (world
+modeling, flat credit, temporal abstraction/hierarchy, language grounding, language
+installation, trust-weighted imagination, self-generated hypotheses) — problem each
+solves, dependency order, status, test env. Explicitly records the separations that
+keep blurring (#3 subgoals != #4 language; #4 grounding != plugged LLM; #5
+installation != #4 grounding). owner:human (a roadmap-level artifact).

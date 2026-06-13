@@ -6,6 +6,7 @@ training assets: `sources/ASSETS.md`.
 
 ## Concepts
 
+- [capability-map](concepts/capability-map.md) — the distinct capabilities (world-model/credit/hierarchy/grounding/installation/imagination/hypotheses), what each solves, dependency order; the anti-conflation index (current)
 - [world-models](concepts/world-models.md) — root page: what world models are, the four families, why they're our bet (draft)
 - [jepa](concepts/jepa.md) — latent-prediction architectures I-JEPA→V-JEPA 2→LeJEPA; collapse problem and fixes (draft)
 - [imagination-training](concepts/imagination-training.md) — Dreamer lineage: RSSM, actor-critic in imagination, Dreamer 4 offline (draft)
