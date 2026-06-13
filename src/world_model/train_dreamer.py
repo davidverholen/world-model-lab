@@ -20,9 +20,40 @@ from world_model.agents import RandomAgent
 from world_model.agents.actor_agent import ActorAgent
 from world_model.envs import make_minigrid_env
 from world_model.models import Actor, ConvEncoder, RecurrentDynamics, RewardHead, SIGReg, ValueHead
+from world_model.models.continue_head import ContinueHead
 from world_model.train_recurrent import collect_round
 from world_model.train_recurrent import train as wm_train
 from world_model.training import ReplayBuffer
+
+
+def train_continue(
+    buffer, encoder, dynamics, continue_head, opt_c, updates, seq_batch, window, device
+):
+    """Train the continue predictor on real (belief, 1-done) pairs along the window."""
+    no_act = dynamics.no_action
+    last = 0.0
+    for _ in range(updates):
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=0.5)  # need terminations
+        obs_seq = torch.as_tensor(batch["obs"], device=device)
+        actions = torch.as_tensor(batch["action"], device=device)
+        dones = torch.as_tensor(batch["done"], device=device, dtype=torch.float32)  # (B, W)
+        b, w = actions.shape
+        with torch.no_grad():
+            z = encoder(obs_seq.flatten(0, 1)).unflatten(0, (b, w))
+        s = dynamics.initial_state(b, device)
+        pa = torch.full((b,), no_act, dtype=torch.long, device=device)
+        logits = []
+        for k in range(w):
+            s = dynamics.update(z[:, k].detach(), pa, s)
+            logits.append(continue_head(s))
+            pa = actions[:, k]
+        cont_logits = torch.stack(logits, dim=1)  # (B, W)
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(cont_logits, 1.0 - dones)
+        opt_c.zero_grad()
+        loss.backward()
+        opt_c.step()
+        last = loss.item()
+    return last
 
 
 def imagine_ac(
@@ -30,6 +61,7 @@ def imagine_ac(
     encoder,
     dynamics,
     reward_head,
+    continue_head,
     actor,
     critic,
     target_critic,
@@ -61,25 +93,29 @@ def imagine_ac(
                 s = dynamics.update(z[:, k], pa, s)
                 pa = actions[:, k]
             # imagine H steps under the current actor
-            states, acts, rews = [], [], []
+            states, acts, rews, conts = [], [], [], []
             si = s
             for _t in range(horizon):
                 a = torch.distributions.Categorical(logits=actor(si)).sample()
                 states.append(si)
                 acts.append(a)
                 rews.append(reward_head(si, a))
+                conts.append(torch.sigmoid(continue_head(si)))  # P(episode continues)
                 si = dynamics.update(dynamics.predict_next(si, a), a, si)
             s_states = torch.stack(states)  # (H, b, S)
             a_acts = torch.stack(acts)  # (H, b)
             r_rews = torch.stack(rews)  # (H, b)
+            c_cont = torch.stack(conts)  # (H, b) in [0,1]
             v_tgt = target_critic(s_states.flatten(0, 1)).unflatten(0, (horizon, b))  # (H, b)
             v_H = target_critic(si)  # (b,)
-            # lambda-returns: G_t = r_t + gamma[(1-lam)V(s_{t+1}) + lam G_{t+1}], G_H=V(s_H)
+            # lambda-returns with the continue predictor: the per-step discount is
+            # gamma*c_t, so reward past a predicted termination (c->0) is zeroed.
+            # G_t = r_t + gamma*c_t[(1-lam)V(s_{t+1}) + lam G_{t+1}], G_H=V(s_H)
             returns = torch.empty(horizon, b, device=device)
             g = v_H
             for t in reversed(range(horizon)):
                 nextv = v_tgt[t + 1] if t + 1 < horizon else v_H
-                g = r_rews[t] + gamma * ((1 - lam) * nextv + lam * g)
+                g = r_rews[t] + gamma * c_cont[t] * ((1 - lam) * nextv + lam * g)
                 returns[t] = g
 
         flat_s = s_states.flatten(0, 1)
@@ -159,9 +195,11 @@ def main() -> None:
     actor = Actor(state_dim=dyn.state_dim, num_actions=n_act).to(device)
     critic = ValueHead(state_dim=dyn.state_dim).to(device)
     target_critic = copy.deepcopy(critic)
+    cont = ContinueHead(state_dim=dyn.state_dim).to(device)
     wm_mods = [enc, dyn, rew, val]
     opt_wm = torch.optim.Adam([q for m in wm_mods for q in m.parameters()], lr=3e-4)
     opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
+    opt_c = torch.optim.Adam(cont.parameters(), lr=3e-4)
 
     mpc_steps = args.actor_steps
     buffer = ReplayBuffer(
@@ -220,12 +258,24 @@ def main() -> None:
             success_frac=args.success_frac,
             amp=args.amp,
         )
+        cont_loss = train_continue(
+            buffer,
+            enc,
+            dyn,
+            cont,
+            opt_c,
+            args.ac_updates_per_round,
+            args.seq_batch,
+            args.window,
+            device,
+        )
         print(f"round {rnd}: actor-critic imagine {args.ac_updates_per_round} ...")
         al, cl, ir = imagine_ac(
             buffer,
             enc,
             dyn,
             rew,
+            cont,
             actor,
             critic,
             target_critic,
@@ -242,8 +292,8 @@ def main() -> None:
         )
         rate = evaluate_actor(enc, dyn, actor, args.env_id, args.eval_episodes, device)
         print(
-            f"  actor_loss={al:.3f} critic_loss={cl:.4f} imagined_return={ir:.3f} "
-            f"eval_success={rate:.2f}"
+            f"  cont_loss={cont_loss:.4f} actor_loss={al:.3f} critic_loss={cl:.4f} "
+            f"imagined_return={ir:.3f} eval_success={rate:.2f}"
         )
         if best["rate"] is None or rate >= best["rate"]:
             best = {
@@ -254,6 +304,7 @@ def main() -> None:
                     "dynamics": copy.deepcopy(dyn.state_dict()),
                     "actor": copy.deepcopy(actor.state_dict()),
                     "critic": copy.deepcopy(critic.state_dict()),
+                    "continue_head": copy.deepcopy(cont.state_dict()),
                 },
             }
 

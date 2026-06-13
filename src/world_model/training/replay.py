@@ -132,6 +132,7 @@ class ReplayBuffer:
             "action": self.actions[idx],
             "reward": self.rewards[idx],
             "return": self.returns[idx],
+            "done": self.dones[idx],  # terminations (windows may end in one)
             "next_obs": self._to_float(self.next_obs[starts + length - 1]),
         }
 
