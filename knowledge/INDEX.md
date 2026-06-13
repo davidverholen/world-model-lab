@@ -63,7 +63,8 @@ training assets: `sources/ASSETS.md`.
 - [0011-nikishin-resets](experiments/0011-nikishin-resets.md) — naive reset transfer fails (9 runs, all arms < ctrl): mis-mapped "last layers" (we reset the world model itself); primacy-bias diagnosis confirmed in-setting; corrected mapping = exp 0012 (done)
 - [0012-utd-and-targeted-resets](experiments/0012-utd-and-targeted-resets.md) — UTD ×4 wins: 63% mean, first PPO defeat at equal env budget (80% peak); resets conclusively dead; stability bar still open → 0013 trunk-freeze (done)
 - [0013-trunk-freeze](experiments/0013-trunk-freeze.md) — BREAKTHROUGH: encoder freeze stops all crashes (6/6 seeds); interference = encoder drift; GRU must stay plastic; ceiling unconverged → 0014 freeze-round sweep (done)
-- [0014-freeze-round-sweep](experiments/0014-freeze-round-sweep.md) — when to pin the encoder: fenc@3 vs fenc@4, both bars in reach (running)
+- [0014-freeze-round-sweep](experiments/0014-freeze-round-sweep.md) — frontier mapped: 40/47/53/60/63% across freeze timings; residual crashes = GRU drift → staged freeze (done)
+- [0015-staged-freeze](experiments/0015-staged-freeze.md) — staged pension: encoder@2 + GRU@4/5; both bars targeted (running)
 
 ## Wanted pages (linked but not yet written)
 
