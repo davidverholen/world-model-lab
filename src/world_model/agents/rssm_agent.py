@@ -39,8 +39,13 @@ class RSSMActorAgent:
         actor, config}). Reactive policy — ignores planner kwargs (horizon/candidates)."""
         ckpt = torch.load(path, map_location="cpu", weights_only=True)
         n = int(ckpt["config"]["num_actions"])
-        enc = ConvEncoder()
-        enc.load_state_dict(ckpt["encoder"])
+        if ckpt.get("encoder") == "dino":  # rung-3 Crafter: frozen DINO, rebuilt (not stored)
+            from world_model.models.frozen_encoder import FrozenDinoEncoder
+
+            enc = FrozenDinoEncoder(pool=ckpt["config"].get("pool", "cls"))
+        else:  # MiniGrid: the encoder state_dict is stored in the checkpoint
+            enc = ConvEncoder()
+            enc.load_state_dict(ckpt["encoder"])
         rssm = RSSM(embed_dim=enc.latent_dim, num_actions=n)
         rssm.load_state_dict(ckpt["rssm"])
         actor = Actor(state_dim=rssm.state_dim, num_actions=n)

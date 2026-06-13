@@ -44,42 +44,53 @@ def main() -> None:
     args = parser.parse_args()
 
     render_mode = "rgb_array" if args.record else "human"
+    crafter = False
 
     if args.checkpoint:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
-        rssm_agent = bool(ckpt.get("rssm_agent", False))
-        recurrent = bool(ckpt.get("recurrent", False))
-        partial = rssm_agent or recurrent  # both use the partial RGB view (not fully observable)
-        # tile_size must match training: it changes the agent's OBSERVATIONS (not the
-        # GIF render). A 16-vs-8 mismatch here silently cost 60pp success in exp 0006.
-        env = make_minigrid_env(args.env_id, render_mode=render_mode, fully_observable=not partial)
-        expected = ckpt.get("config", {}).get("obs_shape")
-        if expected is not None and tuple(env.observation_space.shape) != tuple(expected):
-            raise SystemExit(
-                f"observation shape mismatch: env {env.observation_space.shape} vs "
-                f"checkpoint {tuple(expected)} — check env-id/tile_size against training"
-            )
-        if rssm_agent:
-            # reactive policy over the RSSM belief (exp 0019) — no MPC planning
+        crafter = ckpt.get("encoder") == "dino"  # rung-3 Crafter checkpoint (frozen DINO)
+        if crafter:
+            from world_model.envs import make_crafter_env
+
+            if not args.record:  # Crafter renders to frames, not a live pygame window
+                args.record = "crafter_play.gif"
+                print(f"(Crafter has no live window — recording a GIF to {args.record})")
+            env = make_crafter_env(length=500)
             agent = RSSMActorAgent.from_checkpoint(
                 args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
             )
-            print(f"world-model reactive RSSM agent from {args.checkpoint} (device={device})")
+            pool = ckpt["config"].get("pool", "cls")
+            print(f"Crafter RSSM agent (pool={pool}) from {args.checkpoint}")
         else:
-            cls = RecurrentMPCAgent if recurrent else MPCAgent
-            extra = {"epsilon": args.epsilon} if recurrent else {}
-            agent = cls.from_checkpoint(
-                args.checkpoint,
-                device,
-                horizon=args.horizon,
-                candidates=args.candidates,
-                iters=args.iters,
-                seed=args.seed,
-                **extra,
+            rssm_agent = bool(ckpt.get("rssm_agent", False))
+            recurrent = bool(ckpt.get("recurrent", False))
+            partial = rssm_agent or recurrent  # both use the partial RGB view
+            # tile_size must match training: it changes the agent's OBSERVATIONS (not the
+            # GIF render). A 16-vs-8 mismatch here silently cost 60pp success in exp 0006.
+            env = make_minigrid_env(
+                args.env_id, render_mode=render_mode, fully_observable=not partial
             )
-            kind = "recurrent belief-state" if recurrent else "feedforward"
-            print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
+            expected = ckpt.get("config", {}).get("obs_shape")
+            if expected is not None and tuple(env.observation_space.shape) != tuple(expected):
+                raise SystemExit(
+                    f"observation shape mismatch: env {env.observation_space.shape} vs "
+                    f"checkpoint {tuple(expected)} — check env-id/tile_size against training"
+                )
+            if rssm_agent:
+                agent = RSSMActorAgent.from_checkpoint(
+                    args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
+                )
+                print(f"world-model reactive RSSM agent from {args.checkpoint} (device={device})")
+            else:
+                cls = RecurrentMPCAgent if recurrent else MPCAgent
+                extra = {"epsilon": args.epsilon} if recurrent else {}
+                agent = cls.from_checkpoint(
+                    args.checkpoint, device, horizon=args.horizon,
+                    candidates=args.candidates, iters=args.iters, seed=args.seed, **extra,
+                )
+                kind = "recurrent belief-state" if recurrent else "feedforward"
+                print(f"world-model MPC agent ({kind}) from {args.checkpoint} (device={device})")
     else:
         env = make_minigrid_env(args.env_id, render_mode=render_mode)
         agent = RandomAgent(env.action_space, seed=args.seed)
@@ -92,26 +103,40 @@ def main() -> None:
             obs, _ = env.reset(seed=args.seed + episode)
             if hasattr(agent, "reset"):
                 agent.reset()
-            total_reward, steps, done = 0.0, 0, False
+            total_reward, steps, done, info = 0.0, 0, False, {}
             while not done:
                 if args.record:
-                    frames.append(env.render())
+                    frame = env.render()
+                    if crafter:  # 64->256 nearest-neighbour so pixel-art is watchable
+                        frame = np.repeat(np.repeat(frame, 4, axis=0), 4, axis=1)
+                    frames.append(frame)
                 else:
                     time.sleep(1.0 / args.fps)
-                obs, reward, terminated, truncated, _ = env.step(agent.act(obs))
+                obs, reward, terminated, truncated, info = env.step(agent.act(obs))
                 total_reward += float(reward)
                 steps += 1
                 done = terminated or truncated
-            success = total_reward > 0
-            successes += int(success)
-            outcome = "reached goal" if success else "timed out"
-            print(f"episode {episode + 1}: {outcome} in {steps} steps, reward={total_reward:.2f}")
+            if crafter:
+                ach = sum(1 for v in info.get("achievements", {}).values() if v > 0)
+                print(
+                    f"episode {episode + 1}: {ach} achievements, "
+                    f"reward={total_reward:.2f}, {steps} steps"
+                )
+            else:
+                success = total_reward > 0
+                successes += int(success)
+                outcome = "reached goal" if success else "timed out"
+                print(
+                    f"episode {episode + 1}: {outcome} in {steps} steps, "
+                    f"reward={total_reward:.2f}"
+                )
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
         env.close()
 
-    print(f"success rate: {successes}/{args.episodes}")
+    if not crafter:
+        print(f"success rate: {successes}/{args.episodes}")
     if args.record and frames:
         import imageio
 
