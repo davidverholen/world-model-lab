@@ -249,6 +249,19 @@ def main() -> None:
         help="apply --freeze at the start of this round's training",
     )
     parser.add_argument(
+        "--freeze2",
+        choices=["none", "gru"],
+        default="none",
+        help="exp 0015 staged pension: second freeze event — pin GRU cell + action "
+        "embed at --freeze2-round (encoder typically already frozen earlier)",
+    )
+    parser.add_argument(
+        "--freeze2-round",
+        type=int,
+        default=4,
+        help="apply --freeze2 at the start of this round's training",
+    )
+    parser.add_argument(
         "--reset-round",
         type=int,
         default=-1,
@@ -373,18 +386,22 @@ def main() -> None:
             )
             did_reset = True
             print(f"  reset ({args.reset}) applied; optimizer rebuilt")
+        freeze_now = []
         if args.freeze != "none" and rnd == args.freeze_round:
-            frozen = [encoder]
+            freeze_now += [encoder]
             if args.freeze == "trunk":
-                frozen += [dynamics.cell, dynamics.action_embed]
-            for m in frozen:
+                freeze_now += [dynamics.cell, dynamics.action_embed]
+        if args.freeze2 == "gru" and rnd == args.freeze2_round:
+            freeze_now += [dynamics.cell, dynamics.action_embed]
+        if freeze_now:
+            for m in freeze_now:
                 for p in m.parameters():
                     p.requires_grad_(False)
             # optimizer over remaining trainable params only (fresh moments for them)
             trainable = [p for m in modules for p in m.parameters() if p.requires_grad]
             opt = torch.optim.Adam(trainable, lr=opt.param_groups[0]["lr"])
-            n_frozen = sum(p.numel() for m in frozen for p in m.parameters())
-            print(f"  freeze ({args.freeze}) applied at round {rnd}: {n_frozen} params frozen")
+            n_frozen = sum(p.numel() for m in freeze_now for p in m.parameters())
+            print(f"  freeze applied at round {rnd}: {n_frozen} params newly frozen")
         if rnd == 0 and args.round0_updates is not None:
             round_updates = args.round0_updates
         elif did_reset and args.post_reset_updates:
