@@ -530,3 +530,14 @@ compile 1.33x but CUDA-graph capture fights our freeze/reset optimizer rebuilds)
 Already fleet-efficient via 6-wide parallelism. Shipped TF32 default + --amp opt-in
 (off by default for fp32 comparability); deferred torch.compile to the actor/Crafter
 phase (bigger models, no reset/freeze pattern). compute-strategy.md updated.
+
+## [2026-06-13] milestone | exp 0016: planner distillation fails (BC compounding error) → on-policy
+
+Flat actor distilled from the 80% planner via BC: train_acc ~54% (stochastic CEM
+target), eval ~0% (O(eT^2) compounding error on the 25-step brittle chain). Clean
+negative; literature gate confirms (DAgger/Ross-Bagnell). Also surfaced an
+eval-rigor finding: teacher 80%(10 eps, seeds 10000+) vs 25-30%(20 eps, seeds 0-19)
+— headline numbers are high-variance point estimates; standardize >=20 eval eps on
+a fixed seed set. Verdict: go on-policy. Exp 0017 = imagination actor-critic
+(Dreamer-style; on-policy, no teacher — fixes all three failure modes, and it's the
+Crafter-path actor anyway). New code: Actor, ActorAgent, distill_actor.

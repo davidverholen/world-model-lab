@@ -67,6 +67,7 @@ training assets: `sources/ASSETS.md`.
 - [0013-trunk-freeze](experiments/0013-trunk-freeze.md) — BREAKTHROUGH: encoder freeze stops all crashes (6/6 seeds); interference = encoder drift; GRU must stay plastic; ceiling unconverged → 0014 freeze-round sweep (done)
 - [0014-freeze-round-sweep](experiments/0014-freeze-round-sweep.md) — frontier mapped: 40/47/53/60/63% across freeze timings; residual crashes = GRU drift → staged freeze (done)
 - [0015-staged-freeze](experiments/0015-staged-freeze.md) — counter-outcome: GRU freeze caps at 30–37%; stability↔performance is a real frontier; rung-2b MET at 0012, pivot to actor recommended (done)
+- [0016-actor-distillation](experiments/0016-actor-distillation.md) — BC planner-distillation fails (O(εT²) compounding error + stochastic teacher); eval-variance surprise (80%→25-30% on fresh seeds); on-policy needed → 0017 imagination actor-critic (done)
 
 ## Wanted pages (linked but not yet written)
 

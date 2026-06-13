@@ -181,3 +181,5 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
       Rezende 2015 (variational empowerment) — key-possession as objectively valuable
 - [ ] Eysenbach et al. 2019, DIAYN (diversity is all you need) — unsupervised skill
       discovery, skills as latent-conditioned policies
+- [ ] Ross & Bagnell DAgger (AISTATS 2011) — BC compounding error O(eT^2) + on-policy
+      fix; background for why exp 0016 failed (cite, likely no full ingest needed)
