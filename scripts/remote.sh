@@ -70,7 +70,9 @@ run)
   }
   git push desktop HEAD:refs/heads/dispatch -f
   echo "running on $REMOTE @ $(git rev-parse --short HEAD): uv run $*"
-  ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && uv run $*"
+  # PYTHONUNBUFFERED: stream logs live instead of 4KB block-buffering (negligible cost —
+  # we print ~per-200-updates, not in a hot loop). Detached runs otherwise look empty mid-run.
+  ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && export PYTHONUNBUFFERED=1 && uv run $*"
   ;;
 shell)
   [ -z "$(git status --porcelain)" ] || {
@@ -79,7 +81,8 @@ shell)
   }
   git push desktop HEAD:refs/heads/dispatch -f
   echo "shell on $REMOTE @ $(git rev-parse --short HEAD): $*"
-  ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && $*"
+  # export PYTHONUNBUFFERED so backgrounded per-seed python subshells inherit live logging.
+  ssh "$REMOTE" "cd $REMOTE_DIR && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && export PYTHONUNBUFFERED=1 && $*"
   ;;
 kill)
   ssh "$REMOTE" "taskkill //IM python.exe //F" || true
