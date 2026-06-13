@@ -901,3 +901,16 @@ MiniGrid path byte-identical (21/21 tests), Crafter gets distributional loss. Lo
 config that gave MSE imagined_return 21 now gives 6.1->5.4 STABLE, critic_loss 2.5->2.2 -- blow-up
 gone. Eval flat in 2 noisy rounds (calibration-delays-ignition, cf 0021); climb test needs a long
 run -> dispatching overnight. Pages: experiments/0023.
+
+## [2026-06-13] experiment | exp 0023 result — first Crafter LEARNING run (two-hot critic)
+
+Overnight desktop run (2 seeds, 10 rounds) of the full rung-3 pipeline (frozen DINO + RSSM +
+critic-on-replay + two-hot critic + embedding cache). RESULT: learns and climbs off the random
+floor (1 ach) to ~2.5-3 achievements / reward ~2 (20x random reward), no collapse, NO ignition
+stall (the 0021 calibration-kills-exploration risk did not materialize -- Crafter reward dense
+enough). Both seeds plateau at the shallow tree (~3 ach). Two-hot fixed the CRITIC (loss 1.5-2.7
+stable vs MSE 35) but imagined_return stayed inflated/noisy (s0 20->5-10 self-calibrating; s1
+17-22 w/ a round-8 collapse to 0.56) -- the REWARD head is the remaining over-prediction source.
+Best reward s0 2.10@r6, s1 1.97@r2. Next (reordered by data): exp 0024 DINO patch tokens (richer
+spatial features for navigation/gathering, attack the plateau) BEFORE the reward-head fix, since
+the plateau (not value) is the headline blocker. Pages: experiments/0023 Result+Lesson, INDEX.

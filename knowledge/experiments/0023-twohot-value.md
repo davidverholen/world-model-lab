@@ -31,15 +31,36 @@ two-hot sums to 1, fits target 18 bounded).
 
 ## Result
 
-Local-GPU smoke (rounds 0→1, same config that gave MSE imagined_return 21): two-hot gives
-**imagined_return 6.11→5.39 (stable)**, **critic_loss 2.5→2.2** — the blow-up is gone and
-stable across rounds (MSE grew 9.95→21.67). Eval flat (0.10/1.0) in 2 noisy rounds — the
-calibration-delays-ignition pattern (cf 0021); the climb test needs a long run.
-_Overnight desktop run pending → fill curve + achievement trajectory._
+**Success — the rung-3 pipeline LEARNS and climbs.** Overnight desktop run, 2 seeds, 10
+rounds (round0+actor 10k steps/round, 2k WM + 2k AC updates, eval 8 eps, horizon 15,
+repval 0.3, commit 26f5693). Per-round mean eval achievements (random floor = 1):
+
+| round | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | best reward |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s0 | 1.25 | 1.62 | 1.50 | 2.25 | **3.00** | 2.62 | 3.00 | 2.38 | 2.00 | 2.75 | **2.10** @r6 |
+| s1 | 1.50 | 2.25 | **3.00** | 2.62 | 2.50 | 2.62 | 1.88 | 1.62 | 2.25 | 2.50 | **1.97** @r2 |
+
+Both climb off the random floor to **~2.5–3 achievements / reward ~2** (20× the random
+reward ~0.1), no collapse, and — key — **no ignition stall** (the 0021 calibration-kills-
+exploration risk did NOT materialize; Crafter's denser reward gives enough signal). Then
+both **plateau at the shallow tree (~2.5–3 achievements)**, oscillating.
+
+`imagined_return` is the weak spot: bounded-critic-LOSS held (1.5–2.7 vs MSE's 35), but the
+λ-return stayed **inflated and noisy** — s0 trended down (20→5–10, self-calibrating) while
+s1 stayed 17–22 with a one-round collapse to 0.56. The two-hot critic fixed the *critic*;
+the **reward head** still over-predicts in imagination (accumulates over horizon 15).
 
 ## Lesson
 
-_pending (overnight run)_
+**Two-hot critic delivered a learning rung-3 agent** (bounded critic, no blow-up, climbs
+to ~3 achievements) — the value-scale fix works and the recipe (frozen DINO + RSSM +
+critic-on-replay + two-hot + embedding cache) is sound. But it's a *partial* value fix:
+imagined_return stays inflated/noisy because the **reward head** is the remaining
+over-prediction source → next is a symlog/distributional **reward** head. Separately, the
+**plateau at the shallow tree** is the headline open problem — likely representation
+(global CLS can't localize resources to navigate to) and/or no temporal abstraction for the
+deep tree. Backlog: (a) richer features (DINO patch tokens, exp 0024) for navigation/
+gathering; (b) symlog reward head for clean value; (c) hierarchy for deep achievements.
 
 ## Links
 
