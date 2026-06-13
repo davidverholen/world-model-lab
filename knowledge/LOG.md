@@ -1009,3 +1009,16 @@ the others internals. Wrote v0 requirements catalog at knowledge/design/groundin
 verification harness, phased build with a P1 mandatory-reading validation gate). The spec is the
 boundary object, owned/versioned here; implementation lives in the separate repo. Downstream of
 the Crafter foundation; not started.
+
+## [2026-06-14] milestone | exp 0025 SUCCESS — combined fix resolves the exploitation (all seeds move/craft)
+
+Combined fix (DINO patch tokens + two-hot reward head + two-hot critic + critic-on-replay), 3
+seeds, 10 rounds. best_eval_reward s0 2.35 / s1 2.47 / s2 3.47. DECISIVE: behavior_report PASSES
+on ALL 3 seeds (vs 0023 all-stationary, 0024 seed-dependent) — moved_frac 0.11-0.18 (all move,
+span 18-22 tiles), action entropy 1.5-2.0 (no collapse), real tech-tree (wood/stone pickaxes,
+furnace), s2 6 unique achievements / reward 3.77. imagined_return calibrated 1.3-1.7 (vs 8-22),
+trended DOWN. Both levers needed: patch tokens (navigate) + bounded reward (dont hallucinate
+reward). The exploitation arc 0017->0025 is CLOSED. Residual: s0 minor make_iron_sword spam.
+Ceiling (~3-6 ach) now a COMPUTE-SCALING question (~10x under-trained vs DreamerV3) -> exp 0026
+scaling slope. Process win: behavior_report (from the maintainer s it-doesnt-move catch) was the
+decisive metric; eval_reward alone looked flat. Pages: experiments/0025 Result+Lesson, INDEX.

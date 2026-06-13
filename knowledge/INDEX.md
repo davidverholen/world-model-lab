@@ -89,6 +89,7 @@ calls these elaborate).
 - [0020-ac-reset](experiments/0020-ac-reset.md) — REFUTED: per-round actor-critic reset suppressed learning (s1 0.55→0); ruled out behaviour-layer plasticity as the collapse cause (done)
 - [0021-critic-on-replay](experiments/0021-critic-on-replay.md) — CONFIRMED: DreamerV3 critic-on-replay calibrates imagined value (2–7→~1); kept as recipe default (--repval 0.3) (done)
 - [0022-frozen-dino-probe](experiments/0022-frozen-dino-probe.md) — frozen DINOv2 features encode Crafter state (linear probe 0.98 vs 0.80 baseline); frozen-encoder bet validated (done)
+- [0025-reward-head-patch](experiments/0025-reward-head-patch.md) — combined fix (patch tokens + two-hot reward head) RESOLVES the exploitation: all 3 seeds move/explore/craft (behavior_report PASS), s2 reaches 6 achievements; ceiling now compute-bound (done)
 - [0024-dino-patch-tokens](experiments/0024-dino-patch-tokens.md) — patch tokens unlock navigation (s0 moves + builds table) but seed-dependent; representation IS part of the bottleneck; behavior gate caught the s0/s1 split (done)
 - [0023-twohot-value](experiments/0023-twohot-value.md) — two-hot distributional critic bounds Crafter value; first rung-3 learning run climbs to ~3 achievements (2 seeds), plateaus at shallow tree; reward head still inflates imagination (done)
 
