@@ -17,15 +17,51 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from world_model.agents import RandomAgent
 from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_crafter_env
 from world_model.models import Actor, FrozenDinoEncoder, RewardHead, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.rssm import RSSM
-from world_model.train_recurrent import collect_round
 from world_model.train_rssm import imagine_ac, wm_train
-from world_model.training import ReplayBuffer
+from world_model.training import ReplayBuffer, Transition
+
+
+@torch.no_grad()
+def collect_embed(buffer, env, enc, rssm, actor, n_act, steps, epsilon, device, rng, seed):
+    """Collect into the buffer storing FROZEN-ENCODER EMBEDDINGS (not pixels): encode each
+    frame ONCE here, so WM updates never re-run DINO. actor=None → pure random (round 0)."""
+
+    def emb(o):
+        return enc(torch.as_tensor(o, dtype=torch.float32, device=device).unsqueeze(0))
+
+    obs, _ = env.reset(seed=seed)
+    embed = emb(obs)
+    state = rssm.initial(1, device)
+    prev_a = torch.full((1,), rssm.no_action, device=device)
+    reward_events = episodes = 0
+    for _ in range(steps):
+        if actor is not None:
+            state, _, _ = rssm.obs_step(state, prev_a, embed)
+        if actor is None or rng.random() < epsilon:
+            a = int(rng.integers(n_act))
+        else:
+            a = int(actor(rssm.belief(state)).argmax(dim=-1))
+        next_obs, r, term, trunc, _ = env.step(a)
+        done = term or trunc
+        next_embed = emb(next_obs)
+        buffer.add(
+            Transition(embed[0].cpu().numpy(), a, float(r), next_embed[0].cpu().numpy(), done)
+        )
+        reward_events += int(r > 0)
+        prev_a = torch.tensor([a], device=device)
+        embed = next_embed
+        if done:
+            episodes += 1
+            obs, _ = env.reset()
+            embed = emb(obs)
+            state = rssm.initial(1, device)
+            prev_a = torch.full((1,), rssm.no_action, device=device)
+    return reward_events, episodes
 
 
 @torch.no_grad()
@@ -94,29 +130,30 @@ def main() -> None:
     opt_wm = torch.optim.Adam([q for m in wm_mods for q in m.parameters()], lr=3e-4)
     opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
 
+    # buffer stores DINO EMBEDDINGS (float32), not pixels; identity "encoder" in the WM/AC
+    # loops so the cached embeddings pass through untouched (zero DINO forwards in training).
     cap = args.round0_steps + args.rounds * args.actor_steps + 1000
-    buffer = ReplayBuffer(cap, env.observation_space.shape, seed=args.seed)
+    buffer = ReplayBuffer(cap, (ed,), seed=args.seed, obs_dtype=np.float32)
+    train_enc = torch.nn.Identity()
+    rng = np.random.default_rng(args.seed)
     best = {"reward": None, "round": -1, "state": {}}
 
     for rnd in range(args.rounds):
-        if rnd == 0:
-            agent, steps = RandomAgent(env.action_space, seed=args.seed), args.round0_steps
-        else:
-            for m in wm_mods + [actor, critic]:
-                m.train()
-            agent = RSSMActorAgent(
-                enc, rssm, actor, n_act, device, epsilon=args.epsilon, seed=args.seed + rnd
-            )
-            steps = args.actor_steps
+        for m in wm_mods + [actor, critic]:
+            m.train()
+        act_fn = None if rnd == 0 else actor
+        steps = args.round0_steps if rnd == 0 else args.actor_steps
         print(f"round {rnd}: collecting {steps} ...", flush=True)
-        r, e = collect_round(buffer, env, agent, steps, seed=args.seed + rnd)
+        r, e = collect_embed(
+            buffer, env, enc, rssm, act_fn, n_act, steps, args.epsilon, device, rng, args.seed + rnd
+        )
         print(f"  -> {e} episodes, {r} reward events")
         buffer.compute_returns(args.gamma)
 
         print(f"round {rnd}: wm train {args.updates_per_round} ...", flush=True)
         wm_train(
             buffer,
-            enc,
+            train_enc,
             rssm,
             recon_head,
             rew,
@@ -135,7 +172,7 @@ def main() -> None:
         print(f"round {rnd}: imagine AC {args.ac_updates_per_round} ...", flush=True)
         al, cl, ir = imagine_ac(
             buffer,
-            enc,
+            train_enc,
             rssm,
             rew,
             cont,

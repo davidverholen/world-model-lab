@@ -169,6 +169,16 @@ def test_success_oversampling():
     assert (batch["reward"][:, -1] > 0).sum() == 4
 
 
+def test_replay_float_obs_roundtrip_exact():
+    # frozen-encoder cache: the buffer stores DINO embeddings (float32, unbounded) verbatim
+    buf = ReplayBuffer(capacity=4, obs_shape=(8,), seed=0, obs_dtype=np.float32)
+    e = np.array([1.5, -2.3, 0.0, 100.0, -0.7, 3.14, 42.0, -1e3], dtype=np.float32)
+    buf.add(Transition(e, 1, 0.5, e * 2, False))
+    batch = buf.sample(1)
+    assert batch["obs"].dtype == np.float32
+    assert np.array_equal(batch["obs"][0], e)  # exact — no uint8 [0,1] quantization
+
+
 def test_uint8_replay_roundtrip_exact():
     env = make_minigrid_env("MiniGrid-Empty-5x5-v0")
     obs, _ = env.reset(seed=0)

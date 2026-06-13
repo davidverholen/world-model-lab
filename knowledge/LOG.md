@@ -866,3 +866,16 @@ optimization and is needed before a full-scale run. Tiny CPU smoke: full flywhee
 end, imagined_return sane (0.10/0.18 = calibrated, critic-on-replay carries to Crafter), ckpt
 saved. MiniGrid train_rssm untouched (lam>0 guard preserves it). Next: embedding cache -> first
 real desktop Crafter run; then harden DreamerV3 recipe (two-hot/symlog/percentile-norm).
+
+## [2026-06-13] milestone | embedding cache for the frozen-encoder Crafter loop
+
+Implemented freezing payoff: train_crafter now stores DINO EMBEDDINGS (float32) in replay,
+not pixels, encoding each frame ONCE at collection (new collect_embed) and passing an Identity
+encoder to wm_train/imagine_ac -> zero DINO forwards in WM/AC updates (~98% of forwards
+eliminated; training-update cost no longer DINO-bound). ReplayBuffer gained an obs_dtype param
+(float32 stores embeddings verbatim, no *255 round-trip; default uint8 unchanged -> MiniGrid
+path untouched, 20/20 tests). Correctness-equivalent: cached round-0 smoke is NUMERICALLY
+IDENTICAL to the v1 uncached run (0.393/0.1687/0.096) -- same embeddings, same training, just
+encoded at collection. Float-buffer roundtrip test added. Embeddings are ~8x smaller than the
+image buffer too. Makes a full-scale desktop Crafter run feasible. Next: first real run +
+harden DreamerV3 recipe.

@@ -22,14 +22,22 @@ class Transition:
 class ReplayBuffer:
     """Flat ring buffer of transitions with uniform sampling."""
 
-    def __init__(self, capacity: int, obs_shape: tuple[int, ...], seed: int | None = None):
-        # Observations are stored as uint8 (they originate from uint8 pixels scaled to
-        # [0,1], so round-trip via round(x*255) is exact) — 4x less RAM than float32;
-        # at 130k transitions x 2 obs arrays that's ~2.5 GB instead of ~10 GB per run
-        # (exp 0010 ops lesson: 6 parallel float32 buffers paged the desktop to death).
+    def __init__(
+        self,
+        capacity: int,
+        obs_shape: tuple[int, ...],
+        seed: int | None = None,
+        obs_dtype: np.dtype = np.uint8,
+    ):
+        # Pixel obs are stored as uint8 (originate from uint8 pixels scaled to [0,1], so
+        # round-trip via round(x*255) is exact) — 4x less RAM than float32 (exp 0010 ops
+        # lesson: 6 parallel float32 buffers paged the desktop to death). obs_dtype=float32
+        # stores embeddings verbatim (no [0,1] assumption) — for the frozen-encoder cache
+        # (train_crafter: store DINO embeddings, not pixels; skip the encoder in WM updates).
+        self._u8 = np.dtype(obs_dtype) == np.uint8
         self.capacity = capacity
-        self.obs = np.zeros((capacity, *obs_shape), dtype=np.uint8)
-        self.next_obs = np.zeros((capacity, *obs_shape), dtype=np.uint8)
+        self.obs = np.zeros((capacity, *obs_shape), dtype=obs_dtype)
+        self.next_obs = np.zeros((capacity, *obs_shape), dtype=obs_dtype)
         self.actions = np.zeros(capacity, dtype=np.int64)
         self.rewards = np.zeros(capacity, dtype=np.float32)
         self.returns = np.zeros(capacity, dtype=np.float32)
@@ -41,8 +49,8 @@ class ReplayBuffer:
 
     def add(self, t: Transition) -> None:
         i = self.pos
-        self.obs[i] = np.round(t.obs * 255.0)
-        self.next_obs[i] = np.round(t.next_obs * 255.0)
+        self.obs[i] = np.round(t.obs * 255.0) if self._u8 else t.obs
+        self.next_obs[i] = np.round(t.next_obs * 255.0) if self._u8 else t.next_obs
         self.actions[i] = t.action
         self.rewards[i] = t.reward
         self.dones[i] = t.done
@@ -50,8 +58,8 @@ class ReplayBuffer:
         self.size = min(self.size + 1, self.capacity)
         self.total_adds += 1
 
-    def _to_float(self, obs_u8: np.ndarray) -> np.ndarray:
-        return obs_u8.astype(np.float32) / 255.0
+    def _to_float(self, obs: np.ndarray) -> np.ndarray:
+        return obs.astype(np.float32) / 255.0 if self._u8 else obs.astype(np.float32, copy=False)
 
     def sample(self, batch_size: int) -> dict[str, np.ndarray]:
         idx = self.rng.integers(0, self.size, size=batch_size)
