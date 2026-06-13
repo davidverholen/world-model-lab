@@ -250,3 +250,46 @@ def test_actor_agent_acts():
     obs, _ = env.reset(seed=0)
     a = agent.act(obs)
     assert 0 <= a < n
+
+
+def test_rssm_obs_and_img_steps():
+    import torch as t
+    from torch.distributions import kl_divergence
+
+    from world_model.models.rssm import RSSM
+
+    rssm = RSSM(embed_dim=16, num_actions=3, deter_dim=32, stoch_dim=8)
+    assert rssm.state_dim == 40
+    b = 4
+    state = rssm.initial(b, "cpu")
+    prev_a = t.full((b,), rssm.no_action, dtype=t.long)
+    embed = t.randn(b, 16)
+
+    # obs_step: posterior path, gradients flow, valid dists
+    state2, prior, post = rssm.obs_step(state, prev_a, embed)
+    h, z = state2
+    assert h.shape == (b, 32) and z.shape == (b, 8)
+    assert rssm.belief(state2).shape == (b, 40)
+    kl = kl_divergence(post, prior).sum(-1)
+    assert kl.shape == (b,) and t.isfinite(kl).all()
+    kl.mean().backward()  # gradients flow through prior+post+cell
+
+    # img_step: prior path, stochastic (two samples differ)
+    s_a, _ = rssm.img_step(state2, t.zeros(b, dtype=t.long))
+    s_b, _ = rssm.img_step(state2, t.zeros(b, dtype=t.long))
+    assert not t.equal(s_a[1], s_b[1])  # stochastic z differs across samples
+
+
+def test_rssm_heads_consume_belief():
+    import torch as t
+
+    from world_model.models import RewardHead, ValueHead
+    from world_model.models.rssm import RSSM
+
+    rssm = RSSM(embed_dim=16, num_actions=3, deter_dim=32, stoch_dim=8)
+    rh = RewardHead(latent_dim=rssm.state_dim, num_actions=3)
+    vh = ValueHead(state_dim=rssm.state_dim)
+    state = rssm.initial(2, "cpu")
+    belief = rssm.belief(state)
+    assert rh(belief, t.zeros(2, dtype=t.long)).shape == (2,)
+    assert vh(belief).shape == (2,)
