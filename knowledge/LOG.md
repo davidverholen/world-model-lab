@@ -997,3 +997,15 @@ our installation interest). LIKELY GAP (UNVERIFIED, needs deep protocol): rich-e
 dynamics. Recommendation: literature-first — ingest this cluster BEFORE building any custom env
 (gives task designs + baselines + decides reuse-vs-build). Queued under a new QUEUE subsection. No
 build started.
+
+## [2026-06-14] design | two-domain split: CrafterManual grounding-env as a separate repo; this project authors requirements
+
+The maintainer framed the grounding testbed as a SECOND context-architecture DOMAIN: a separate
+standalone GitHub repo (CrafterManual / Crafter-RTFM), built by its own Claude to spec, with THIS
+research project iteratively AUTHORING requirements for it. Clean inter-domain contract:
+requirements flow research->tool, capability reports flow tool->research; neither reaches into
+the others internals. Wrote v0 requirements catalog at knowledge/design/grounding-env-spec.md
+(gate=verify-gap-first; mandatory-read-to-learn-DYNAMICS, rich+PyTorch, built-in referent-swap
+verification harness, phased build with a P1 mandatory-reading validation gate). The spec is the
+boundary object, owned/versioned here; implementation lives in the separate repo. Downstream of
+the Crafter foundation; not started.
