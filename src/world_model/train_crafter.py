@@ -67,9 +67,12 @@ def collect_embed(buffer, env, enc, rssm, actor, n_act, steps, epsilon, device, 
 
 @torch.no_grad()
 def evaluate(enc, rssm, actor, n_act, episodes, length, device, seed_base=10_000):
-    """Mean episode reward + mean #achievements unlocked (greedy RSSMActorAgent)."""
+    """Mean episode reward, mean #achievements, and the SET of achievements unlocked across
+    eval episodes (greedy RSSMActorAgent). The set reveals DEPTH — count alone can't tell
+    {wake_up,collect_sapling} (trivial) from {collect_wood,place_table} (real progress)."""
     agent = RSSMActorAgent(enc, rssm, actor, n_act, device, epsilon=0.0, seed=seed_base)
     rewards, achievements = [], []
+    unlocked: set[str] = set()
     for ep in range(episodes):
         env = make_crafter_env(length=length, seed=seed_base + ep)
         obs, info = env.reset(seed=seed_base + ep)
@@ -80,8 +83,10 @@ def evaluate(enc, rssm, actor, n_act, episodes, length, device, seed_base=10_000
             total += r
             done = term or trunc
         rewards.append(total)
-        achievements.append(sum(1 for v in info["achievements"].values() if v > 0))
-    return float(np.mean(rewards)), float(np.mean(achievements))
+        ep_unlocked = {k for k, v in info["achievements"].items() if v > 0}
+        achievements.append(len(ep_unlocked))
+        unlocked |= ep_unlocked
+    return float(np.mean(rewards)), float(np.mean(achievements)), unlocked
 
 
 def main() -> None:
@@ -193,12 +198,13 @@ def main() -> None:
             device,
             beta_repval=args.repval,
         )
-        mean_r, mean_ach = evaluate(
+        mean_r, mean_ach, unlocked = evaluate(
             enc, rssm, actor, n_act, args.eval_episodes, args.eval_length, device
         )
         print(
             f"  actor_loss={al:.3f} critic_loss={cl:.4f} imagined_return={ir:.3f} "
-            f"eval_reward={mean_r:.2f} eval_achievements={mean_ach:.2f}",
+            f"eval_reward={mean_r:.2f} eval_achievements={mean_ach:.2f} "
+            f"unlocked=[{','.join(sorted(unlocked))}]",
             flush=True,
         )
         if best["reward"] is None or mean_r >= best["reward"]:
