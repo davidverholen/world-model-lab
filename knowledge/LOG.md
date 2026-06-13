@@ -730,3 +730,19 @@ claim was a premature smoke-test promotion (inflation re-emerges after 4k×7 AC 
 Pages: experiments/0019 Result+Lesson filled (pre-registered hypothesis left intact).
 Code: play.py + agents/rssm_agent.py (watchable checkpoints). Next: fork (a), the
 round-6 collapse, via retention/plasticity levers.
+
+## [2026-06-13] milestone+curation | exp 0020 actor-critic reset — REFUTED (fork a closed)
+
+Fork (a) tested and falsified fast. Per-round shrink-perturb reset of the actor-critic
+(α=0.5, `--ac-reset`) to attack 0019's round-6 collapse instead **suppressed learning**:
+best_eval s0/s1/s2 = 0.00/0.05/0.10 vs 0019's 0.00/0.55/0.35 — the reset erased the
+competence on the two seeds that had it. Mechanism: 0019's policy *consolidates*
+gradually across rounds (s1 0.15→0.20→0.55), and an α=0.5 reset halves that each round.
+So the round-6 collapse is NOT behaviour-layer plasticity loss (clean falsification).
+Critic reset made `imagined_return` inflation worse (s2 → 7.3), confirming **value
+miscalibration** is the load-bearing problem → redirect to fork (b): ground/bound the
+imagined value (DAgger real-rollout anchoring / KL / shorter horizon), not the behaviour
+layer. Pages: experiments/0020 Result+Lesson (status REFUTED); pre-reg hypothesis intact.
+Caveats logged not chased: only aggressive α tested; 0019's 0.55→0 may be partly eval
+variance. Code already committed d03eeba (the --ac-reset flag); this entry records the
+outcome. Live logs worked this run (PYTHONUNBUFFERED in the dispatched commit).

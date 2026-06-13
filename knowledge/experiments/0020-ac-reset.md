@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-13
 ---
 
-# 0020: Actor-critic reset — attacking the round-6 collapse (pre-registered)
+# 0020: Actor-critic reset — attacking the round-6 collapse [REFUTED]
 
 ## Hypothesis
 
@@ -44,11 +44,42 @@ Command per seed:
 
 ## Result
 
-_pending (dispatched)_
+**Hypothesis refuted — the reset did not prevent collapse, it suppressed learning.**
+3 seeds, DoorKey-6x6, commit d03eeba, `--ac-reset --ac-reset-alpha 0.5`. Final best_eval
+vs the 0019 baseline (same seeds, reset off):
+
+| seed | 0019 (no reset) | 0020 (ac-reset α=0.5) |
+|---|---|---|
+| s0 | 0.00 | 0.00 |
+| s1 | **0.55** | 0.05 |
+| s2 | **0.35** | 0.10 |
+
+Per-round, s1 stayed flat 0 through round 5 (0019 it built 0.15→0.20→0.55); s2 only
+flickered 0.05–0.10 (0019 reached 0.35). The reset roughly **erased** the competence on
+the two seeds that had it. `imagined_return` under reset got *worse*, not better — s2
+ran 2.1→5.1→5.1→**7.3** (critic repeatedly reset toward fresh, re-inflating).
 
 ## Lesson
 
-_pending_
+**The round-6 collapse is NOT behaviour-layer plasticity loss** — if it were, restoring
+plasticity would have helped. Instead, resetting the actor-critic each round destroyed
+**cross-round consolidation**: 0019's competence accumulates gradually (s1
+0.15→0.20→0.55 over rounds 3–5), and an α=0.5 reset halves that progress every round, so
+it never reaches the peak. Periodic reset is the wrong tool when the policy needs to
+*compound* across rounds, not re-explore. Clean falsification — fork (a) is closed.
+
+The diagnosis redirects to **fork (b): value miscalibration.** Resetting the critic made
+`imagined_return` inflation *worse* (s2 → 7.3), confirming the inflated value — not
+plasticity — is the load-bearing problem (consistent with 0019's headline: RSSM fixed
+policy quality, not value calibration). Next lever: ground/bound the imagined value
+(DAgger-style real-rollout anchoring, KL/free-bits on the prior, or shorter imagination
+horizon) rather than touch the behaviour layer.
+
+Caveats logged, not chased: (i) only aggressive per-round α=0.5 was tested — a gentle or
+infrequent reset isn't strictly ruled out, but the consolidation mechanism makes it
+unpromising; (ii) 0019's single-round 0.55→0 drop may be partly eval variance (20 eps),
+so "collapse" may overstate a noisy weak-and-inconsistent policy — another reason the
+real fix is value calibration + variance reduction, not resets.
 
 ## Links
 
