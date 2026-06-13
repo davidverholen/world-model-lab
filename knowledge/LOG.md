@@ -806,3 +806,14 @@ the load-bearing fact for our fix. Pre-registered + implemented exp 0021 (b1): `
 flag in train_rssm, critic also regressed on real burn-in returns (reuses beliefs already
 computed; real_bel detached → grad to critic only). Flag defaults off → baseline ≡ 0019.
 Prediction: imagined_return falls 2–4 → ~1 and ignition broadens. Smoke-confirmed wiring.
+
+## [2026-06-13] decision | ADR 0006 accepted — Crafter (original) over Craftax for rung 3
+
+Dave accepted ADR 0006. Crafter (original, PyTorch-native) for rung-3 first contact, NOT
+Craftax. Three deciding facts: (1) Craftax 257x is a model-FREE PPO (1B-step) figure; we
+are model-based/sample-efficient (~1e6 steps) so env-stepping is not our wall; (2) Craftax
+is JAX-only, vs ADR 0001 PyTorch (interop friction / full rewrite), and 0001 pre-registered
+the only revisit trigger as heavy parallel-env training; (3) we want pixel obs (frozen-
+encoder thesis), and Craftax fast mode is symbolic. Craftax kept as documented escape hatch
+with a measured trigger (env-stepping >=~30% wall-clock, or sample-hungry pivot). Next:
+Crafter env wrapper behind the MiniGrid interface -> hello-Crafter baseline.
