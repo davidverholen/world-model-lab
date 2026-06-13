@@ -220,9 +220,9 @@ def main() -> None:
     p.add_argument(
         "--repval",
         type=float,
-        default=0.0,
-        help="exp 0021: critic-on-replay weight (DreamerV3 beta_repval=0.3) — also trains "
-        "the critic on REAL returns to ground the actor's value baseline vs inflated imagination",
+        default=0.3,
+        help="critic-on-replay weight (DreamerV3 beta_repval). Now recipe-DEFAULT (0.3) after "
+        "exp 0021 confirmed it calibrates imagined value (inflated->~1). Set 0.0 to disable.",
     )
     p.add_argument("--epsilon", type=float, default=0.3)
     p.add_argument("--gamma", type=float, default=0.98)

@@ -2,6 +2,50 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-13] milestone+curation | exp 0021 CONFIRMED — critic-on-replay kept as recipe default
+
+Critic-on-replay (DreamerV3 β_repval 0.3) confirmed on our stack: imagined_return pulled
+from 0019's inflated 2–7 down to ~1.0 (s1 clean 3.2→1.0) — independent validation of the
+Dreamer mechanism AND our implementation. Ignition still occurs (s2 0.55, s0 0.15) but
+LATE (round 6 vs 0019's 3–5) and at honest value; endpoint trajectories opposite (0019
+inflated→collapse, 0021 calibrated→rising). Best evals seed-reshuffled wash
+(0019 0/0.55/0.35; 0021 0.15/0/0.55). DECISION (Dave): mechanism confirms the Dreamer
+design → keep it; default flipped `--repval` 0.0→0.3 (recipe default now); bank the
+MiniGrid imagination loop as good-enough+calibrated, don't over-polish the stepping stone,
+move to recipe-hardening (two-hot/symlog/percentile-norm) → Crafter. Caveat logged: core
+mechanism confirmed on a sparse task; full DreamerV3 recipe still to harden on denser
+rewards. Process meta-lesson (2nd time): I read rounds 0–5 as "ignition vanished"; the
+final round flipped it — partial-data conclusions burned us again (cf. 0019 smoke-test).
+Pages: experiments/0021 Result+Lesson (status CONFIRMED); code default flip.
+
+## [2026-06-13] curation | language-grounding: symbols-as-thought ideas (Dave)
+
+Added an "Ideas to look into later" section to concepts/language-grounding.md capturing
+three forward ideas from a conversation (flagged not-decisions): (1) pixels-for-percept /
+symbols-for-thought boundary — text→pixels→frozen vision encoder is right for text the
+agent SEES in-world, wrong for text-as-thought (rendering discards symbolic structure the
+tokens already carry); distinct from text→video→latent which stays legit (generating
+experience ≠ binding meaning). (2) The deep question is symbol→belief binding (a word =
+pointer into a belief region), which makes language a capability jump (ape↔human gap):
+compositional abstraction lets the agent imagine in abstractions not pixels (counterfactuals,
+"what if I had a pickaxe") ⇒ systematic generalization. (3) LLM-as-aligned-source-into-belief
+= PAN's leverage done experience-primary: keep frozen vision, add a language pathway mapping
+LLM-seeded tokens into the SAME belief space, alignment learned by grounding; beyond Dynalang
+on deep binding + LLM-prior reuse. Also doubles as why [[frozen-encoder-lean]] survives the
+language rung. Rides into next milestone commit (with the exp 0021 result). No page cites
+PAN/Dynalang as authority (QUEUE-only).
+
+## [2026-06-13] curation | Queued imagination-module substrate thread
+
+Conversation on modular reuse of big pretrained world models (could a Cosmos-scale
+video model serve as the Dreamer imagination loop?). Verdict in-conversation: no for
+the inner loop (latency/pixel/non-differentiable — wrong complexity class), but the
+question reframes usefully as "reuse the representation, not the simulator." Added a
+neutral OPEN-QUESTION block to sources/QUEUE.md bracketing the design space with two
+already-in-KB items: DIAMOND (2405.12399, diffusion WM) vs V-JEPA 2-AC (in 2506.09985,
+frozen-encoder + predictor). Explicitly flagged not-a-decision to avoid biasing the
+future read. No wiki page asserts anything yet.
+
 ## [2026-06-12] curation | Knowledge base bootstrapped
 
 Initial setup per ADR 0002 (Karpathy LLM Wiki structure × Context Architecture

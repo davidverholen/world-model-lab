@@ -148,3 +148,48 @@ scales." Sharpening:
   the ungrounded word to grounded experience. Associations are the bridge that makes
   tutorial words connect to the agent's world even for unfamiliar words. ⇒ grounding
   is two-hop: word ↔ (embedding/associations) ↔ grounded concepts.
+
+## Ideas to look into later: symbols-as-thought, not pixels (Dave, 2026-06-13)
+
+Forward ideas, not decisions — flagged to revisit when the language rung opens. They
+sharpen HOW language should enter, and double as the reason the [[frozen-encoder-lean]]
+(reuse frozen DINO/JEPA vision) survives even at the language rung.
+
+- **Pixels-for-percept / symbols-for-thought boundary.** Two different jobs, opposite
+  right answers. (a) *Text-as-percept* — a sign/menu/tutorial screen the agent SEES in
+  the world — genuinely arrives through the eyes; render→frozen vision encoder, fine.
+  (b) *Text-as-thought* — language as a medium of abstraction/planning — must NOT go
+  text→pixels→vision encoder: the symbolic structure is already in the tokens, and
+  rendering throws it away to make a model re-derive a lossy shadow. So the
+  "translate text to vision first, keep one encoder" path is right for (a), wrong for
+  (b). (Distinct from text→video→latent, which stays legit — its job is *generating
+  experience to train on* (install-arch 2b), not *binding meaning to belief*. Same
+  operation, different job.)
+
+- **The deep question is symbol→belief/memory binding, and it's more than image-gen.**
+  A word should be a *pointer into the region of belief space* the agent has
+  experienced as that thing (a "door" = the cluster of latent states/affordances of
+  doors), not a pixel pattern. Meaning = learned alignment between symbol and belief
+  region — the [[#What it is]] binding/installation problem at its deepest. This is
+  also where language becomes a CAPABILITY jump, not an I/O channel (the ape↔human gap:
+  language as the big cognitive difference): a compositional, recombinable abstraction
+  layer over latent state lets the agent **imagine in abstractions, not pixels** —
+  "what if I had a pickaxe" is trivial symbolically, near-impossible pixel-by-pixel;
+  counterfactuals, negation, the-not-yet-seen become representable ⇒ systematic
+  generalization (the thing flat sensory latents are worst at). Binding language in
+  adds a NEW KIND OF LATENT the imagination can run on.
+
+- **LLM-as-aligned-source-into-belief = PAN's leverage, done experience-primary.**
+  PAN gets its power by making the LLM the *substrate* (capped at the text prior); the
+  clean alternative gets the SAME pretrained symbolic structure as an *overridable
+  source aligned into our belief space*. Concrete sketch: keep the frozen vision
+  encoder for perception; add a separate *language pathway* mapping tokens (seeded by
+  LLM embeddings, for the free associative/compositional structure — see association-
+  matrix section) into the SAME belief space the world model uses, with the alignment
+  LEARNED BY GROUNDING (text bound to the experiences it describes). Then imagination
+  runs over a latent that is simultaneously experiential and symbolic. Closest existing
+  work: **Dynalang** (language as a predicted modality inside Dreamer); this thesis goes
+  past it on two axes — deep symbol↔belief *binding* (not just predicting tokens) and
+  *reusing the LLM prior* rather than learning symbolic structure from scratch. See
+  PAN/GLP + Critiques-of-World-Models in [[QUEUE]] (the substrate-vs-source axis) and
+  [[generative-vs-predictive]].

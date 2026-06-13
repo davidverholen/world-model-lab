@@ -44,6 +44,24 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
 - [ ] arxiv:2406.19320 Δ-IRIS context-aware tokenization · arxiv:2406.01361 DART
       (Atari in a world of tokens) — token-WM efficiency line, lower priority
 
+## Imagination-module substrate (forward / modular-reuse thread; raised in conversation 2026-06-13)
+
+OPEN QUESTION, NOT A DECISION. When a future modular design asks "what powers the
+imagination module," read these two as the bracketing pair before forming any view —
+they span the design space. Flagged explicitly because the question arose from an
+off-the-cuff idea (could a Cosmos-scale video model BE the Dreamer imagination loop?);
+do not let that framing prejudge the read. Both items already in the KB:
+- diffusion-in-(latent/pixel): arxiv:2405.12399 DIAMOND (queued below under Medium) —
+  small diffusion WM an RL agent learns inside; the existence proof that diffusion WMs
+  work at Atari scale (contrast: Cosmos-scale video diffusion does NOT fit a tight
+  per-grad-step imagination loop — latency/pixel/non-differentiable).
+- frozen-encoder + small action-conditioned predictor: V-JEPA 2-AC, inside
+  arxiv:2506.09985 (V-JEPA 2; already a verified source) — reuse a big pretrained
+  encoder, learn a small dynamics model on top. The "reuse the representation, not the
+  simulator" path; pairs with DINO-WM (2411.04983) and the DINOv3 frozen-encoder
+  retention hypothesis (above).
+Read both neutrally; the decision (if any) belongs to a later ADR, not this note.
+
 ## Medium (context and alternatives)
 
 - [ ] arxiv:2508.10104 DINOv3 (Meta, verified 2026-06-12) — 7B SSL vision backbone,

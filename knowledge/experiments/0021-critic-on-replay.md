@@ -7,7 +7,7 @@ verified: true
 last_reviewed: 2026-06-13
 ---
 
-# 0021: Critic-on-replay — grounding the imagined value (pre-registered) [reuse DreamerV3]
+# 0021: Critic-on-replay — grounding the imagined value [CONFIRMED, kept as recipe default]
 
 ## Hypothesis
 
@@ -45,11 +45,47 @@ Command per seed:
 
 ## Result
 
-_pending (dispatched)_
+**Prediction (i) confirmed — value calibrated; (ii) nuanced — ignition delayed, not
+broadened.** 3 seeds, DoorKey-6x6, commit 7c6d1bd, `--repval 0.3`. Per-round eval +
+`imagined_return`:
+
+| seed | eval r0–6 | best | imagined_return trend |
+|---|---|---|---|
+| s0 | 0,0,0,0,0,0,**0.15** | 0.15 | 0.6→0.4→0.2→…→**1.04** |
+| s1 | 0,0,0,0,0,0,0 | 0.00 | **3.2→1.6→1.3→1.4→1.1→1.0** |
+| s2 | 0,0,0,0,0,0,**0.55** | 0.55 | 1.9→0.55→…→**1.24** |
+
+`imagined_return` was pulled from 0019's inflated 2–7 down to **~1.0 (real scale)** —
+s1's clean 3.2→1.0 is the mechanism working exactly as designed. Ignition still
+occurred (s2 0.55, s0 0.15) but **late** (round 6 vs 0019's rounds 3–5), and crucially
+*at honest value* (s2 0.55 with imagined_return 1.24, not inflated). Endpoint
+trajectories are **opposite**: 0019's inflated runs peaked mid then collapsed at round 6
+(0.55→0.00); 0021's calibrated runs are *rising* at round 6 (0.00→0.55). Aggregate best
+is a wash and seed-reshuffled (0019: 0/0.55/0.35; 0021: 0.15/0/0.55).
 
 ## Lesson
 
-_pending_
+**Critic-on-replay (DreamerV3 β_repval) works as advertised — independent confirmation
+of the Dreamer design on our stack** (sparse MiniGrid, from scratch): it grounds the
+critic in real returns and calibrates imagined value (inflated→~1). Validates both the
+recipe and our implementation. Caveat: confirmed the *core mechanism* on a sparse task;
+DreamerV3 pairs it with two-hot + percentile-norm on denser rewards (full recipe still
+to harden — next, on the way to Crafter).
+
+The trade is **early-ignition speed for honest value + a healthier endpoint**: less
+imagined optimism → slower bootstrap (ignition delayed) but NOT prevented, and the
+calibrated runs climb at the end where inflated runs collapse. For Crafter — denser
+rewards, deep tree, where value inflation would be far more damaging — calibrated value
+is what we want, so **critic-on-replay is kept as the recipe default** (`--repval` 0.0→0.3).
+DECISION (Dave): bank the MiniGrid imagination loop as good-enough-and-now-calibrated;
+don't over-polish a stepping stone (the marginal DoorKey seed isn't our bottleneck);
+move to recipe-hardening → Crafter.
+
+**Process meta-lesson (2nd time this thread):** an interim read at rounds 0–5 showed flat
+zero and I concluded "calibration killed ignition" — the final round flipped it (late
+ignition). Partial-data conclusions burned us again (cf. the 0019 smoke-test promotion).
+Standing rule reinforced: this flywheel can ignite at the *last* round — wait for the
+full run before concluding.
 
 ## Links
 
