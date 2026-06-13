@@ -222,6 +222,14 @@ verify at ingest.
       class) reading-to-learn-DYNAMICS env. CrafText covers rich+instructions; RTFM covers
       dynamics+toy. The intersection (rich + dynamics) is the candidate gap → "Crafter-with-manuals"
       DEVELOPMENT testbed (referent-swap + tutorial-reveals-hidden-recipe), real Minecraft for DEPLOY.
+- SPEC (maintainer, 2026-06-14): = "CrafText's rich world + RTFM's MANDATORY reading + PyTorch",
+      built as a manual-layer ON our existing CrafterEnv (not a new engine). The HARD part is the env
+      design, not the plumbing: make reading mandatory by per-episode randomizing the crafting graph /
+      referent map (RL can't discover, text can reveal) WITHOUT making it unsolvable. Verification =
+      ablate {with-manual, no-manual, SWAPPED-manual}: grounded iff with >> without AND behaviour
+      follows the swapped manual (the referent-swap gold standard). Gate before building: deep-verify
+      the gap + ingest CrafText/RTFM/SILG/LDD for task designs + baselines. Downstream of the Crafter
+      foundation; not now.
 ### Generated video as experience (architecture 2b)
 - [ ] arxiv:2603.28489 Video Generation Models as World Models survey (2026) —
       map of the area; + awesome-list github.com/ziqihuangg/Awesome-From-Video-Generation-to-World-Model
