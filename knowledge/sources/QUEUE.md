@@ -183,3 +183,7 @@ paper is "MAINTAINING Plasticity in Deep Continual Learning".
       discovery, skills as latent-conditioned policies
 - [ ] Ross & Bagnell DAgger (AISTATS 2011) — BC compounding error O(eT^2) + on-policy
       fix; background for why exp 0016 failed (cite, likely no full ingest needed)
+- [ ] arxiv:2007.09560 Hoel, "The Overfitted Brain: Dreams evolved to assist
+      generalization" (Patterns 2021; verified 2026-06-13) — dreams as
+      anti-overfitting data augmentation; ties dreaming to our primacy-bias/retention
+      thread; backs concepts/dreaming.md

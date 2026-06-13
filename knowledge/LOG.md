@@ -595,3 +595,15 @@ STRUCTURALLY for 3D occlusion/amodal-completion (object permanence) — the stro
 real case. Corrected over-attribution (3D-hard != generative-key; DreamerV3 does 3D
 latent). Resolution: latent core + optional generative module per mode; testable
 (text->latent direct vs render-and-re-encode at Messenger scale).
+
+## [2026-06-13] curation | dreaming concept (Dave) + lazy-generation refinement + text→video→latent
+
+Dreaming page (backlog): Dave's relaxed-constraints + weak-writeback = Hoel
+overfitted-brain (verified arXiv:2007.09560) — dreams = anti-overfitting augmentation;
+over-training triggers dreams = OUR primacy bias. Two functions: creativity-seeding +
+latent-dream-augmentation (cheap testable retention regularizer, no gen-AI). Also:
+generative-vs-predictive refined — generation is LAZY/attention-gated (latent tracks
+persistence/object-permanence; render on demand only), demoting last night's
+continuous-amodal-generative claim (Dave's correction); text→latent solved by
+composition text→video→encoder (seams: domain video-gen, encoder robustness to
+generated frames, trust-gate). Hoel queued.

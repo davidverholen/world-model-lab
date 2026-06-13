@@ -136,3 +136,20 @@ mode-switched by the configurator ([[architecture-strategy]]). Compatible, not
 either/or. And **testable**: can we map text→belief-latent DIRECTLY (LeCun-pure), or
 must we render→re-encode (generative)? Cheap test at Messenger/RTFM scale — earn the
 generative module with evidence rather than assume it.
+
+## Generation is lazy & attention-gated (Dave, 2026-06-13 — refines the amodal case)
+
+Correction to "3D occlusion ⇒ generative": what occlusion needs is the LATENT/belief
+to TRACK persistence (object permanence as a fact held in the belief vector: "person
+XY still behind me"), NOT continuous pixel reconstruction. Generation is LAZY and
+ATTENTION-GATED — invoked only when exact visual detail is actually needed; otherwise
+the abstract latent suffices. Compute-efficient AND cognitively accurate (you don't
+render the room behind you every tick). ⇒ persistent world-state stays latent
+(LeCun); generation is an occasional on-demand op, not a continuous requirement.
+
+Knowledge-import pipeline (Dave): text→latent is solved by COMPOSITION —
+text→video (solved, domain-specific text-conditioned gen) → video→latent (our
+encoder). Seams: (1) needs a domain video generator (Oasis/Genie-class for
+Minecraft, text-hooked); (2) encoder must survive generated-frame distribution shift
+(WBench "collapse under minor visual shifts"); (3) resulting latents low-trust →
+corroboration gate. Shape right; seams known.
