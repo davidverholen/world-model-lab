@@ -32,6 +32,7 @@ class CrafterEnv(gym.Env):
         self._env = crafter.Env(seed=seed, **self._kwargs)
         self.action_space = gym.spaces.Discrete(self._env.action_space.n)
         self.observation_space = gym.spaces.Box(0.0, 1.0, (3, size, size), dtype=np.float32)
+        self.render_size = 512  # viewing resolution (independent of the agent's obs size)
 
     @staticmethod
     def _chw(obs: np.ndarray) -> np.ndarray:
@@ -51,7 +52,9 @@ class CrafterEnv(gym.Env):
         return self._chw(obs), float(reward), terminated, truncated, info
 
     def render(self):
-        return self._env.render()
+        # crisp high-res render of the SAME scene (not an upscale of the 64x64 obs);
+        # the agent still sees obs at `size`. render_size is settable for viewing.
+        return self._env.render((self.render_size, self.render_size))
 
     def close(self):
         pass

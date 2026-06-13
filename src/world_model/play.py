@@ -56,6 +56,7 @@ def main() -> None:
     parser.add_argument("--candidates", type=int, default=1024, help="MPC imagined futures/step")
     parser.add_argument("--iters", type=int, default=3, help="CEM refinement iterations")
     parser.add_argument("--record", type=str, default=None, help="save GIF here instead of window")
+    parser.add_argument("--window-size", type=int, default=600, help="Crafter view/window px")
     parser.add_argument(
         "--epsilon",
         type=float,
@@ -75,6 +76,7 @@ def main() -> None:
             from world_model.envs import make_crafter_env
 
             env = make_crafter_env(length=500)
+            env.render_size = args.window_size  # crisp high-res viewing render
             agent = RSSMActorAgent.from_checkpoint(
                 args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
             )
@@ -121,7 +123,7 @@ def main() -> None:
 
     frames: list[np.ndarray] = []
     successes = 0
-    viewer = _crafter_viewer() if (crafter and not args.record) else None  # live Crafter window
+    viewer = _crafter_viewer(args.window_size) if (crafter and not args.record) else None
     try:
         for episode in range(args.episodes):
             obs, _ = env.reset(seed=args.seed + episode)
@@ -130,10 +132,7 @@ def main() -> None:
             total_reward, steps, done, info = 0.0, 0, False, {}
             while not done:
                 if args.record:
-                    frame = env.render()
-                    if crafter:  # 64->256 nearest-neighbour so pixel-art is watchable
-                        frame = np.repeat(np.repeat(frame, 4, axis=0), 4, axis=1)
-                    frames.append(frame)
+                    frames.append(env.render())  # Crafter renders high-res directly
                 elif viewer is not None:  # live Crafter window
                     if not _crafter_show(viewer, env.render(), args.fps):
                         raise KeyboardInterrupt
