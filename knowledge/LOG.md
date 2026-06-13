@@ -483,3 +483,11 @@ hardcoded. KEY DESIGN DIRECTION: the Mode-1 actor we distill should be hierarchi
 (manager-worker), unifying actor + hierarchy + temporal-abstraction + language
 threads. 5 sources queued (Director, FuN, Option-Critic, empowerment, DIAYN).
 Dave accepted rung-2b as MET (63% > PPO 37%, stable) — pivot to actor confirmed.
+
+## [2026-06-13] curation | architecture-testing tier ladder added (Dave)
+
+hierarchy-and-credit page gains a 3-tier testing ladder: (1) Empty/DoorKey =
+mechanism debugging (fast loop); (2) MiniGrid KeyCorridor/ObstructedMaze/MultiRoom
+= cheap flat-vs-hierarchical credit A/B (negative = cheap kill, positive =
+necessary-not-sufficient); (3) Crafter = the decisive skill-reuse claim. Principle:
+cheapest env that reveals the effect; never debug architecture on Crafter.

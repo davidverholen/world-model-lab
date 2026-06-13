@@ -75,6 +75,24 @@ for flat MC variance). So this is not a detour from the Crafter pivot — it is 
 central rung-3 design question, to be folded into the actor work rather than run
 separately.
 
+## Where to test it — three-tier ladder (Dave, 2026-06-13)
+
+Apply the environment-ladder philosophy to ARCHITECTURE testing: use the cheapest
+env that can reveal the specific effect, pay for the expensive env only when the
+question demands it.
+
+| tier | env | question it answers | cost | what it CANNOT show |
+|---|---|---|---|---|
+| 1 mechanism | Empty / DoorKey | does the manager-worker actor run/train/stay stable? | ~minutes | hierarchy's value (flat already solves) |
+| 2 credit | MiniGrid **KeyCorridor / ObstructedMaze / MultiRoom-N6** | does hierarchy help long-horizon sparse credit (flat-vs-hier A/B)? | ~minutes–1 h, CPU-cheap | skill *reuse* (tiny subgoal vocabulary, little cross-context transfer) |
+| 3 reuse | Crafter | does hierarchy enable reusable/transferable skills + deep tech tree? | 8–12 h GPU/run | — (the decisive, publishable claim) |
+
+Discipline: get the architecture correct+stable at tier 1 (fast loop, dozens of
+iterations/day), run the cheap flat-vs-hierarchical A/B at tier 2 (a negative here
+is a loud cheap kill signal; a positive is necessary-but-not-sufficient
+encouragement), and only then pay Crafter's cost for the tier-3 capability claim.
+Never debug architecture on Crafter (~2 iterations/day).
+
 ## Links
 
 [[temporal-abstraction]] · [[language-grounding]] · [[agent-architecture]] ·
