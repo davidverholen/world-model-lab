@@ -72,13 +72,17 @@ def wm_train(
 
         state = rssm.initial(b, device)
         prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+        rh_twohot = hasattr(reward_head, "twohot_loss")  # bounded reward head (Crafter) vs MSE
         kl = recon = r_l = v_l = c_l = torch.zeros((), device=device)
         for k in range(w):
             state, prior, post = rssm.obs_step(state, prev_a, embed[:, k])
             belief = rssm.belief(state)
             kl = kl + kl_balanced(post, prior, free_bits)
             recon = recon + F.mse_loss(recon_head(belief), embed[:, k].detach())
-            r_l = r_l + reward_loss(reward_head(belief, actions[:, k]), rewards[:, k])
+            if rh_twohot:
+                r_l = r_l + reward_head.twohot_loss(belief, actions[:, k], rewards[:, k])
+            else:
+                r_l = r_l + reward_loss(reward_head(belief, actions[:, k]), rewards[:, k])
             v_l = v_l + value_loss(value_head(belief), returns[:, k])
             c_l = c_l + F.binary_cross_entropy_with_logits(continue_head(belief), 1.0 - dones[:, k])
             prev_a = actions[:, k]

@@ -60,3 +60,42 @@ class TwoHotValueHead(nn.Module):
         logits = self.net(x)
         tgt = self._twohot(symlog(target_scalar.detach()))
         return -(tgt * F.log_softmax(logits, dim=-1)).sum(-1).mean()
+
+
+def _twohot_encode(y: torch.Tensor, bins: torch.Tensor) -> torch.Tensor:
+    """Two-hot encode (already symlog-space, clamped) y (...,) → (..., len(bins))."""
+    y = y.clamp(bins[0], bins[-1])
+    below = torch.clamp((bins <= y[..., None]).long().sum(-1) - 1, 0, len(bins) - 1)
+    above = torch.clamp(below + 1, 0, len(bins) - 1)
+    b, a = bins[below], bins[above]
+    w_above = torch.where(a > b, (y - b) / (a - b), torch.zeros_like(y))
+    target = torch.zeros(*y.shape, len(bins), device=y.device)
+    target.scatter_add_(-1, below.unsqueeze(-1), (1 - w_above).unsqueeze(-1))
+    target.scatter_add_(-1, above.unsqueeze(-1), w_above.unsqueeze(-1))
+    return target
+
+
+class TwoHotRewardHead(nn.Module):
+    """Action-conditioned two-hot reward predictor (DreamerV3-style, bounded). Drop-in for
+    RewardHead: forward(latent, action) returns the symexp expectation (scalar). Bounds per-step
+    reward so the imagination AC can't exploit an over-predicted action (exp 0023 diagnostic: the
+    agent spammed mk_iron_sword because the MSE reward head over-predicted it)."""
+
+    def __init__(self, state_dim, num_actions, num_bins=255, vmin=-20.0, vmax=20.0, hidden=256):
+        super().__init__()
+        self.action_embed = nn.Embedding(num_actions, hidden)
+        self.net = nn.Sequential(
+            nn.Linear(state_dim + hidden, hidden), nn.SiLU(), nn.Linear(hidden, num_bins)
+        )
+        self.register_buffer("bins", torch.linspace(vmin, vmax, num_bins))
+
+    def _logits(self, latent, action):
+        return self.net(torch.cat([latent, self.action_embed(action)], dim=-1))
+
+    def forward(self, latent, action):
+        probs = F.softmax(self._logits(latent, action), dim=-1)
+        return symexp((probs * self.bins).sum(-1))
+
+    def twohot_loss(self, latent, action, target):
+        tgt = _twohot_encode(symlog(target.detach()), self.bins)
+        return -(tgt * F.log_softmax(self._logits(latent, action), dim=-1)).sum(-1).mean()

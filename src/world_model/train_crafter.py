@@ -19,10 +19,10 @@ import torch
 
 from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_crafter_env
-from world_model.models import Actor, FrozenDinoEncoder, RewardHead, ValueHead
+from world_model.models import Actor, FrozenDinoEncoder, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.rssm import RSSM
-from world_model.models.twohot import TwoHotValueHead
+from world_model.models.twohot import TwoHotRewardHead, TwoHotValueHead
 from world_model.train_rssm import imagine_ac, wm_train
 from world_model.training import ReplayBuffer, Transition
 
@@ -121,7 +121,7 @@ def main() -> None:
     rssm = RSSM(embed_dim=ed, num_actions=n_act).to(device)
     sd = rssm.state_dim
     recon_head = torch.nn.Linear(sd, ed).to(device)
-    rew = RewardHead(latent_dim=sd, num_actions=n_act).to(device)
+    rew = TwoHotRewardHead(state_dim=sd, num_actions=n_act).to(device)  # bounded reward (exp 0025)
     val = ValueHead(state_dim=sd).to(device)
     cont = ContinueHead(state_dim=sd).to(device)
     actor = Actor(state_dim=sd, num_actions=n_act).to(device)
