@@ -664,3 +664,21 @@ reclassifying them is a separate judgment call (deferred). environment-ladder ke
 ADR-0003 (frozen decision) + design-page (living spec) split. Also resolved flag (1)
 above: "pension" wording normalized to "freeze/frozen" across exps 0014/0015 (Dave
 approved a clearer word). Link graph re-verified closed post-move.
+
+## [2026-06-13] curation | agent-architecture synced to code: 4 → 5 layers
+
+Checked design/agent-architecture against the actual src/world_model/ (Explore map).
+The page was an accurate snapshot of the exp-0001–0010 MPC+value system but stale
+across all layers vs the 0016–0019 code: missing the learned actor (second acting
+mode), the stochastic RSSM world model, the continue + reconstruction heads, and the
+entire imagination actor-critic training loop. Per Dave ("the model should follow the
+architecture, not stick to 4 layers"), promoted the imagination actor-critic to a real
+**L4 BEHAVIOR** layer (policy gradient + λ-return critic w/ EMA target); the flywheel
+moved L4 → **L5**. Updates: title now count-agnostic ("Nested Optimization Layers");
+mermaid redrawn (5 subgraphs, two acting modes L1-search + L4-amortized feeding L5);
+algorithm table gained the L4 row + RSSM/continue in L2/L3 + 0017-0019 failure modes;
+prose contrasts Dreamer(no L1)/TD-MPC2/PPO(model-free) against our layering and locates
+model-exploitation at L4. Renumber rippled to one cross-ref: capability-map "4 → 5
+optimization layers" (the (L1)/(L2) maps in lecun-2022-path are stable, untouched).
+FLAGGED (separate, not fixed): lecun-2022-path:38 calls stochastic latents "future" —
+now built (RSSM, 0019); that page wants a refresh too.

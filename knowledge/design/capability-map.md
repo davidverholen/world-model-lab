@@ -45,6 +45,6 @@ KeyCorridor). Never first-establish a capability on Crafter.
 
 ## Links
 
-[[agent-architecture]] (the CURRENT system's 4 optimization layers — this page is
+[[agent-architecture]] (the CURRENT system's 5 optimization layers — this page is
 the FUTURE capability set) · [[hierarchy-and-credit]] · [[language-grounding]] ·
 [[temporal-abstraction]] · [[environment-ladder]] · [[0005-minecraft-milestone]]
