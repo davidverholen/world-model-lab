@@ -9,7 +9,7 @@ last_reviewed: 2026-06-13
 
 # 0006: Crafter (original) over Craftax for rung 3
 
-**Status:** accepted (2026-06-13, Dave)
+**Status:** accepted (2026-06-13, maintainer)
 
 ## Context
 

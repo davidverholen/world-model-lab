@@ -9,7 +9,7 @@ last_reviewed: 2026-06-12
 
 # 0005: Minecraft as the pre-real-world milestone — three learning signals
 
-**Status:** accepted (2026-06-12, proposed by Dave)
+**Status:** accepted (2026-06-12, proposed by the maintainer)
 
 ## Context
 
@@ -35,7 +35,7 @@ research risk:
    not merely LLM-as-planner (Voyager direction) — though that is the pragmatic
    fallback.
 
-**Text-signal staircase (Dave, 2026-06-12):** de-risk language grounding on cheap
+**Text-signal staircase (maintainer, 2026-06-12):** de-risk language grounding on cheap
 envs first — (i) Messenger/RTFM, where reading the per-episode manual is
 *necessary* to win (clean grounding signal, MiniGrid-scale compute);
 (ii) text-augmented Crafter, where tutorials are helpful-but-not-necessary

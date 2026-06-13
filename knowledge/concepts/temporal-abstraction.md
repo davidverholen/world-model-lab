@@ -11,14 +11,14 @@ last_reviewed: 2026-06-12
 
 ## What it is
 
-The critique (raised by Dave via Stephen E. Robbins, Bergson lineage): current
+The critique (raised by the maintainer via Stephen E. Robbins, Bergson lineage): current
 world models — ours included — factorize experience as z_{t+1} = f(z_t, a_t) at a
 fixed tick. A real *event* ("stirring coffee") is (a) temporally extended with
 internal unity, (b) driven by an extended action (a motor policy with feedback,
 not a keypress), (c) multimodally bound (sight/sound/feel as one). Flip-book
 models represent none of that directly. The Bergsonian core (lived duration ≠
 sequence of snapshots) survives any discretization; the engineering bet (LeCun,
-and Dave's synthesis) is that a HIERARCHY of timescales captures enough: high
+and the maintainer's synthesis) is that a HIERARCHY of timescales captures enough: high
 levels treat whole time-series as units, low levels keep frame detail.
 
 ## The converging research lines (rarely cite each other)

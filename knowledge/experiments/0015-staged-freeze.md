@@ -18,7 +18,7 @@ clears BOTH bars: mean ≥55% AND no >20pp post-(first-)freeze crash. Bottom-up
 progressive freezing principle imported from FreezeOut/LayerLock (supervised/SSL);
 uncovered in flywheel RL. Counter-outcome: GRU freeze caps means again (à la
 ftrunk) → the frontier is fundamental at this budget → propose budget-tier
-extension + PPO re-baseline to Dave.
+extension + PPO re-baseline to the maintainer.
 
 Arms (3 seeds, UTD ×4, standard protocol): (a) enc@2+gru@4; (b) enc@2+gru@5.
 Comparators: fenc@2 47% stable / fenc@4 60% crashy / utd 63% violent.
@@ -53,7 +53,7 @@ recovers the ftrunk ceiling, regardless of timing. No staged config clears both 
    frozen outright; it needs a gentler regularizer, not a hard freeze. Untested levers from
    the literature gate: data augmentation (Ma 2024), FAU-gated Adaptive-RR
    scheduling, churn reduction — all deferred pending the strategic call below.
-3. **Strategic inflection (for Dave):** rung-2b's actual exit criterion — "beat
+3. **Strategic inflection (for the maintainer):** rung-2b's actual exit criterion — "beat
    model-free on sample efficiency" — was MET at exp 0012 (63% vs PPO 37% at equal
    env budget; best-checkpoint selection is a legitimate technique). The crash-free
    "both bars" target was our own added rigor, now characterized as a frontier.

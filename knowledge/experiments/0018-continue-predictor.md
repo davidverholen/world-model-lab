@@ -59,7 +59,7 @@ old finding), so there is no honest gradient toward real success, only toward
 exploitation. Dreamer's defenses we LACK: stochastic latents (RSSM — a deterministic
 model is maximally exploitable) and return normalization.
 
-**Strategic fork (Dave's call):**
+**Strategic fork (maintainer's call):**
 (a) Deepen the imagination AC toward real-Dreamer: stochastic latents / shorter
     horizon (H=5, cheap one-variable test of the compounding-error hypothesis) /
     off-distribution uncertainty penalty. Bigger build, the "faithful" path.

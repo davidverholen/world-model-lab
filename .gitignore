@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Editor / IDE (personal workflow config; keep local)
+.vscode/
+
 # Experiment artifacts
 runs/
 experiments/runs/

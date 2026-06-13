@@ -64,7 +64,7 @@ success-frac 0.25) + `--updates-per-round 6000` everywhere;
    plasticity preserver is an untested lever for us.
 4. Exp 0014 (pre-registered, autonomous): **freeze-round sweep** — fenc@3 and
    fenc@4 vs fenc@2 (existing), same budget, 6 runs. Bar unchanged. If freeze@3/4
-   clears both bars → retention SOLVED at rung 2 → propose 2b closure to Dave +
+   clears both bars → retention SOLVED at rung 2 → propose 2b closure to the maintainer +
    pivot to the actor thread.
 
 ## Links

@@ -229,7 +229,7 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
 - [ ] arxiv:2506.09270 Uncertainty Prioritized Experience Replay (RLC 2025)
 - [ ] arxiv:2410.18082 Prioritized Generative Replay · arxiv:2602.14351 WIMLE
       — NOTE the gap that keeps 2b novel: all weight by the GENERATOR's
-      self-confidence; reality-corroborated cross-source priors (Dave's gate)
+      self-confidence; reality-corroborated cross-source priors (maintainer's gate)
       appear uncovered
 ### Self-generated hypotheses / directed exploration
 - [ ] arxiv:2005.05960 Plan2Explore (id confirmed) — ensemble-disagreement
@@ -255,7 +255,7 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
 - [ ] arxiv:2504.17490 Plasticine benchmark · arxiv:2410.07994 Neuroplastic
       Expansion — plasticity tooling/methods (lower priority)
 
-## Hierarchy / subgoal emergence (Dave's credit-assignment brainstorm 2026-06-13; ids to verify)
+## Hierarchy / subgoal emergence (maintainer's credit-assignment brainstorm 2026-06-13; ids to verify)
 - [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
       noted under temporal-abstraction) — manager-worker subgoals INSIDE a Dreamer
       world model; the most direct fit for a hierarchical actor

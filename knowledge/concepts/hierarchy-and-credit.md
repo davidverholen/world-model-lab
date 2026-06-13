@@ -9,7 +9,7 @@ last_reviewed: 2026-06-13
 
 # Hierarchy & Credit Assignment: from flat value to emergent subgoals
 
-## The question (Dave, 2026-06-13)
+## The question (maintainer, 2026-06-13)
 
 DoorKey pays reward only at the green goal; key-pickup and door-opening yield
 nothing. Is the agent's solution therefore "random / acausal"? Will causality
@@ -43,7 +43,7 @@ architecture, not just more training.
 
 ## Unsupervised, context-conditional subgoal emergence (no hardcoding)
 
-Honoring Dave's constraint (subgoals needed only when the door blocks → must be
+Honoring the maintainer's constraint (subgoals needed only when the door blocks → must be
 discovered, latent, conditional):
 
 1. **Bottleneck discovery** — subgoals = states most successful trajectories funnel
@@ -75,7 +75,7 @@ for flat MC variance). So this is not a detour from the Crafter pivot — it is 
 central rung-3 design question, to be folded into the actor work rather than run
 separately.
 
-## Where to test it — three-tier ladder (Dave, 2026-06-13)
+## Where to test it — three-tier ladder (maintainer, 2026-06-13)
 
 Apply the environment-ladder philosophy to ARCHITECTURE testing: use the cheapest
 env that can reveal the specific effect, pay for the expensive env only when the

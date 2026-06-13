@@ -66,7 +66,7 @@ PPO is ahead at every comparable budget. Sweep artifacts: `runs/sweeps/exp0007/`
 4. Comparisons need full curves, not endpoints — both protocols already emit
    `eval_success=` per checkpoint, and /sweep aggregated them cleanly (first
    dogfood: worked, table above pasted from RESULTS.md + logs).
-5. Proposal for [[environment-ladder]] (owner: human, needs Dave's sign-off):
+5. Proposal for [[environment-ladder]] (owner: human, needs the maintainer's sign-off):
    rung-2 exit splits into "solve DoorKey under partial obs" (✅ exp 0006) and
    "beat model-free on sample efficiency" — the latter moves to the smallest env
    where PPO struggles at budget (find it in exp 0008).

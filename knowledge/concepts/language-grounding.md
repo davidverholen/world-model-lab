@@ -12,7 +12,7 @@ last_reviewed: 2026-06-12
 ## What it is
 
 The text-signal goal (ADR [[0005-minecraft-milestone]]) requires two capabilities
-our agent lacks entirely (formulated by Dave, 2026-06-12):
+our agent lacks entirely (formulated by the maintainer, 2026-06-12):
 
 1. **Binding**: map text entities ("furnace") onto visual/latent concepts learned
    from play — needs a shared or aligned embedding geometry (VL-JEPA/CLIP
@@ -23,7 +23,7 @@ our agent lacks entirely (formulated by Dave, 2026-06-12):
    Today all knowledge enters via gradients on experienced transitions; text
    demands knowledge that arrives before experience.
 
-## Language ≠ the subgoal gap; language ≠ a plugged-in LLM (Dave, 2026-06-13)
+## Language ≠ the subgoal gap; language ≠ a plugged-in LLM (maintainer, 2026-06-13)
 
 Two refinements that set the order of operations:
 
@@ -44,7 +44,7 @@ Two refinements that set the order of operations:
 
 ## Verifying grounding is REAL (not a shortcut) — the falsifiability battery
 
-The hard part (Dave): how to check the word is connected to the internal model, not
+The hard part (maintainer): how to check the word is connected to the internal model, not
 a spurious correlation. Tests, weakest → strongest:
 
 1. **Imagination match**: text "get the key" → latent rollout ends in a
@@ -74,20 +74,20 @@ or a custom DoorKey-with-manual) — Crafter is where grounded language PAYS OFF
 |---|---|---|---|---|
 | 1 | **text-as-context** — tutorial embedding carried in the belief state; dynamics head conditions on it | in-context (no weight change) — world-model ICL | Dynalang; EMMA's entity attention (Messenger) | low — first Messenger experiment |
 | 2a | **text-as-data, own dreams** — world model imagines rollouts from text; trains on them | gradients, via synthetic experience | (apparently unexplored in latent WMs — original-idea candidate, run wall protocol before claiming) | medium — but circular: requires text understanding first |
-| 2b | **text-as-data, external imagination engine** (Dave, 2026-06-12) — text → domain video generator (Oasis / Dreamer-4-WM / Genie-3 class) → IDM action labels (VPT) → replay as trust-weighted synthetic experience → **corroboration gate**: real play validates/reinforces or discounts ("verstärkt oder nicht") | gradients, via externally generated experience | Oasis, Cosmos (synthetic-data platform), VPT IDM; gate ≈ MBPO's model-trust lessons | medium; breaks 2a's circularity — the external model carries the text grounding; unifies ADR-0005 signals 2+3 (text rides the video path) |
+| 2b | **text-as-data, external imagination engine** (maintainer, 2026-06-12) — text → domain video generator (Oasis / Dreamer-4-WM / Genie-3 class) → IDM action labels (VPT) → replay as trust-weighted synthetic experience → **corroboration gate**: real play validates/reinforces or discounts ("verstärkt oder nicht") | gradients, via externally generated experience | Oasis, Cosmos (synthetic-data platform), VPT IDM; gate ≈ MBPO's model-trust lessons | medium; breaks 2a's circularity — the external model carries the text grounding; unifies ADR-0005 signals 2+3 (text rides the video path) |
 | 3 | **text-as-weights** — hypernetwork: tutorial → Δθ of dynamics head | explicit fast weights | Schmidhuber 1991 fast-weight programmers ([[intellectual-lineage]]); knowledge-editing (ROME/MEMIT) | high |
 
 Prediction worth pre-registering when the thread opens: (1) suffices for
 Messenger-scale (manual fits in context); (2)/(3) become necessary when tutorials
 exceed context or must persist across episodes (Minecraft wiki scale).
 
-The cognitive analogy (Dave): humans convert text into mental imagery/simulation
+The cognitive analogy (maintainer): humans convert text into mental imagery/simulation
 ([[intellectual-lineage]]: Craik's "try it in the head"), which becomes belief only
 through corroboration against experience. Human imagination is not exact simulation
 either — it works *because of* constant verification and reinforcement, not despite
 inexactness. So hallucination is not disqualifying; the gate IS the mechanism.
 
-**Unified trust-weighted replay (Dave, 2026-06-12):** every transition carries a
+**Unified trust-weighted replay (maintainer, 2026-06-12):** every transition carries a
 trust weight w. The SOURCE sets the prior (own validated play: high; others'
 IDM-labeled video: medium; generated video: low; own dreams: lowest); CORROBORATION
 updates it (consistency with verified experience raises w, contradiction lowers it);
@@ -101,7 +101,7 @@ transitions into Crafter replay with low priors; verify the gate discounts them
 and clean synthetic data earns weight. Gate failure modes are
 [[retention]]-adjacent (synthetic data = another distribution shift).
 
-## Horizon: self-generated hypotheses (Dave, 2026-06-12)
+## Horizon: self-generated hypotheses (maintainer, 2026-06-12)
 
 Once binding + installation + the trust gate exist, the source of new beliefs can
 shift from external text to the agent itself: compose novel candidate dynamics in
@@ -126,9 +126,9 @@ on synthetic data — another distribution-shift source the flywheel lessons app
 (grounding rides on top of the hierarchical actor — its subgoals/events are the
 attachment points words bind to)
 
-## Word associations: an "association matrix" IS a word embedding (Dave, 2026-06-13)
+## Word associations: an "association matrix" IS a word embedding (maintainer, 2026-06-13)
 
-Dave: humans have associations with words; the word itself "lands in latent space".
+The maintainer: humans have associations with words; the word itself "lands in latent space".
 Proposed associated-words-as-metadata, or an association matrix — "not sure it
 scales." Sharpening:
 
@@ -136,7 +136,7 @@ scales." Sharpening:
   **associative** (word↔word: "key"↔"lock"↔"open"). Humans have both.
 - **An association matrix IS a word embedding.** Distributional semantics: word2vec/
   GloVe implicitly factorize a (shifted-PMI) co-occurrence matrix (Levy & Goldberg
-  2014). So don't rebuild it as metadata (Dave's "doesn't scale" instinct is right —
+  2014). So don't rebuild it as metadata (the maintainer's "doesn't scale" instinct is right —
   the scalable form is the dense embedding VECTOR = compressed associations). Import
   it free from a pretrained text embedding/LLM.
 - Architectural move: take the associative structure for free; BIND it to OUR grounded
@@ -149,7 +149,7 @@ scales." Sharpening:
   tutorial words connect to the agent's world even for unfamiliar words. ⇒ grounding
   is two-hop: word ↔ (embedding/associations) ↔ grounded concepts.
 
-## Ideas to look into later: symbols-as-thought, not pixels (Dave, 2026-06-13)
+## Ideas to look into later: symbols-as-thought, not pixels (maintainer, 2026-06-13)
 
 Forward ideas, not decisions — flagged to revisit when the language rung opens. They
 sharpen HOW language should enter, and double as the reason the [[frozen-encoder-lean]]

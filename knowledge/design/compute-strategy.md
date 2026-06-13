@@ -17,24 +17,24 @@ environment-ladder rung. Prices checked 2026-06-12 (vast.ai: 4090 ~$0.31–0.44/
 
 | Option | VRAM / bandwidth / FP32 | Best for |
 |---|---|---|
-| RTX 4070 Laptop (local) | 8 GB / 256 GB/s / ~15–20 TFLOPS | rungs 1–2: iteration speed, env-loop-bound work |
-| RTX 5070 Ti (desktop, idle) | 16 GB / ~900 GB/s / ~44 TFLOPS | rung 3: multi-hour GPU-bound training (~2.5–3× laptop) |
+| laptop GPU (local) | 8 GB / 256 GB/s / ~15–20 TFLOPS | rungs 1–2: iteration speed, env-loop-bound work |
+| desktop GPU (idle) | 16 GB / ~900 GB/s / ~44 TFLOPS | rung 3: multi-hour GPU-bound training (~2.5–3× laptop) |
 | vast.ai burst (4090/5090) | 24–32 GB, ~$0.35–0.55/hr | rung 3–4: parallel sweeps (N seeds × arms), baselines |
 | H100+ class | 80 GB, $1–2+/hr | rung 4+: ≥100M-param transformer world models only |
 
 ## Measured: laptop thermals & power cap (2026-06-12)
 
 90 s synthetic training load (`matmul` loop, 100% util): temp 62→78 °C and still
-climbing; **power capped at ~45 W** (4070 Laptop TGP range is 35–115 W — ours is
+climbing; **power capped at ~45 W** (laptop GPU TGP range is 35–115 W — ours is
 near the floor); clocks ~1.15–1.2 GHz vs 3.1 GHz max boost; driver counters show
 **SW Thermal Slowdown was already active ~396 s cumulative** across today's training.
-Effective throughput is therefore ~35–40% of nominal 4070L → revised speedup
-estimate for the 5070 Ti on GPU-bound training: **~4–6×** (was 2.5–3×).
+Effective throughput is therefore ~35–40% of nominal laptop GPU → revised speedup
+estimate for the desktop GPU on GPU-bound training: **~4–6×** (was 2.5–3×).
 Comfort/longevity: sustained low-80s °C chassis heat + full fans on a laptop.
 
 ## Measured: laptop vs desktop benchmark (2026-06-12, scripts/gpu_bench.py)
 
-| | 4070 Laptop (45 W) | 5070 Ti desktop | ratio |
+| | laptop GPU (45 W) | desktop GPU | ratio |
 |---|---|---|---|
 | matmul fp32 sustained | 7.0 TFLOPS | 31.4 TFLOPS | **4.5×** ✅ (predicted 4–6×) |
 | recurrent train-step (b32, w24) | 30.1 upd/s | 27.9 upd/s | **0.93×** ✅ (predicted ≈1× for latency-bound) |
@@ -49,7 +49,7 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
 - **latency-bound corollary (2026-06-12, measured)**: since the GPU idles, N seeds
   run as N concurrent processes on ONE GPU (bottleneck: CPU cores for env loops).
   Measured: 3-seed DoorKey-6x6 sweep (7 rounds each) = **35 min wall** on the
-  5070 Ti, seeds within 80 s of each other (exp 0009) — contention ≈ nil at N=3.
+  desktop GPU, seeds within 80 s of each other (exp 0009) — contention ≈ nil at N=3.
   Renting an H100 for this class would cost ~10× for zero (possibly negative)
   speedup. "Best available GPU" is the wrong axis below rung 3; sweep.py
   `--parallel N` is the planned enhancement.
@@ -57,15 +57,15 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
 ## Key predictions (validate when first dispatching remotely)
 
 - Rungs 1–2 workloads are env-loop/latency-bound: bigger GPUs ≈ 1.0–1.3× — don't switch.
-- DreamerV3-small on Crafter 1M steps: ~30–45 h (4070L, throttled) → ~8–12 h
-  (5070 Ti) → ~4–6 h (5090).
+- DreamerV3-small on Crafter 1M steps: ~30–45 h (laptop GPU, throttled) → ~8–12 h
+  (desktop GPU) → ~4–6 h (5090).
 - Rental fits us unusually well: envs generate data → nothing to upload but code,
   nothing to download but checkpoints/logs.
-- Trigger for wiring up the 5070 Ti (and writing the dispatch ADR): first run
+- Trigger for wiring up the desktop GPU (and writing the dispatch ADR): first run
   projected > **~1 h** on the laptop (lowered from 4 h after the thermal
   measurement — long runs throttle AND cook the chassis).
 
-## Compute efficiency as the lab's strategy (Dave, 2026-06-13)
+## Compute efficiency as the lab's strategy (maintainer, 2026-06-13)
 
 Stated principle, generalized from the architecture-testing tier ladder
 ([[hierarchy-and-credit]]) and a DeepMind talk's claim that for AGI compute
@@ -107,7 +107,7 @@ A standard UTD run (~30 min) breaks down as:
 | 4% | eval (full planner) | |
 | **0.4%** | env stepping | **a compiled/JAX MiniGrid would save ~nothing — question closed** |
 
-Acceleration verdict (Dave's "reasonable effort only"): no big easy wins; we're
+Acceleration verdict (maintainer's "reasonable effort only"): no big easy wins; we're
 already fleet-efficient via 6-wide parallelism (launch-bound runs overlap, GPU ~85%).
 Measured levers on the training step: TF32 1.02× (enabled anyway, free), bf16 1.23×,
 torch.compile reduce-overhead 1.33× **but CUDA-graph capture conflicts with our
@@ -116,7 +116,7 @@ on by default + `--amp` (bf16) opt-in flag (OFF by default to keep fp32 retentio
 results comparable; use for long actor/Crafter runs). **Deferred:** torch.compile
 until the actor work brings bigger models and drops the reset/freeze pattern.
 
-## Crafter-phase rental mapping (asked by Dave 2026-06-12)
+## Crafter-phase rental mapping (asked by the maintainer 2026-06-12)
 
 - Actor *development* (MiniGrid-scale iterations): rental buys ~nothing
   (measured latency-bound regime; bottleneck is the redesign loop).
@@ -125,9 +125,9 @@ until the actor work brings bigger models and drops the reset/freeze pattern.
   first designed Crafter sweep; prerequisite: one session of vast provisioning
   (docker/setup + sweep.py backend). Cloud spend stays human-triggered
   (autonomous-mode guardrail).
-- Single long runs: 5090 ≈ 2–2.5× the 5070 Ti (~$3/run) — nice, not strategic.
+- Single long runs: 5090 ≈ 2–2.5× the desktop GPU (~$3/run) — nice, not strategic.
 - If the Python env loop becomes the wall: Craftax (JAX, env-on-GPU, ~100×)
-  is the radical option — would reopen ADR 0001 (Dave's call). Decision shape
+  is the radical option — would reopen ADR 0001 (the maintainer's call). Decision shape
   pre-agreed (2026-06-12): NO framework-abstraction layer (JAX's value — fused
   jit/vmap/scan incl. the env — is exactly what abstractions can't express;
   meta-framework maintenance would displace research). Instead: hybrid dlpack
@@ -149,7 +149,7 @@ until the actor work brings bigger models and drops the reset/freeze pattern.
   and Minecraft (Java) can never fuse, so the hybrid IS the ladder's lasting
   pattern; a full port pays only under massive Craftax-native experiment volume.
 
-## JAX rewrite — consolidated revisit triggers (Dave asked 2026-06-13; extends [[0001-pytorch-over-jax]])
+## JAX rewrite — consolidated revisit triggers (maintainer asked 2026-06-13; extends [[0001-pytorch-over-jax]])
 
 Standing answer to "should we ever rewrite to JAX?": **not now, and the advantage
 SHRINKS as we climb.** JAX's one decisive lever is end-to-end on-GPU parallel-env
@@ -177,7 +177,7 @@ niche, not a dying bet — we're just not in that niche.
 
 ## Upgrade path (<€5k home lab, decided 2026-06-12: not yet)
 
-Buy trigger: Crafter-scale runs keep the 5070 Ti >90% utilized for multi-hour
+Buy trigger: Crafter-scale runs keep the desktop GPU >90% utilized for multi-hour
 stretches AND experiments queue behind it (gpu_bench + run timestamps make this
 measurable, not vibes). Then, in order of €-efficiency:
 1. used RTX 3090 24 GB (~€700) as second GPU in the desktop — VRAM headroom +

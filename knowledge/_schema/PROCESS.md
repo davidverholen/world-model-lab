@@ -1,6 +1,6 @@
 # Knowledge Base Operating Process
 
-## The research loop (default operating cycle — adopted 2026-06-12, Dave)
+## The research loop (default operating cycle — adopted 2026-06-12, maintainer)
 
 1. **Experiment** to incrementally verify knowledge — ours AND the literature's
    claims in our setting (pre-registered hypothesis with refutation alternatives;
@@ -14,14 +14,14 @@
    when *practice* improves (new technique, new gotcha); lint and milestone check
    this seam. Trigger = process drift, not knowledge growth.
 
-**Compute efficiency is the operating constraint (Dave, 2026-06-13):** as a home
+**Compute efficiency is the operating constraint (maintainer, 2026-06-13):** as a home
 lab we compete only on doing more with less. Every experiment: spend the *minimum
 sufficient* compute — the smallest scale at which the tested effect can appear, no
 more — and prefer measuring efficiency *slopes* across cheap→medium scales over
 single expensive endpoints. Literature-first and pre-registration are efficiency
 gates (they delete wasted runs). Full rationale: [[compute-strategy]].
 
-**Horizon (Dave, 2026-06-12):** this loop holds until we reach genuinely original
+**Horizon (maintainer, 2026-06-12):** this loop holds until we reach genuinely original
 territory — a blocking problem no published work solves (scout comes up empty on
 the specific question, not the general area). **A frontier claim requires the
 hitting-a-wall protocol (scout skill: S2/OpenAlex citation walks from anchor
@@ -98,7 +98,7 @@ record in LOG.md (cheap, append-only), promote later if it recurs.
 - End: route any learning signals per the table above; append LOG.md entry if the
   session changed the wiki.
 
-## Literature-first rule (added 2026-06-12, Dave)
+## Literature-first rule (added 2026-06-12, maintainer)
 
 Before designing an experiment that attacks a *known class* of problem (collapse,
 exploration, interference, ...), check QUEUE/scout for prior art and ingest the key
@@ -134,13 +134,13 @@ knowledge base consistent with its code:
 Full `/kb-lint` stays a separate periodic pass; the checkpoint lint covers only
 pages touched since the last checkpoint.
 
-## Per-iteration literature gate (Dave, 2026-06-12) — part of the NORMAL process
+## Per-iteration literature gate (maintainer, 2026-06-12) — part of the NORMAL process
 
 EVERY new learning — especially each specific failure — triggers a targeted search
 (WebSearch + wall protocol when blocking) BEFORE the next experiment is designed.
 Always, not only when unsupervised. Exps 0011/0012 are the precedent (two redesigns
 from found papers, zero wasted GPU on mapped walls).
 
-Supervised vs autonomous operation differ in EXACTLY ONE thing: whether Dave's
+Supervised vs autonomous operation differ in EXACTLY ONE thing: whether the maintainer's
 go is awaited between iterations. The loop, gates, and guardrails are identical
 (/research-cycle skill).

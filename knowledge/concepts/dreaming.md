@@ -3,17 +3,17 @@ status: draft
 owner: agent
 scope: local
 sources: []
-verified: false   # backlog concept (Dave, 2026-06-13); Hoel ref verified, queued for ingest
+verified: false   # backlog concept (maintainer, 2026-06-13); Hoel ref verified, queued for ingest
 last_reviewed: 2026-06-13
 ---
 
 # Dreaming: relaxed-constraint generation as augmentation + creativity
 
-Backlog concept (Dave, 2026-06-13). Possibly unifies the creativity thread
+Backlog concept (maintainer, 2026-06-13). Possibly unifies the creativity thread
 ([[generative-vs-predictive]] §novelty, [[capability-map]] #7) and the retention
 thread ([[retention]]).
 
-## Dave's model of dreaming
+## The maintainer's model of dreaming
 
 Two properties: (1) the established world model is applied LESS STRICTLY (relaxed
 constraints → wild recombination, "purely creative"); (2) dream results are written
@@ -23,7 +23,7 @@ weak-conditioning generation + near-zero write-back.
 ## Maps onto the Overfitted Brain Hypothesis (Hoel 2021, arXiv:2007.09560, Patterns)
 
 Verified 2026-06-13. Hoel: dreams = DATA AUGMENTATION to reduce overfitting. They are
-deliberately less detailed and more fantastical (= Dave's relaxed constraints) to
+deliberately less detailed and more fantastical (= the maintainer's relaxed constraints) to
 pull representations AWAY from overfitting narrow waking experience; not written as
 fact (= weak write-back). Striking: **the most reliable way to trigger a dream about
 something is to OVER-TRAIN on a novel task** — i.e. dreaming is a response to the
