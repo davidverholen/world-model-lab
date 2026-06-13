@@ -841,3 +841,15 @@ environments/crafter.md (incl. the Crafter->Minecraft proxy->target transfer rel
 Dave asked about: method+frozen-encoder transfer, WM weights do not; JAX corollary). INDEX
 + environment-ladder additive pointer. Next: 64x64 encoder (frozen DINO/JEPA per lean) +
 port the calibrated imagination loop; harden DreamerV3 recipe here (denser rewards).
+
+## [2026-06-13] experiment+curation | exp 0022 — frozen DINOv2 encodes Crafter state (encoder bet validated)
+
+Before building the frozen-encoder pipeline, validated the gating risk (does natural-image
+DINO transfer to Crafter pixel-art?). scripts/probe_dino_crafter.py: linear probe on frozen
+DINOv2-S CLS features (600 random-play frames) -> "which materials in the 9x9 view" (free
+labels from info.semantic). Result: mean test acc 0.981 vs majority 0.804 (+0.177 lift),
+per-material 0.93-1.00; shuffled-label control collapses to 0.748 (signal real). Frozen DINO
+VALIDATED as the Crafter encoder, no fine-tuning. Greenlights DINO-WM-style build (frozen
+DINOv2 + small RSSM dynamics). Frozen => drop SIGReg, cache embeddings in replay, immune to
+primacy/drift. Pages: experiments/0022, crafter.md encoder bullet, INDEX (also caught up
+0019-0021 statuses). Next: FrozenDinoEncoder module + wire into the RSSM flywheel for Crafter.

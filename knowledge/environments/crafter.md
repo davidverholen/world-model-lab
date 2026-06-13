@@ -66,8 +66,10 @@ real one; the frozen encoder is the thread tying the rungs together.
 
 ## What's next
 
-- **Encoder for 64×64:** our MiniGrid-sized ConvEncoder needs resizing OR (preferred) swap to
-  a frozen DINO/JEPA encoder + small learned dynamics ([[frozen-encoder-lean]]).
+- **Encoder for 64×64:** frozen **DINOv2-S** + small learned dynamics — VALIDATED
+  ([[0022-frozen-dino-probe]]: linear probe on frozen DINO features predicts in-view
+  materials at 0.98 vs 0.80 baseline; transfer to pixel-art confirmed). Build the
+  FrozenDinoEncoder module next ([[frozen-encoder-lean]]).
 - **Port the calibrated imagination loop** (RSSM + critic-on-replay) to Crafter.
 - **Harden the DreamerV3 recipe HERE** (two-hot critic, symlog, percentile return-norm) —
   deferred from MiniGrid because Crafter's denser, multi-scale rewards actually exercise it.

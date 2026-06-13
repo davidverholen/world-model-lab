@@ -85,7 +85,10 @@ calls these elaborate).
 - [0016-actor-distillation](experiments/0016-actor-distillation.md) — BC planner-distillation fails (O(εT²) compounding error + stochastic teacher); eval-variance surprise (80%→25-30% on fresh seeds); on-policy needed → 0017 imagination actor-critic (done)
 - [0017-imagination-actor-critic](experiments/0017-imagination-actor-critic.md) — Dreamer AC built; model exploitation (imagined_return 2-3 vs eval 0) — missing continue predictor → 0018 (done)
 - [0018-continue-predictor](experiments/0018-continue-predictor.md) — continue predictor partially tames exploitation (s0 2.06→1.13) but actor exploits other off-distribution errors; deterministic WM can't imagine the 25-step chain → stochastic latents; fork (deepen vs DAgger) (done, partial)
-- [0019-stochastic-latents](experiments/0019-stochastic-latents.md) — RSSM stochastic latents (Gaussian prior/posterior, KL+recon, img_step AC); smoke shows imagined_return SANE (~0.1 vs 0017/0018's 2-5) — exploitation killed (running)
+- [0019-stochastic-latents](experiments/0019-stochastic-latents.md) — RSSM stochastic latents; partial win, eval off zero (s1 0.55) but value still inflated → fixed policy quality not calibration (done)
+- [0020-ac-reset](experiments/0020-ac-reset.md) — REFUTED: per-round actor-critic reset suppressed learning (s1 0.55→0); ruled out behaviour-layer plasticity as the collapse cause (done)
+- [0021-critic-on-replay](experiments/0021-critic-on-replay.md) — CONFIRMED: DreamerV3 critic-on-replay calibrates imagined value (2–7→~1); kept as recipe default (--repval 0.3) (done)
+- [0022-frozen-dino-probe](experiments/0022-frozen-dino-probe.md) — frozen DINOv2 features encode Crafter state (linear probe 0.98 vs 0.80 baseline); frozen-encoder bet validated (done)
 
 ## Wanted pages (linked but not yet written)
 
