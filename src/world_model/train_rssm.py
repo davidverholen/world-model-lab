@@ -27,7 +27,7 @@ from world_model.models.continue_head import ContinueHead
 from world_model.models.reward import reward_loss
 from world_model.models.rssm import RSSM
 from world_model.models.value import value_loss
-from world_model.train_recurrent import collect_round
+from world_model.train_recurrent import collect_round, shrink_perturb
 from world_model.training import ReplayBuffer
 
 
@@ -198,6 +198,13 @@ def main() -> None:
     p.add_argument("--success-frac", type=float, default=0.25)
     p.add_argument("--ignition-events", type=int, default=5)
     p.add_argument("--freeze-round", type=int, default=2)
+    p.add_argument(
+        "--ac-reset",
+        action="store_true",
+        help="exp 0020: shrink-perturb actor+critic at the start of each round >=1 "
+        "(Nikishin/Qiao primacy fix on the behaviour layer) — attacks the round-6 collapse",
+    )
+    p.add_argument("--ac-reset-alpha", type=float, default=0.5)
     p.add_argument("--epsilon", type=float, default=0.3)
     p.add_argument("--gamma", type=float, default=0.98)
     p.add_argument("--lam", type=float, default=0.95)
@@ -285,6 +292,16 @@ def main() -> None:
             args.success_frac,
             device,
         )
+        if args.ac_reset and rnd >= 1:
+            # primacy/plasticity reset of the behaviour layer (exp 0020). Resync the EMA
+            # target to the perturbed critic and rebuild opt_ac so stale Adam moments
+            # don't corrupt the freshly perturbed params.
+            shrink_perturb(actor, args.ac_reset_alpha)
+            shrink_perturb(critic, args.ac_reset_alpha)
+            target_critic.load_state_dict(critic.state_dict())
+            opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
+            print(f"  ac reset (shrink-perturb alpha={args.ac_reset_alpha})")
+
         print(f"round {rnd}: imagine AC {args.ac_updates_per_round} ...")
         al, cl, ir = imagine_ac(
             buffer,
