@@ -102,6 +102,7 @@ def main() -> None:
     p.add_argument("--horizon", type=int, default=15)
     p.add_argument("--ent-coef", type=float, default=3e-3)
     p.add_argument("--repval", type=float, default=0.3)  # critic-on-replay (exp 0021), kept on
+    p.add_argument("--pool", default="cls", choices=["cls", "patch_mean", "cls+patch"])  # exp 0024
     p.add_argument("--ep-length", type=int, default=2000)  # collection episode cap
     p.add_argument("--eval-episodes", type=int, default=5)
     p.add_argument("--eval-length", type=int, default=1000)
@@ -115,7 +116,7 @@ def main() -> None:
 
     env = make_crafter_env(length=args.ep_length, seed=args.seed)
     n_act = int(env.action_space.n)
-    enc = FrozenDinoEncoder().to(device)  # frozen; not in any optimizer
+    enc = FrozenDinoEncoder(pool=args.pool).to(device)  # frozen; not in any optimizer
     ed = enc.latent_dim
     rssm = RSSM(embed_dim=ed, num_actions=n_act).to(device)
     sd = rssm.state_dim
