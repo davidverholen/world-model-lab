@@ -21,6 +21,7 @@ class ActorAgent:
         num_actions: int,
         device: str,
         sample: bool = False,
+        epsilon: float = 0.0,
         seed: int = 0,
     ):
         self.encoder = encoder.to(device).eval()
@@ -29,6 +30,7 @@ class ActorAgent:
         self.num_actions = num_actions
         self.device = device
         self.sample = sample
+        self.epsilon = epsilon
         self.rng = torch.Generator(device="cpu").manual_seed(seed)
         self.reset()
 
@@ -41,6 +43,10 @@ class ActorAgent:
         z = self.encoder(torch.as_tensor(obs, device=self.device).unsqueeze(0))
         self._state = self.dynamics.update(z, self._prev_action, self._state)
         logits = self.actor(self._state)
+        if self.epsilon > 0 and torch.rand((), generator=self.rng).item() < self.epsilon:
+            action = int(torch.randint(self.num_actions, (1,), generator=self.rng))
+            self._prev_action = torch.tensor([action], device=self.device)
+            return action
         if self.sample:
             probs = torch.softmax(logits, dim=-1).cpu()
             action = int(torch.multinomial(probs, 1, generator=self.rng))
