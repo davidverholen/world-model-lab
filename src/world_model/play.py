@@ -23,26 +23,70 @@ from world_model.agents import MPCAgent, RandomAgent, RecurrentMPCAgent
 from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_minigrid_env
 
+_INV_KEYS = [
+    "health",
+    "food",
+    "drink",
+    "energy",
+    "wood",
+    "stone",
+    "coal",
+    "iron",
+    "diamond",
+    "sapling",
+    "wood_pickaxe",
+    "stone_pickaxe",
+    "iron_pickaxe",
+]
 
-def _crafter_viewer(size: int = 384):
-    """Open a live pygame window for Crafter (its env renders frames, not an auto window)."""
+
+def _crafter_viewer(world_px: int = 600, panel_px: int = 340):
+    """Live pygame window: world render on the left + an HUD panel (inventory + event log)."""
     import pygame
 
     pygame.init()
-    screen = pygame.display.set_mode((size, size))
+    pygame.font.init()
+    screen = pygame.display.set_mode((world_px + panel_px, world_px))
     pygame.display.set_caption("Crafter — world-model agent")
-    return pygame, screen, pygame.time.Clock(), size
+    return {
+        "pygame": pygame,
+        "screen": screen,
+        "clock": pygame.time.Clock(),
+        "world_px": world_px,
+        "panel_px": panel_px,
+        "font": pygame.font.SysFont("monospace", 16),
+        "big": pygame.font.SysFont("monospace", 22, bold=True),
+    }
 
 
-def _crafter_show(viewer, frame_64: np.ndarray, fps: float) -> bool:
-    """Blit an upscaled frame; return False if the window was closed."""
-    pygame, screen, clock, size = viewer
-    k = max(1, size // frame_64.shape[0])
-    up = np.repeat(np.repeat(frame_64, k, axis=0), k, axis=1)
-    screen.blit(pygame.surfarray.make_surface(up.swapaxes(0, 1)), (0, 0))
-    pygame.display.flip()
-    clock.tick(fps)
-    return not any(e.type == pygame.QUIT for e in pygame.event.get())
+def _crafter_show(v, frame: np.ndarray, info: dict, events: list, title: str, fps: float) -> bool:
+    """Render world + HUD; return False if the window was closed."""
+    pg, screen, wpx = v["pygame"], v["screen"], v["world_px"]
+    surf = pg.surfarray.make_surface(frame.swapaxes(0, 1))
+    if surf.get_width() != wpx:
+        surf = pg.transform.smoothscale(surf, (wpx, wpx))
+    screen.blit(surf, (0, 0))
+    screen.fill((18, 18, 22), (wpx, 0, v["panel_px"], wpx))
+    y = [12]
+
+    def line(text, fnt=v["font"], color=(220, 220, 220)):
+        screen.blit(fnt.render(text, True, color), (wpx + 14, y[0]))
+        y[0] += fnt.get_height() + 3
+
+    line(title, v["big"], (255, 255, 255))
+    y[0] += 8
+    line("INVENTORY", color=(140, 190, 255))
+    inv = info.get("inventory", {})
+    for k in _INV_KEYS:
+        if inv.get(k, 0):
+            line(f"  {k:13} {inv[k]}")
+    y[0] += 10
+    line("EVENTS", color=(150, 255, 180))
+    for ev in events[-16:]:
+        line("  " + ev, color=(190, 255, 190) if ev[0] == "+" else (255, 190, 190))
+    pg.display.flip()
+    v["clock"].tick(fps)
+    return not any(e.type == pg.QUIT for e in pg.event.get())
 
 
 def main() -> None:
@@ -56,7 +100,21 @@ def main() -> None:
     parser.add_argument("--candidates", type=int, default=1024, help="MPC imagined futures/step")
     parser.add_argument("--iters", type=int, default=3, help="CEM refinement iterations")
     parser.add_argument("--record", type=str, default=None, help="save GIF here instead of window")
-    parser.add_argument("--window-size", type=int, default=600, help="Crafter view/window px")
+    parser.add_argument("--window-size", type=int, default=600, help="Crafter window px")
+    parser.add_argument(
+        "--resolution",
+        type=int,
+        default=0,
+        help="Crafter render px (0 = window-size); "
+        "render >window gives crisper anti-aliased viewing, render <window is blocky-upscaled",
+    )
+    parser.add_argument(
+        "--world-view",
+        type=int,
+        default=0,
+        help="Crafter FOV in tiles (0 = agent's 9x9 view); "
+        "e.g. 15 shows more world around the player (viewing only; agent obs unchanged)",
+    )
     parser.add_argument(
         "--epsilon",
         type=float,
@@ -75,8 +133,8 @@ def main() -> None:
         if crafter:
             from world_model.envs import make_crafter_env
 
-            env = make_crafter_env(length=500)
-            env.render_size = args.window_size  # crisp high-res viewing render
+            env = make_crafter_env(length=500, world_view=args.world_view)
+            env.render_size = args.resolution or args.window_size  # decoupled render px
             agent = RSSMActorAgent.from_checkpoint(
                 args.checkpoint, device, epsilon=args.epsilon, seed=args.seed
             )
@@ -126,15 +184,21 @@ def main() -> None:
     viewer = _crafter_viewer(args.window_size) if (crafter and not args.record) else None
     try:
         for episode in range(args.episodes):
-            obs, _ = env.reset(seed=args.seed + episode)
+            obs, info = env.reset(seed=args.seed + episode)
             if hasattr(agent, "reset"):
                 agent.reset()
-            total_reward, steps, done, info = 0.0, 0, False, {}
+            total_reward, steps, done = 0.0, 0, False
+            unlocked: set[str] = set()
+            events: list[str] = []
             while not done:
                 if args.record:
                     frames.append(env.render())  # Crafter renders high-res directly
-                elif viewer is not None:  # live Crafter window
-                    if not _crafter_show(viewer, env.render(), args.fps):
+                elif viewer is not None:  # live Crafter window + HUD
+                    title = (
+                        f"ep {episode + 1}/{args.episodes}  r={total_reward:.1f}  "
+                        f"ach={len(unlocked)}  t={steps}"
+                    )
+                    if not _crafter_show(viewer, env.render(), info, events, title, args.fps):
                         raise KeyboardInterrupt
                 else:
                     time.sleep(1.0 / args.fps)
@@ -142,11 +206,17 @@ def main() -> None:
                 total_reward += float(reward)
                 steps += 1
                 done = terminated or truncated
+                if crafter:  # log achievement unlocks (+ death) as events
+                    new = {k for k, v in info.get("achievements", {}).items() if v > 0} - unlocked
+                    events += [f"+ {k} (t{steps})" for k in sorted(new)]
+                    unlocked |= new
+                    if terminated:
+                        events.append(f"x died (t{steps})")
             if crafter:
-                ach = sum(1 for v in info.get("achievements", {}).values() if v > 0)
+                names = ", ".join(sorted(unlocked)) or "none"
                 print(
-                    f"episode {episode + 1}: {ach} achievements, "
-                    f"reward={total_reward:.2f}, {steps} steps"
+                    f"episode {episode + 1}: {len(unlocked)} achievements "
+                    f"[{names}], reward={total_reward:.2f}, {steps} steps"
                 )
             else:
                 success = total_reward > 0
@@ -160,7 +230,7 @@ def main() -> None:
     finally:
         env.close()
         if viewer is not None:
-            viewer[0].quit()
+            viewer["pygame"].quit()
 
     if not crafter:
         print(f"success rate: {successes}/{args.episodes}")
