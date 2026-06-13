@@ -976,3 +976,11 @@ is NOT a fundamental wall -- (a) current ~3 plateau = the exploitation BUG (0025
 mid-tree = mostly COMPUTE SCALING (DreamerV3 reaches it at ~1M steps; we are ~10x under-trained),
 (c) only deepest chains might want hierarchy, as an efficiency lever. For a compute-efficiency lab
 efficient scaling IS the research. Discipline: MEASURE the scaling slope once 0025 lands.
+
+## [2026-06-14] curation | ROADMAP.md refreshed to current state (rung 3 / exp 0025 era)
+
+ROADMAP was stale (stopped ~exp 0008). Rewrote to reflect the journey: rungs 1-2 done
+(incl. the imagination actor-critic line + retention thread), rung 3 (Crafter) current
+with the frozen-encoder + calibrated-imagination + value-hardening + behavior-QA progress
+and the next steps (consistent navigation, scaling slope, hierarchy). Depersonalized for
+the public repo (no identity/hardware leaks; proper KB links). Phases map to ladder rungs.
