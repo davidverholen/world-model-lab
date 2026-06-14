@@ -100,6 +100,7 @@ calls these elaborate).
 - [0033-rtfm-length1-grounding](experiments/0033-rtfm-length1-grounding.md) — DECISIVE NEGATIVE: the swap test caught a non-reading shortcut correct−none missed (swapped≈correct, swap_follow=0); vision reads the staged state → handoff HO-0006 (done)
 - [0034-rtfm-oneshot-ignition](experiments/0034-rtfm-oneshot-ignition.md) — one_shot re-test: fixed a base-reward-farming confound (train on tutorial-only reward), then hit a pure sparse-reward ignition wall (0–6 chance events, no gradient) → curriculum handoff HO-0007 (done)
 - [0036-rtfm-shaping-ignition](experiments/0036-rtfm-shaping-ignition.md) — FIRST genuine reading-to-learn-dynamics: HO-0007 reading-shaping (anneal→0) IGNITES reading; 3/4 seeds correct≫none AND swapped≪correct (content-sensitive, no LRS shortcut); grounding partial (swap_follow 0.15–0.40, s0 failed) → strengthen next (done)
+- [0038-rtfm-aux-grounds-wm](experiments/0038-rtfm-aux-grounds-wm.md) — 2× training NULL (0037); Dynalang masked-manual aux GROUNDS the WM (inv_ratio 0.87→1.1–1.4, all seeds ground, s0 fixed) but swap_follow stays ~0.25 → bottleneck is ACTOR execution, not WM reading (correct-mode identifiability) (done)
 
 ## Wanted pages (linked but not yet written)
 

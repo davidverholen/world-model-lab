@@ -2,6 +2,21 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | exp 0038: masked-manual aux grounds the WM, but swap_follow is ACTOR-bound
+
+Two swap_follow-strengthening levers (exp page 0038). exp0037 (2× training, 40 rounds): NULL —
+swap_follow unchanged ~0.25, same scatter; more training is not the lever. exp0038 (Dynalang
+masked-manual auxiliary ON, --manual-aux-coef 1.0, commit 0b72bcd): the aux is a GENUINE grounding
+signal — inv_ratio (wrong/correct manual reconstruction loss) rose 0.87 (untrained) → 1.1–1.4, i.e.
+the belief is manual-specific, NOT the copy-through failure (deter_noctx anti-baking held). All 4
+seeds now ground (s0, which FAILED in 0036, recovers grounding 0.00→0.30); swapped≪correct clean
+everywhere. BUT swap_follow did NOT break its ~0.25–0.35 ceiling. Re-diagnosis: strengthening the
+WM's reading (proven via inv_ratio) does not move swap_follow → the bottleneck is the ACTOR's
+execution, not WM reading. Likely root cause: correct-mode-only training, where "follow displayed
+manual" ≡ "do true recipe" (identifiability gap the reward can't separate). Stall-rule: swap_follow
+resisted 2 levers, but 0038 gave a NEW diagnosis (actor-bound), so next redesign targets the actor
+(stronger-aux disambiguator exp0039, then actor-conditioning §6.2), not a stalled repeat. Next: exp0039.
+
 ## [2026-06-14] curation | exp 0036: reading-shaping IGNITES genuine (partial) reading-to-learn-dynamics → HO-0007 accepted
 
 The HO-0007 dense reading-gated shaping (crafter-rtfm 809d44f, `reading_shaping_coef`, annealed
