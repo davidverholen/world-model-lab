@@ -42,6 +42,8 @@ class ReplayBuffer:
         self.rewards = np.zeros(capacity, dtype=np.float32)
         self.returns = np.zeros(capacity, dtype=np.float32)
         self.dones = np.zeros(capacity, dtype=bool)
+        # optional per-transition integer tag (rung-4: the episode's manual id). Default 0.
+        self.tags = np.zeros(capacity, dtype=np.int64)
         self.size = 0
         self.pos = 0
         self.total_adds = 0
@@ -54,13 +56,14 @@ class ReplayBuffer:
         self.visits = np.zeros(capacity, dtype=np.int64)
         self._valid_cache: np.ndarray | None = None
 
-    def add(self, t: Transition) -> None:
+    def add(self, t: Transition, tag: int = 0) -> None:
         i = self.pos
         self.obs[i] = np.round(t.obs * 255.0) if self._u8 else t.obs
         self.next_obs[i] = np.round(t.next_obs * 255.0) if self._u8 else t.next_obs
         self.actions[i] = t.action
         self.rewards[i] = t.reward
         self.dones[i] = t.done
+        self.tags[i] = tag
         self.visits[i] = 0
         self.pos = (self.pos + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
@@ -153,6 +156,7 @@ class ReplayBuffer:
             "return": self.returns[idx],
             "done": self.dones[idx],  # terminations (windows may end in one)
             "next_obs": self._to_float(self.next_obs[starts + length - 1]),
+            "tag": self.tags[starts],  # per-window tag (rung-4 manual id; constant within episode)
         }
 
     # --- Curious Replay (exp 0028; arxiv:2306.15934) -----------------------------------

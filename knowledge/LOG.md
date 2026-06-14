@@ -1193,3 +1193,15 @@ gradient flow, and the LOAD-BEARING property -- swapping the manual CHANGES the 
 conditioning is used, not ignored). Real-MiniLM integration smoke: manual text -> 384-d tokens ->
 cross-attn -> conditioned prior, correct vs swapped manual differ. Next: rung-4 training loop on
 crafter-rtfm + swap-following eval on held-out r1.
+
+## [2026-06-14] rung-4 | manual-conditioned flywheel (train_rtfm.py) runs end-to-end
+
+The rung-4 training pipeline is built + integrated. world_model.train_rtfm: collect from crafter-rtfm
+(r1 recipes, capped at the task horizon; DINO frame embeds + per-episode manual id as a replay tag) →
+manual-conditioned WM train (ConditionedRSSM, KL(post||manual-conditioned-prior) + recon + reward +
+continue) → imagination AC planning through the conditioned WM → four-mode eval (correct/none/swapped +
+swap_follow) REUSING crafter-rtfm's own harness (run_episode/swap_follow_rate; our agent wrapped as a
+crafter-rtfm Policy). Added: ReplayBuffer per-transition tag channel (manual id), crafter-rtfm as the
+optional `rtfm` extra. 2-round toy smoke runs clean (scores 0.00 as expected, untrained). 27 tests
+pass. Next: a real training run on the desktop GPU to see if it LEARNS to ground (swap-following > 0
+on held-out r1) — the first reading-to-learn-dynamics result.

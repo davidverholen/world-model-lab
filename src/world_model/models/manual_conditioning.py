@@ -40,38 +40,33 @@ class ManualConditioner(nn.Module):
 
 
 class ConditionedRSSM(RSSM):
-    """RSSM whose PRIOR is conditioned on the manual via cross-attention. obs_step/img_step take
-    the episode's manual token embeddings (+ mask); everything else (posterior, GRU, belief,
-    heads-facing interface) is unchanged, so the rung-3 imagination/training machinery reuses it.
-    """
+    """RSSM whose DETERMINISTIC STATE h is conditioned on the manual via cross-attention, so the
+    manual propagates to the prior (dynamics), the posterior, the belief (→ the actor sees it at
+    act-time), and imagination — all from one injection point. prior_net/post_net keep their
+    original dims (the manual is already folded into h). obs_step/img_step take the episode's
+    manual token embeddings (+ mask); the rest of the rung-3 machinery reuses the interface."""
 
-    def __init__(
-        self, *, text_dim: int, ctx_dim: int = 128, n_heads: int = 4, hidden_dim: int = 256, **kw
-    ):
-        super().__init__(hidden_dim=hidden_dim, **kw)
+    def __init__(self, *, text_dim: int, ctx_dim: int = 128, n_heads: int = 4, **kw):
+        super().__init__(**kw)
         self.conditioner = ManualConditioner(self.deter_dim, text_dim, ctx_dim, n_heads)
-        # prior now sees [h, manual-context]; posterior is unchanged (it has the real observation).
-        self.prior_net = nn.Sequential(
-            nn.Linear(self.deter_dim + ctx_dim, hidden_dim),
-            nn.SiLU(),
-            nn.Linear(hidden_dim, 2 * self.stoch_dim),
-        )
+        self.ctx_to_h = nn.Linear(ctx_dim, self.deter_dim)
 
-    def _prior(self, h, tokens, mask):
-        c = self.conditioner(h, tokens, mask)
-        return self._dist(self.prior_net(torch.cat([h, c], dim=-1)))
+    def _deter_cond(self, h, z, prev_action, tokens, mask):
+        """GRU step, then fold the manual cross-attention context into the deterministic state."""
+        h = self._deter(h, z, prev_action)
+        return h + self.ctx_to_h(self.conditioner(h, tokens, mask))
 
     def obs_step(self, state, prev_action, embed, tokens, mask=None):
-        """One step WITH observation. Returns (state, prior, post). Prior is manual-conditioned."""
+        """One step WITH observation. Returns (state, prior, post). h carries the manual."""
         h, z = state
-        h = self._deter(h, z, prev_action)
-        prior = self._prior(h, tokens, mask)
+        h = self._deter_cond(h, z, prev_action, tokens, mask)
+        prior = self._dist(self.prior_net(h))
         post = self._dist(self.post_net(torch.cat([h, embed], dim=-1)))
         return (h, post.rsample()), prior, post
 
     def img_step(self, state, prev_action, tokens, mask=None):
         """One imagination step (no obs) → manual-conditioned prior. Returns (state, prior)."""
         h, z = state
-        h = self._deter(h, z, prev_action)
-        prior = self._prior(h, tokens, mask)
+        h = self._deter_cond(h, z, prev_action, tokens, mask)
+        prior = self._dist(self.prior_net(h))
         return (h, prior.rsample()), prior

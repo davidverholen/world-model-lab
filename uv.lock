@@ -160,6 +160,31 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/32/50/dad93d72f9cb97320d9817c34181d3f76e41a934c3c7b91ef4adc7a5ef36/crafter-1.8.3.tar.gz", hash = "sha256:efd72a7e0b8945cfd00eca6c8caf99f746be5f69072853a2f173fa1f85b4088d", size = 107631, upload-time = "2023-12-13T20:13:23.073Z" }
 
 [[package]]
+name = "crafter-rtfm"
+version = "0.1.0"
+source = { editable = "../crafter-rtfm" }
+dependencies = [
+    { name = "crafter" },
+    { name = "gymnasium" },
+    { name = "numpy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "crafter", specifier = ">=1.8.3" },
+    { name = "gymnasium", specifier = ">=1.3.0" },
+    { name = "numpy", specifier = ">=2.4.6" },
+    { name = "torch", marker = "extra == 'baselines'", specifier = ">=2.0" },
+]
+provides-extras = ["baselines"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=9.0.3" },
+    { name = "ruff", specifier = ">=0.15.17" },
+]
+
+[[package]]
 name = "cuda-bindings"
 version = "13.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1945,6 +1970,11 @@ dependencies = [
     { name = "torch", version = "2.12.0+cu130", source = { registry = "https://download.pytorch.org/whl/cu130" }, marker = "sys_platform == 'win32'" },
 ]
 
+[package.optional-dependencies]
+rtfm = [
+    { name = "crafter-rtfm" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
@@ -1954,6 +1984,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "crafter", specifier = ">=1.8.3" },
+    { name = "crafter-rtfm", marker = "extra == 'rtfm'", editable = "../crafter-rtfm" },
     { name = "einops", specifier = ">=0.8.2" },
     { name = "gymnasium", extras = ["other"], specifier = ">=1.3.0" },
     { name = "imageio", specifier = ">=2.37.3" },
@@ -1964,6 +1995,7 @@ requires-dist = [
     { name = "torch", marker = "sys_platform != 'win32'", specifier = ">=2.12.0" },
     { name = "torch", marker = "sys_platform == 'win32'", specifier = ">=2.12.0", index = "https://download.pytorch.org/whl/cu130" },
 ]
+provides-extras = ["rtfm"]
 
 [package.metadata.requires-dev]
 dev = [
