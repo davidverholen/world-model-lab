@@ -1123,3 +1123,14 @@ ANCHOR: our best agent (crafter_steps_s1) scores only 2.61% vs DreamerV3 14.5% /
 50.5% -- the gap is BREADTH (we touch 8/22). Ingested Achievement Distillation (2307.03486) at method
 depth -> papers/achievement-distillation-2023.md (AD is contrastive representation, NOT SIL; its L_pred
 is the 0031 fallback). Reviewer SHIP. Dispatching 0030 = 0028 (curious) + SIL, 2 seeds.
+
+## [2026-06-14] infra | vectorized parallel env collection (train_crafter --n-envs)
+
+Crafter collection is CPU-bound (single-thread env.step) → GPU idles during collect/eval.
+Added collect_embed_vec: N Crafter workers in parallel (AsyncVectorEnv NEXT_STEP autoreset),
+batched encoder+policy on GPU, per-env streams appended sequentially (contiguity preserved,
+boundaries force-terminated). Opt-in --n-envs (1 = unchanged serial). Measured 1.6x faster
+collection at n=6 on the laptop (scales better on many-core boxes/rentals). Unit-tested
+invariants (no cross-boundary windows) + integration smoke; reviewer SHIP (one robustness fix
+applied: loop bounds total recorded to ~steps). Enables keeping rented GPUs ~100% utilized.
+Design note: design/compute-strategy.md.

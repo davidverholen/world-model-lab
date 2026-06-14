@@ -12,11 +12,13 @@ optimization. See knowledge/environments/crafter.md, experiments/0022-frozen-din
 
 import argparse
 import copy
+import functools
 from pathlib import Path
 
 import numpy as np
 import torch
 import torch.nn.functional as F
+from gymnasium.vector import AsyncVectorEnv, AutoresetMode
 
 from world_model.agents.rssm_agent import RSSMActorAgent
 from world_model.envs import make_crafter_env
@@ -64,6 +66,81 @@ def collect_embed(buffer, env, enc, rssm, actor, n_act, steps, epsilon, device, 
             embed = emb(obs)
             state = rssm.initial(1, device)
             prev_a = torch.full((1,), rssm.no_action, device=device)
+    return reward_events, episodes
+
+
+def _reset_masked_state(rssm, state, mask):
+    """Zero (reset to rssm.initial) the (h, z) of envs flagged in mask (N,) bool tensor."""
+    h, z = state
+    m = mask.unsqueeze(-1)
+    return (torch.where(m, torch.zeros_like(h), h), torch.where(m, torch.zeros_like(z), z))
+
+
+@torch.no_grad()
+def collect_embed_vec(
+    buffer, venv, n_envs, enc, rssm, actor, n_act, steps, epsilon, device, rng, seed
+):
+    """Vectorized parallel collection — same data semantics as collect_embed, ~n_envs faster.
+
+    Steps n_envs Crafter workers in parallel (CPU, gymnasium AsyncVectorEnv NEXT_STEP autoreset)
+    while batching the frozen encoder + RSSM policy on the GPU. After a sub-env terminates, the
+    NEXT vector step returns its reset obs with the action ignored (the "reset step"); we track
+    `awaiting` per env and skip recording that step, resetting the env's RSSM state so the new
+    episode starts fresh. Each env's transition stream is appended SEQUENTIALLY to the buffer and
+    force-terminated at its boundary, so episodes stay contiguous and no sampled window spans two
+    envs — same data semantics as collect_embed (unit-tested invariants + integration). random
+    collection when actor=None."""
+
+    def emb(obs_np):
+        return enc(torch.as_tensor(obs_np, dtype=torch.float32, device=device))
+
+    obs, _ = venv.reset(seed=seed)
+    embed = emb(obs)
+    state = rssm.initial(n_envs, device)
+    prev_a = torch.full((n_envs,), rssm.no_action, dtype=torch.long, device=device)
+    awaiting = np.zeros(n_envs, dtype=bool)  # env terminated last step → this step is its reset
+    streams: list[list] = [[] for _ in range(n_envs)]
+    counts = np.zeros(n_envs, dtype=np.int64)
+    reward_events = episodes = 0
+    while counts.sum() < steps:  # bound TOTAL recorded to ~steps (matches serial; bounds overage)
+        if actor is not None:
+            state, _, _ = rssm.obs_step(state, prev_a, embed)
+            greedy = actor(rssm.belief(state)).argmax(dim=-1)
+        if actor is None:
+            a = torch.as_tensor(rng.integers(n_act, size=n_envs), device=device)
+        else:
+            rand = torch.as_tensor(rng.random(n_envs) < epsilon, device=device)
+            ra = torch.as_tensor(rng.integers(n_act, size=n_envs), device=device)
+            a = torch.where(rand, ra, greedy)
+        a_np = a.cpu().numpy().astype(np.int64)
+        next_obs, r, term, trunc, _ = venv.step(a_np)
+        done = term | trunc
+        next_embed = emb(next_obs)
+        emb_cpu, nemb_cpu = embed.cpu().numpy(), next_embed.cpu().numpy()
+        did_reset = np.zeros(n_envs, dtype=bool)
+        for i in range(n_envs):
+            if awaiting[i]:  # this was env i's reset step (action ignored) — don't record
+                awaiting[i] = False
+                did_reset[i] = True
+                continue
+            streams[i].append(
+                Transition(emb_cpu[i], int(a_np[i]), float(r[i]), nemb_cpu[i], bool(done[i]))
+            )
+            counts[i] += 1
+            reward_events += int(r[i] > 0)
+            if done[i]:
+                awaiting[i] = True
+                episodes += 1
+        embed = next_embed
+        prev_a = a  # consumed by obs_step only on the actor path; dead state when actor is None
+        if did_reset.any():  # fresh RSSM state for envs whose reset obs is now current
+            dr = torch.as_tensor(did_reset, device=device)
+            state = _reset_masked_state(rssm, state, dr)
+            prev_a = torch.where(dr, torch.full_like(prev_a, rssm.no_action), prev_a)
+    for s in streams:  # append per-env; force-terminate each boundary (no cross-env window)
+        for j, t in enumerate(s):
+            done_flag = True if j == len(s) - 1 else t.done
+            buffer.add(Transition(t.obs, t.action, t.reward, t.next_obs, done_flag))
     return reward_events, episodes
 
 
@@ -205,6 +282,9 @@ def main() -> None:
     p.add_argument("--self-imitation", action="store_true")
     p.add_argument("--sil-weight", type=float, default=0.5)
     p.add_argument("--sil-success-frac", type=float, default=0.5)
+    # Vectorized parallel collection (infra): >1 steps that many Crafter workers in parallel,
+    # recovering the GPU idle of the CPU-bound collect phase. 1 = serial collect_embed (fallback).
+    p.add_argument("--n-envs", type=int, default=1)
     p.add_argument("--ep-length", type=int, default=2000)  # collection episode cap
     p.add_argument("--eval-episodes", type=int, default=5)
     p.add_argument("--eval-length", type=int, default=1000)
@@ -218,6 +298,10 @@ def main() -> None:
 
     env = make_crafter_env(length=args.ep_length, seed=args.seed)
     n_act = int(env.action_space.n)
+    venv = None
+    if args.n_envs > 1:  # parallel CPU workers for the collect phase (batched policy on GPU)
+        factory = functools.partial(make_crafter_env, length=args.ep_length)
+        venv = AsyncVectorEnv([factory] * args.n_envs, autoreset_mode=AutoresetMode.NEXT_STEP)
     enc = FrozenDinoEncoder(pool=args.pool).to(device)  # frozen; not in any optimizer
     ed = enc.latent_dim
     rssm = RSSM(embed_dim=ed, num_actions=n_act).to(device)
@@ -248,9 +332,16 @@ def main() -> None:
         act_fn = None if rnd == 0 else actor
         steps = args.round0_steps if rnd == 0 else args.actor_steps
         print(f"round {rnd}: collecting {steps} ...", flush=True)
-        r, e = collect_embed(
-            buffer, env, enc, rssm, act_fn, n_act, steps, args.epsilon, device, rng, args.seed + rnd
-        )
+        if venv is not None:
+            r, e = collect_embed_vec(
+                buffer, venv, args.n_envs, enc, rssm, act_fn, n_act, steps, args.epsilon,
+                device, rng, args.seed + rnd,
+            )
+        else:
+            r, e = collect_embed(
+                buffer, env, enc, rssm, act_fn, n_act, steps, args.epsilon, device, rng,
+                args.seed + rnd,
+            )
         print(f"  -> {e} episodes, {r} reward events")
         buffer.compute_returns(args.gamma)
 
@@ -339,6 +430,8 @@ def main() -> None:
                 },
             }
 
+    if venv is not None:
+        venv.close()
     path = Path(args.save)
     path = path.with_name(f"{path.stem}_s{args.seed}{path.suffix}")
     path.parent.mkdir(parents=True, exist_ok=True)

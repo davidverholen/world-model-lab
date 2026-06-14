@@ -125,6 +125,67 @@ def test_curious_replay_prioritized_sampling():
     assert abs(buf.priorities[10] - expected) < 1e-6
 
 
+class _FakeVecEnv:
+    """Minimal NEXT_STEP-autoreset vector env: each sub-env truncates every ep_len steps; the
+    step AFTER truncation is the reset (action ignored), exactly like gymnasium AsyncVectorEnv."""
+
+    def __init__(self, n, ep_len, obs_shape=(3, 4, 4)):
+        self.n, self.ep_len, self.obs_shape = n, ep_len, obs_shape
+        self.t = np.zeros(n, int)
+        self.awaiting = np.zeros(n, bool)
+        self.rng = np.random.default_rng(0)
+
+    def reset(self, seed=None):
+        self.t[:] = 0
+        self.awaiting[:] = False
+        return np.zeros((self.n, *self.obs_shape), np.float32), {}
+
+    def step(self, a):
+        obs = self.rng.random((self.n, *self.obs_shape)).astype(np.float32)
+        r = np.zeros(self.n, np.float32)
+        term = np.zeros(self.n, bool)
+        trunc = np.zeros(self.n, bool)
+        for i in range(self.n):
+            if self.awaiting[i]:  # reset step — action ignored, env restarts
+                self.awaiting[i] = False
+                self.t[i] = 0
+                continue
+            self.t[i] += 1
+            if self.t[i] >= self.ep_len:
+                trunc[i] = True
+                self.awaiting[i] = True
+        return obs, r, term, trunc, {}
+
+    def close(self):
+        pass
+
+
+def test_vectorized_collection_invariants():
+    # collect_embed_vec must (a) skip reset steps, (b) keep episodes contiguous so no sampled
+    # window crosses an episode/env boundary (the data-correctness guarantee for sequence WM).
+    from world_model.models.rssm import RSSM
+    from world_model.train_crafter import collect_embed_vec
+
+    E, n_envs, n_act = 8, 3, 5
+    rssm = RSSM(embed_dim=E, num_actions=n_act)
+
+    def enc(obs):  # cheap stand-in for the frozen encoder: flatten → first E dims
+        return obs.reshape(obs.shape[0], -1)[:, :E]
+
+    buf = ReplayBuffer(capacity=400, obs_shape=(E,), seed=0, obs_dtype=np.float32)
+    venv = _FakeVecEnv(n_envs, ep_len=4, obs_shape=(3, 4, 4))
+    rng = np.random.default_rng(0)
+    # actor=None → random collection (rssm only used for initial/no_action); epsilon irrelevant
+    rev, eps = collect_embed_vec(buf, venv, n_envs, enc, rssm, None, n_act, 48, 1.0, "cpu", rng, 0)
+    assert eps > 0 and buf.size >= 48  # real transitions recorded, reset steps not
+    # every env-stream is force-terminated and episodes end every ep_len → dones present
+    assert buf.dones[: buf.size].sum() >= eps
+    # THE invariant: no sampled length-L window contains a done before its final step
+    buf.compute_returns(0.99)
+    batch = buf.sample_sequences(16, length=4)
+    assert not batch["done"][:, :-1].any()
+
+
 def test_recurrent_world_model_and_agent():
     from world_model.agents import RecurrentMPCAgent
     from world_model.models import RecurrentDynamics, RewardHead

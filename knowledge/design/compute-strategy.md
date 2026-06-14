@@ -189,6 +189,23 @@ measurable, not vibes). Then, in order of €-efficiency:
 Rejected: enterprise rack gear (>€5k for non-ancient silicon, noise, idle power),
 Mac unified memory (MPS second-class for the PyTorch/CUDA RL ecosystem).
 
+## Measured: vectorized env collection (2026-06-14)
+
+Crafter collection is CPU-bound (single-threaded Python `env.step`), so the GPU idles
+during the collect/eval phases (~75% util at 2 parallel seeds — the 25% idle is collection).
+`train_crafter --n-envs N` now steps N Crafter workers in parallel (gymnasium AsyncVectorEnv,
+NEXT_STEP autoreset) while batching the frozen encoder + RSSM policy on the GPU
+(`collect_embed_vec`; opt-in, `--n-envs 1` = unchanged serial path). Measured **1.6× faster
+collection at n=6 on the laptop** (random collection, 122→193 steps/s) — modest here because
+the laptop CPU is weak and the per-step GPU-encode/IPC is serialized; expected to scale
+better on a many-core box (desktop / rental), which is the point. Implication for renting
+(see GPU-utilization note): to keep a rented card ~100% utilized, run **enough parallel seeds
+to fill the collect-phase idle** AND size **vCPUs ≥ seeds** (one collection thread each);
+`--n-envs` lowers the per-seed CPU idle so fewer seeds/cheaper instances saturate the GPU.
+The bigger lever (deferred) is async collect-while-train (overlap collection with grad steps).
+Equivalence to serial: unit-tested data invariants (contiguous episodes, no cross-boundary
+windows) + integration smoke; not bit-identical (parallel streams).
+
 ## Links
 
 [[environment-ladder]] · CLAUDE.md hardware section · future ADR: remote dispatch
