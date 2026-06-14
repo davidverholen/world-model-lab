@@ -131,7 +131,8 @@ def wm_train_rtfm(
     window,
     free_bits,
     device,
-    success_frac=0.5,
+    success_frac=0.0,  # WM/reward head trains on the UNBIASED distribution (else it over-predicts
+    # reward; success-oversampling is for the ACTOR's imagination start states only, in imagine_ac)
 ):
     recon = kl = torch.zeros(())
     w = window
