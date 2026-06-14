@@ -73,7 +73,7 @@ run)
   # Exports BEFORE uv sync so they cover sdist builds. PYTHONUTF8=1: force UTF-8 so
   # Windows (cp1252) sdist builds don't crash reading utf-8 setup files (e.g. crafter's
   # README). PYTHONUNBUFFERED=1: stream logs live instead of 4KB block-buffering.
-  ssh "$REMOTE" "cd $REMOTE_DIR && export PYTHONUTF8=1 PYTHONUNBUFFERED=1 && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && uv run $*"
+  ssh "$REMOTE" "cd $REMOTE_DIR && export PYTHONUTF8=1 PYTHONUNBUFFERED=1 && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync --extra rtfm && uv run $*"
   ;;
 shell)
   [ -z "$(git status --porcelain)" ] || {
@@ -84,7 +84,7 @@ shell)
   echo "shell on $REMOTE @ $(git rev-parse --short HEAD): $*"
   # Exports BEFORE uv sync (cover sdist builds) and inherited by backgrounded per-seed
   # subshells. PYTHONUTF8=1: Windows cp1252 sdist-build fix (crafter README). PYTHONUNBUFFERED=1: live logs.
-  ssh "$REMOTE" "cd $REMOTE_DIR && export PYTHONUTF8=1 PYTHONUNBUFFERED=1 && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync && $*"
+  ssh "$REMOTE" "cd $REMOTE_DIR && export PYTHONUTF8=1 PYTHONUNBUFFERED=1 && git fetch origin dispatch && git reset --hard FETCH_HEAD && uv sync --extra rtfm && $*"
   ;;
 kill)
   ssh "$REMOTE" "taskkill //IM python.exe //F" || true
