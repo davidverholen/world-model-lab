@@ -11,6 +11,7 @@ See knowledge/design/rung4-manual-conditioned-agent.md. Requires the `rtfm` extr
 
 import argparse
 import copy
+from pathlib import Path
 
 import crafter_rtfm as C
 import numpy as np
@@ -321,7 +322,7 @@ def main() -> None:
         print(
             f"  -> {ev} reward events; {len(registry.manuals)} manuals; buffer {buffer.size}"
         )
-        wm_train_rtfm(
+        recon, kl = wm_train_rtfm(
             buffer,
             registry,
             rssm,
@@ -335,7 +336,7 @@ def main() -> None:
             args.free_bits,
             device,
         )
-        imagine_ac_rtfm(
+        al, cl, ir = imagine_ac_rtfm(
             buffer,
             registry,
             rssm,
@@ -360,10 +361,29 @@ def main() -> None:
         eval_agent = RTFMAgent(enc, text_enc, rssm, actor, n_act, device, epsilon=0.0)
         r = evaluate_rtfm(eval_agent, eval_seeds[: args.n_eval_seeds], args.length, args.max_steps)
         print(
+            f"  recon={recon:.3f} kl={kl:.3f} actor_loss={al:.3f} critic_loss={cl:.3f} "
+            f"imagined_return={ir:.3f}",
+            flush=True,
+        )
+        print(
             f"  correct={r['CORRECT']:.2f} none={r['NONE']:.2f} swapped={r['SWAPPED']:.2f} "
             f"grounding={r['grounding']:.2f} swap_follow={r['swap_follow']:.2f}",
             flush=True,
         )
+
+    path = Path(args.save)
+    path = path.with_name(f"{path.stem}_s{args.seed}{path.suffix}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "rtfm_agent": True,
+            "rssm": rssm.state_dict(),
+            "actor": actor.state_dict(),
+            "config": {"pool": args.pool, "num_actions": n_act, "text_dim": td, "embed_dim": ed},
+        },
+        path,
+    )
+    print(f"saved -> {path}", flush=True)
 
 
 if __name__ == "__main__":
