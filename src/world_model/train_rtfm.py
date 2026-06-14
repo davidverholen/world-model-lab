@@ -85,8 +85,7 @@ class RTFMAgent:
 
 @torch.no_grad()
 def collect_rtfm(
-    buffer, registry, agent, n_episodes, length, seeds, mode, device, use_agent, max_steps,
-    one_shot
+    buffer, registry, agent, n_episodes, length, seeds, mode, device, use_agent, max_steps, one_shot
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
@@ -108,12 +107,19 @@ def collect_rtfm(
         for t in range(max_steps):
             a = agent.act(obs, info) if use_agent else int(rng.integers(env.action_space.n))
             obs, r, term, trunc, info = env.step(a)
+            # HONEST grounding reward (exp 0035): the env step reward `r` MIXES base-Crafter
+            # achievements (wood/food/drink — farmable WITHOUT reading) with the sparse tutorial
+            # bonus, both magnitude 1.0. Training on `r` lets the agent farm the readingless base
+            # reward and never read the manual (the exp 0034 all-zeros failure). Train on ONLY the
+            # tutorial component (newly-earned reading achievements this step) so reading the
+            # manual is the SOLE reward source — the env reward `r` is deliberately discarded.
+            r_read = float(len(info["tutorial_newly"]))
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
             buffer.add(
-                Transition(emb[0].cpu().numpy(), a, float(r), nemb[0].cpu().numpy(), done), tag=mid
+                Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done), tag=mid
             )
-            events += int(r > 0)
+            events += int(r_read > 0)
             emb = nemb
             if done:
                 break
@@ -338,9 +344,7 @@ def main() -> None:
             args.one_shot,
         )
         buffer.compute_returns(args.gamma)
-        print(
-            f"  -> {ev} reward events; {len(registry.manuals)} manuals; buffer {buffer.size}"
-        )
+        print(f"  -> {ev} reward events; {len(registry.manuals)} manuals; buffer {buffer.size}")
         recon, kl = wm_train_rtfm(
             buffer,
             registry,

@@ -12,11 +12,12 @@ wheels/
 # Editor / IDE (personal workflow config; keep local)
 .vscode/
 
-# Experiment artifacts
+# Experiment artifacts (run logs + checkpoints live under runs/<exp>/ — see scripts/dispatch_rtfm.sh)
 runs/
 experiments/runs/
 *.ckpt
 *.pt
+*.log
 events.out.tfevents.*
 
 # Knowledge base raw source binaries (registered in sources/SOURCES.md)

@@ -95,6 +95,9 @@ calls these elaborate).
 - [0025-reward-head-patch](experiments/0025-reward-head-patch.md) — combined fix (patch tokens + two-hot reward head) RESOLVES the exploitation: all 3 seeds move/explore/craft (behavior_report PASS), s2 reaches 6 achievements; ceiling now compute-bound (done)
 - [0024-dino-patch-tokens](experiments/0024-dino-patch-tokens.md) — patch tokens unlock navigation (s0 moves + builds table) but seed-dependent; representation IS part of the bottleneck; behavior gate caught the s0/s1 split (done)
 - [0023-twohot-value](experiments/0023-twohot-value.md) — two-hot distributional critic bounds Crafter value; first rung-3 learning run climbs to ~3 achievements (2 seeds), plateaus at shallow tree; reward head still inflates imagination (done)
+- [0032-rtfm-grounding](experiments/0032-rtfm-grounding.md) — rung-4 first grounding attempt (length-3 recipes): correct never lifts off zero; can't separate "can't ground" from "can't do 3-step sequence" → drop to length-1 (done)
+- [0033-rtfm-length1-grounding](experiments/0033-rtfm-length1-grounding.md) — DECISIVE NEGATIVE: the swap test caught a non-reading shortcut correct−none missed (swapped≈correct, swap_follow=0); vision reads the staged state → handoff HO-0006 (done)
+- [0034-rtfm-oneshot-ignition](experiments/0034-rtfm-oneshot-ignition.md) — one_shot re-test: fixed a base-reward-farming confound (train on tutorial-only reward), then hit a pure sparse-reward ignition wall (0–6 chance events, no gradient) → curriculum handoff HO-0007 (done)
 
 ## Wanted pages (linked but not yet written)
 

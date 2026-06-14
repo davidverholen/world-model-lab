@@ -2,6 +2,23 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-14] curation | exp 0034 (one_shot re-test): base-reward farming fixed → sparse-reward ignition wall → HO-0007
+
+Re-ran the rung-4 manual-conditioned agent under crafter-rtfm's `one_shot` fix (HO-0006, which
+killed the within-episode SEARCH leak 0033 exposed). Two findings, recorded in
+experiments/0034-rtfm-oneshot-ignition.md. (1) **Confound:** the env step reward `r` MIXES
+farmable base-Crafter achievements with the sparse tutorial bonus (both 1.0); `collect_rtfm` trained
+on `r`, so the agent farmed readingless base reward (all-zeros eval while ~120 "events"/round).
+**Fixed:** train on tutorial-only reward `len(info["tutorial_newly"])` so reading is the sole reward
+source. (2) **Residual wall:** with the honest reward, one_shot length-1 is too SPARSE to ignite —
+reward events collapse to chance (0–6/60, no climb), no gradient toward reading, eval stays at
+chance across all rounds (run runs/exp0035, 4 seeds). one_shot is correct (search/no-text provably
+fail; a scripted reader still grounds, swap_follow=1.0) so **HO-0006 ACCEPTED** — but a from-scratch
+LEARNER can't bootstrap. → **HO-0007 opened** (requirement: a reading-gated training curriculum/
+shaping signal that's dense enough to bootstrap without reopening the search leak; eval stays honest
+one_shot + swap_follow on held-out). Also: reward fix + run housekeeping (runs/<exp>/s<seed>.{pt,log}
+convention, scripts/dispatch_rtfm.sh, *.log gitignored). Next: await crafter-rtfm on HO-0007, re-test.
+
 ## [2026-06-14] ingest | Achievement Distillation (Moon et al., NeurIPS 2023) → papers/achievement-distillation-2023.md (full method depth: achievement segmentation rule, intra/cross-trajectory InfoNCE losses with formulas, Crafter per-achievement results, RSSM portability note)
 
 ## [2026-06-14] ingest | Curious Replay for Model-based Adaptation (Kauvar et al., ICML 2023) → papers/curious-replay-2023.md (method depth; priority formula, update rule, Crafter results, frozen-encoder applicability)
