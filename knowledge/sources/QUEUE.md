@@ -310,6 +310,25 @@ exploration/hierarchy-bound → these). INGEST the matching one(s) once 0027 pic
 - NOTE DreamerV3-XP (2510.21418, queued below under directed exploration) is the
       uncertainty-driven-exploration sibling; read as the pair to Curious Replay.
 
+LEADERBOARD SYNTHESIS (2026-06-14, verified via search; resolves the 0028 tension). Crafter
+Score = geometric mean of 22 achievement rates. Human 50.5%. **Achievement Distillation
+(2307.03486) 21.8% / reward 12.6 — best FROM-SCRATCH**; Curious Replay 19.4; PPO-ResNet 15.6;
+DreamerV3 14.5 / reward 11.7; LSTM-SPCNN 12.1. **The deep tree is near-universally UNSOLVED:**
+even AD (the champion) collects IRON only ~3%, DreamerV3 ~0.15% (AD = "20× DreamerV3"); diamond
+≈0% for all from-scratch. So the ~14–22% scores are dominated by SHALLOW/MID breadth (the
+geom-mean rewards any nonzero rate). Implication: our depth plateau is MOSTLY the universal
+Crafter ceiling at the iron/diamond tier; the real headroom is the STONE tier (collect_stone /
+stone_pickaxe / furnace), where SOTA reaches moderate rates and we get ~0. The method credited
+with the depth gain is **Achievement Distillation — an ACTOR-SIDE contrastive self-imitation on
+the achievement hierarchy, NOT a WM trick** — which vindicates our 0029/0028 actor-side
+diagnosis. New sources to queue:
+- [ ] arxiv:2507.04075 Accurate & Efficient World Modeling with Masked Latent Transformers
+      (MLT, 2025) — recent Crafter WM entrant; check its per-achievement depth.
+- [ ] arxiv:2406.07381 World Models with Hints of LLMs for Goal Achieving — LLM-prior
+      exploration on Crafter; the "cheap external prior" lever for the deep tree.
+- (already queued) 2307.03486 Achievement Distillation — PROMOTE to ingest if the next fork is
+  the actor-side capstone; 2305.00508 structured-exploration is its sibling.
+
 ## Hierarchy / subgoal emergence (maintainer's credit-assignment brainstorm 2026-06-13; ids to verify)
 - [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
       noted under temporal-abstraction) — manager-worker subgoals INSIDE a Dreamer

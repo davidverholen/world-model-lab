@@ -1097,3 +1097,17 @@ no stone/furnace; s1 reached one transient make_wood_sword (= 0027's wood-pickax
 (0026 replay-ratio, 0027 data, 0028 curiosity) + 0029 cleared perception => actor/credit-side is
 the frontier. Scout launched on the Crafter leaderboard (is the deep tree solved by ANY SOTA, or
 universal ceiling?) to calibrate next-fork expectations.
+
+## [2026-06-14] scout | Crafter leaderboard — deep tree near-universally unsolved; SOTA is actor-side
+
+Resolves the 0028 tension (CR is "champion" yet NULL for depth in our hands). Crafter Score =
+geom-mean of 22 achievement rates. Human 50.5%. Achievement Distillation (2307.03486) 21.8%
+(best from-scratch), Curious Replay 19.4, PPO-ResNet 15.6, DreamerV3 14.5. KEY: the deep tree
+is near-universally UNSOLVED from scratch — AD collects iron ~3% (= 20x DreamerV3's ~0.15%),
+diamond ~0% for all. The ~14-22% scores are dominated by shallow/mid breadth. So our depth
+plateau is MOSTLY the universal ceiling at iron/diamond; real headroom is the STONE tier where
+SOTA reaches moderate rates and we get ~0. The method credited with depth gains is Achievement
+Distillation = ACTOR-SIDE contrastive self-imitation on the achievement hierarchy, NOT a WM
+trick -> vindicates the 0029/0028 actor-side diagnosis. (scout agent stalled on a fetch; synthesis
+done inline via search.) Queued: 2507.04075 MLT, 2406.07381 LLM-hint WM. Next fork decision pending
+maintainer: actor-side AD-style capstone (target stone tier, NOT diamond) vs consolidate the rung.
