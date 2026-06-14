@@ -1076,3 +1076,14 @@ reports its Crafter gains SPECIFICALLY on the deep nodes we're stuck on (stone p
   (recon+KL near-uniform), that's the likely culprit, not the method.
 
 No paid resources used (desktop GPU only). No PAID-RESOURCE flag this cycle.
+
+## [2026-06-14] experiment | exp 0029 stat-perception probe — frozen encoder NOT blind; drink-spam is actor-side
+
+Triggered by the maintainer watching crafter_steps_s1 spam collect_drink at the cap. Probed
+linear decodability of Crafter vitals from the frozen DINO embedding AND the trained RSSM
+belief. Result: drink decodes at 0.95 (embedding, cls+patch) and 0.94 (belief) — the level
+survives end-to-end to the actor. Refutes the perception hypothesis: it is an actor/reward/
+credit problem (drinking at cap is a no-op with no penalty), not encoder blindness. Vindicates
+frozen-encoder-lean. Converges with 0026/0027 (depth is actor/exploration-bound). Side finding:
+health drops 0.79->0.35 in the belief (RSSM compresses the slow health stat). New diagnostic
+tool: world_model.stat_probe.
