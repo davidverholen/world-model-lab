@@ -37,11 +37,46 @@ Command per seed: `python -m world_model.train_crafter --pool cls+patch --rounds
 
 ## Result
 
-_pending (dispatched)_
+**Null for the depth hypothesis — 2× data buys breadth/reliability, NOT crafting depth.**
+2 seeds, 20 rounds (~200k steps), 1× replay (else identical to 0025). best_eval_reward
+**s0 3.47** (round 16), **s1 3.72** (round 18) — both *above* 0025's 2.35/2.47/3.47, and
+eval_achievement count rose (peak 4.38 / 4.62 vs 0025's ~3.25). behavior_report **PASS**
+both, and — the win over 0026 — **movement held** (moved_frac 0.13/0.14, span 13.8/16.3,
+entropy 1.87/2.04, no farming-in-place collapse): 1× replay avoided 0026's over-training,
+as predicted.
+
+BUT the **depth did not exceed 0025**. Deepest achievement per seed: s0 stalls at
+`place_table` (never a pickaxe); s1 reaches `make_wood_pickaxe` *once* (round 15, transient,
+also in its behavior histogram at 0.06). The eval union is the same shallow/mid set as
+0026 plus place_table + one transient wood pickaxe — **no `collect_stone`, no
+`make_stone_pickaxe`, no `place_furnace`** (all of which *0025* reached on individual
+seeds). So 2× exploration data lifted the shallow-achievement *count/reward* but did not
+climb the tech-tree past where 1× data already reached. imagined_return stayed calibrated
+(~1.0–3.3, no inflation).
+
+Caveat: crafting is high-variance and this is 2 seeds vs 0025's 3 — the *absence* of stone/
+furnace is partly seed luck. But the signal that matters is directional: more data did not
+push the **frontier** deeper, only made the shallow tier more reliable. Same shape as 0026.
 
 ## Lesson
 
-_pending_
+**Both compute axes are now ruled out as the depth lever — depth is exploration/hierarchy-
+bound, not compute-bound.** 0026 (replay-ratio, more gradient steps/datum) → breadth not
+depth + over-training. 0027 (step/data, more env steps) → breadth/reliability not depth,
+movement healthy. Two orthogonal scaling knobs, same verdict: the crafting tech-tree
+(table → wood pickaxe → stone → furnace → iron) does **not** open by throwing compute at the
+current objective. The agent rarely *discovers and reinforces* the multi-step sequence —
+this is the DoorKey-class long-horizon credit-assignment problem returning at the deep tree,
+exactly as 0026 predicted. Per the research-cycle **stall rule**, the depth plateau has now
+survived 2 redesigns (0026, 0027) with the same failure mode → **switch the thread from
+scaling to structured exploration / hierarchy** (the pre-staged queue anchors:
+Achievement Distillation 2307.03486, Curious Replay 2306.15934, structured-exploration
+2305.00508). One *positive* carry-forward: 1× replay + 2× data is the healthiest recipe yet
+(highest reward + count with movement intact) — use it as the 0028 baseline, not 0025.
+
+→ next (exp 0028): the cheapest exploration lever first — **Curious Replay** (novelty/
+surprise-prioritized replay sampling), which reuses our existing buffer + two-hot losses as
+the surprise signal. Ingest it at method depth before implementing (lit-gate).
 
 ## Links
 
