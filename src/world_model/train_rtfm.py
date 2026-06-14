@@ -19,7 +19,7 @@ import torch
 import torch.nn.functional as F
 from crafter_rtfm import ManualMode, harness, splits
 
-from world_model.models import Actor, FrozenDinoEncoder, ValueHead
+from world_model.models import Actor, ConditionedActor, FrozenDinoEncoder, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.manual_aux import (
     MaskedManualHead,
@@ -36,6 +36,20 @@ from world_model.training import ReplayBuffer, Transition
 def img_to_chw(img: np.ndarray) -> np.ndarray:
     """crafter-rtfm obs['image'] is HWC uint8 → CHW float [0,1] for the frozen DINO encoder."""
     return img.transpose(2, 0, 1).astype(np.float32) / 255.0
+
+
+def actor_logits(actor, belief, tok, mask):
+    """Single dispatch point for every actor call site (collection, eval, imagination).
+
+    Off path (base ``Actor``): ``actor(belief)`` — byte-for-byte identical to the original code; the
+    manual tokens are ignored, so a flag-off run is unchanged. On path (``ConditionedActor``, the
+    OPTIONAL rung-4 §6.2 fallback): ``actor(belief, tok, mask)`` — the actor cross-attends over the
+    SAME frozen manual token embeddings the world model sees (no privileged channel; see
+    ``models.actor.ConditionedActor``).
+    """
+    if isinstance(actor, ConditionedActor):
+        return actor(belief, tok, mask)
+    return actor(belief)
 
 
 class ManualRegistry:
@@ -83,7 +97,8 @@ class RTFMAgent:
         if self.epsilon > 0 and self.rng.random() < self.epsilon:
             a = int(self.rng.integers(self.n_act))
         else:
-            a = int(self.actor(self.rssm.belief(self._state)).argmax(-1))
+            bel = self.rssm.belief(self._state)
+            a = int(actor_logits(self.actor, bel, self._tok, self._mask).argmax(-1))
         self._prev_a = torch.tensor([a], device=self.device)
         return a
 
@@ -261,7 +276,9 @@ def imagine_ac_rtfm(
             s = state
             for _t in range(horizon):
                 bel = rssm.belief(s)
-                a = Categorical(logits=actor(bel)).sample()
+                # Actor conditioned on THIS episode's manual (tok/mask are (B,...), matching bel's
+                # batch B exactly — same per-row manual the WM uses at this imagined step).
+                a = Categorical(logits=actor_logits(actor, bel, tok, mask)).sample()
                 beliefs.append(bel)
                 acts.append(a)
                 rews.append(rew(bel, a))
@@ -281,7 +298,12 @@ def imagine_ac_rtfm(
                 returns[t] = g
         flat = bel_s.flatten(0, 1)
         adv = (returns - v_tgt).flatten().detach()
-        dist = Categorical(logits=actor(flat))
+        # bel_s is (horizon, B, state_dim) → flatten(0,1) is row-major (horizon, B). Broadcast the
+        # per-episode manual the SAME way: tile tok/mask (B,...) over the horizon axis FIRST, then
+        # flatten(0,1), so flat_tok[h*B + i] lines up with flat[h*B + i]'s episode i at every step.
+        flat_tok = tok.unsqueeze(0).expand(horizon, *tok.shape).flatten(0, 1)
+        flat_mask = mask.unsqueeze(0).expand(horizon, *mask.shape).flatten(0, 1)
+        dist = Categorical(logits=actor_logits(actor, flat, flat_tok, flat_mask))
         actor_loss = -(dist.log_prob(a_s.flatten()) * adv).mean() - ent_coef * dist.entropy().mean()
         critic_loss = critic.twohot_loss(flat, returns.flatten().detach())
         if beta_repval > 0:
@@ -355,6 +377,12 @@ def main() -> None:
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
     p.add_argument("--manual-aux-mask-frac", type=float, default=0.4)
+    # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
+    # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
+    # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
+    # test (swap_follow + swapped≪correct on held-out manuals) stays the unchanged acceptance gate.
+    # OFF = byte-for-byte identical to the WM-only path. See models.actor.ConditionedActor.
+    p.add_argument("--actor-cond", action=argparse.BooleanOptionalAction, default=False)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -381,7 +409,13 @@ def main() -> None:
     rew = TwoHotRewardHead(state_dim=sd, num_actions=n_act).to(device)
     val = ValueHead(state_dim=sd).to(device)  # noqa: F841  (kept for parity / future repval)
     cont = ContinueHead(state_dim=sd).to(device)
-    actor = Actor(state_dim=sd, num_actions=n_act).to(device)
+    # OFF (default): the WM-only base Actor — unchanged. ON (--actor-cond): the OPTIONAL §6.2
+    # fallback ConditionedActor (belief cross-attends over the frozen manual tokens). Same frozen
+    # token embeddings the WM sees; no privileged channel. Swap test remains the acceptance gate.
+    if args.actor_cond:
+        actor = ConditionedActor(belief_dim=sd, text_dim=td, num_actions=n_act).to(device)
+    else:
+        actor = Actor(state_dim=sd, num_actions=n_act).to(device)
     critic = TwoHotValueHead(state_dim=sd).to(device)
     target_critic = copy.deepcopy(critic)
 
@@ -508,7 +542,13 @@ def main() -> None:
             "rtfm_agent": True,
             "rssm": rssm.state_dict(),
             "actor": actor.state_dict(),
-            "config": {"pool": args.pool, "num_actions": n_act, "text_dim": td, "embed_dim": ed},
+            "config": {
+                "pool": args.pool,
+                "num_actions": n_act,
+                "text_dim": td,
+                "embed_dim": ed,
+                "actor_cond": args.actor_cond,
+            },
         },
         path,
     )

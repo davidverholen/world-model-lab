@@ -1,4 +1,4 @@
-from world_model.models.actor import Actor
+from world_model.models.actor import Actor, ConditionedActor
 from world_model.models.encoder import ConvEncoder
 from world_model.models.frozen_encoder import FrozenDinoEncoder
 from world_model.models.memory import RecurrentDynamics
@@ -9,6 +9,7 @@ from world_model.models.value import ValueHead
 
 __all__ = [
     "Actor",
+    "ConditionedActor",
     "ConvEncoder",
     "FrozenDinoEncoder",
     "LatentDynamicsPredictor",

@@ -3,6 +3,7 @@ the predicted prior — if the prior is invariant to the manual, conditioning is
 
 import torch
 
+from world_model.models.actor import Actor, ConditionedActor
 from world_model.models.manual_aux import (
     MaskedManualHead,
     manual_aux_loss,
@@ -116,6 +117,76 @@ def test_anti_baking_belief_excludes_conditioner():
     h_noctx = rssm.deter_noctx(state, prev_a)
     h_cond = rssm._deter_cond(state[0], state[1], prev_a, tokens, mask)
     assert not torch.allclose(h_noctx, h_cond, atol=1e-5)
+
+
+# ---- OPTIONAL actor-conditioning (rung-4 §6.2 fallback, flag-gated OFF by default) ----
+
+
+def test_conditioned_actor_forward_and_gradients():
+    # Forward shape + gradient flows to BOTH the conditioner and the wrapped base actor.
+    torch.manual_seed(0)
+    B, L, bd, td, n_act = 4, 6, 288, 384, 17
+    actor = ConditionedActor(belief_dim=bd, text_dim=td, num_actions=n_act, ctx_dim=64)
+    belief = torch.randn(B, bd)
+    tokens = torch.randn(B, L, td)
+    mask = torch.ones(B, L, dtype=torch.bool)
+    logits = actor(belief, tokens, mask)
+    assert logits.shape == (B, n_act)
+    logits.sum().backward()
+    cond_ps = actor.conditioner.parameters()
+    base_ps = actor.actor.parameters()
+    assert any(p.grad is not None and p.grad.abs().sum() > 0 for p in cond_ps)
+    assert any(p.grad is not None and p.grad.abs().sum() > 0 for p in base_ps)
+
+
+def test_conditioned_actor_depends_on_manual():
+    # The whole point of the fallback: the policy logits must change when the manual changes.
+    torch.manual_seed(0)
+    B, L, bd, td = 3, 5, 288, 384
+    actor = ConditionedActor(belief_dim=bd, text_dim=td, num_actions=7, ctx_dim=64)
+    belief = torch.randn(B, bd)
+    mask = torch.ones(B, L, dtype=torch.bool)
+    logits_a = actor(belief, torch.randn(B, L, td), mask)
+    logits_b = actor(belief, torch.randn(B, L, td), mask)
+    assert not torch.allclose(logits_a, logits_b, atol=1e-4)
+
+
+def test_actor_logits_off_path_byte_for_byte():
+    # The dispatch helper must leave the base-Actor (flag-OFF) path identical to a direct call:
+    # tokens/mask are ignored, output equals actor(belief) exactly.
+    from world_model.train_rtfm import actor_logits
+
+    torch.manual_seed(0)
+    B, bd, n_act = 4, 288, 17
+    base = Actor(state_dim=bd, num_actions=n_act)
+    belief = torch.randn(B, bd)
+    tok = torch.randn(B, 6, 384)
+    mask = torch.ones(B, 6, dtype=torch.bool)
+    out_helper = actor_logits(base, belief, tok, mask)
+    out_direct = base(belief)
+    assert torch.equal(out_helper, out_direct)
+
+
+def test_actor_logits_imagination_broadcast_matches_per_step():
+    # The imagine_ac broadcast trick: tiling tok/mask over the horizon axis then flatten(0,1) must
+    # line up row-for-row with bel_s.flatten(0,1) so each imagined step sees its OWN episode manual.
+    from world_model.train_rtfm import actor_logits
+
+    torch.manual_seed(0)
+    horizon, B, bd, L, td = 3, 4, 288, 5, 384
+    actor = ConditionedActor(belief_dim=bd, text_dim=td, num_actions=7, ctx_dim=64)
+    bel_s = torch.randn(horizon, B, bd)
+    tok = torch.randn(B, L, td)
+    mask = torch.ones(B, L, dtype=torch.bool)
+    flat = bel_s.flatten(0, 1)
+    flat_tok = tok.unsqueeze(0).expand(horizon, *tok.shape).flatten(0, 1)
+    flat_mask = mask.unsqueeze(0).expand(horizon, *mask.shape).flatten(0, 1)
+    flat_logits = actor_logits(actor, flat, flat_tok, flat_mask)
+    # Each (step h, episode i) row must equal a single-row call with episode i's manual.
+    for h in range(horizon):
+        for i in range(B):
+            row = actor_logits(actor, bel_s[h, i : i + 1], tok[i : i + 1], mask[i : i + 1])
+            assert torch.allclose(flat_logits[h * B + i], row[0], atol=1e-5)
 
 
 def test_manual_invariance_diagnostic_runs():
