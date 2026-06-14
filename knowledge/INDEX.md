@@ -34,6 +34,8 @@ calls these elaborate).
 - [architecture-strategy](design/architecture-strategy.md) — modes (configurator) + the real decision is the INTERFACE not model-count + reusable pretrained components (Minecraft WM); decide empirically at rung 3/5b (draft)
 - [environment-ladder](design/environment-ladder.md) — our staged env progression with exit criteria; living spec for ADR 0003 (current)
 - [compute-strategy](design/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
+- [rung4-manual-conditioned-agent](design/rung4-manual-conditioned-agent.md) — the reading-to-learn-dynamics agent: condition the WORLD MODEL (not policy) on the manual; anti-baking as a layered env+eval+probe+arch strategy (draft)
+- [grounding-env-spec](design/grounding-env-spec.md) — the read-to-learn-dynamics benchmark spec (authored here → crafter-rtfm); the env side rung-4 consumes (current)
 
 ## Papers
 

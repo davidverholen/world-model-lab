@@ -1157,3 +1157,16 @@ perception end-to-end; the plateau is exploration/discovery, NOT perception or a
 the rung-3 loop (0026/0027 compute, 0028 WM-curiosity, 0030 self-imitation, 0029+0031 perception all
 ruled out -> discovery wall). No adapter/custom encoder needed; frozen-encoder-lean holds. Foundation
 stable -> safe to build rung-4 reading-to-learn. 1M run unnecessary. New tool: world_model.semantic_probe.
+
+## [2026-06-14] design | rung-4 manual-conditioned agent — proposed; anti-baking as the spine
+
+Pivoted to rung-4 (reading-to-learn-dynamics) after rung-3 closed + foundation validated (0031).
+New design page design/rung4-manual-conditioned-agent.md (proposed, owner:human). Core choices:
+(1) condition the WORLD MODEL (RSSM dynamics + reward head) on the manual, NOT the policy -- the
+grounded "read-to-learn-dynamics" choice AND the strongest anti-baking lever (a WM can only
+shortcut by correctly predicting per-episode dynamics from the manual, which IS reading). (2)
+Frozen/small text encoder mirroring the visual side. (3) Anti-baking is LAYERED: env per-episode
+randomization (memorization useless) + referent-swap & held-out-config eval (the unfakeable metric)
++ belief-probe diagnostic (mechanistic, our 0029/0031 method) + no architecture backdoor. Success =
+swap-following on held-out manuals, NOT task reward. Next: derive the crafter-rtfm handoff (env API
+needs) via commons once design settles.
