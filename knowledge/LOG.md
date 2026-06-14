@@ -1022,3 +1022,16 @@ reward). The exploitation arc 0017->0025 is CLOSED. Residual: s0 minor make_iron
 Ceiling (~3-6 ach) now a COMPUTE-SCALING question (~10x under-trained vs DreamerV3) -> exp 0026
 scaling slope. Process win: behavior_report (from the maintainer s it-doesnt-move catch) was the
 decisive metric; eval_reward alone looked flat. Pages: experiments/0025 Result+Lesson, INDEX.
+
+## [2026-06-14] experiment | exp 0026 replay-ratio scaling — breadth not depth (mixed)
+
+2x updates/round (replay ratio), 0025 recipe, 2 seeds. End achievements ROSE (s0 3.88, s1 4.00
+vs 0025 ~2.25-3.4) BUT the names show it is BREADTH: union all shallow/survival (collect_wood/
+drink/sapling, place_plant, eat_cow, defeat_zombie, wake_up) -- NO crafting tech-tree (no
+pickaxe/table/furnace that 0025 reached). Movement DROPPED (moved_frac 0.07-0.15 vs 0.11-0.18,
+top place_plant/sleep) = mild over-training toward in-place farming (retention/primacy thread).
+=> replay-ratio lifts breadth/reliability (we were mildly under-trained there) but is NOT the
+depth lever; dont push it higher. Depth (crafting->stone->iron) is data/exploration-bound (the
+DoorKey long-horizon credit-assignment problem returning), not under-training. Caveat: crafting
+rare + 2 seeds = partial seed confound. -> exp 0027 step/data scaling (more rounds at 1x replay):
+does more exploration data unlock depth? If not -> exploration/hierarchy-bound. Pages: 0026, INDEX.
