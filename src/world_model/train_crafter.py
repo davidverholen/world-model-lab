@@ -134,14 +134,24 @@ def wm_train_curious(
             )
 
 
+def crafter_score(per_ach_unlock_counts: dict[str, int], episodes: int) -> float:
+    """Official Crafter Score (Hafner 2021): geometric mean of the 22 per-achievement success
+    PERCENTAGES, S = exp(mean_i ln(1 + s_i)) - 1, s_i in [0,100]. Rewards BREADTH (any nonzero
+    rate on many achievements) over spamming a few — the leaderboard metric (human 50.5%,
+    Achievement-Distillation 21.8%, DreamerV3 14.5%). Needs many episodes for stable rare rates."""
+    rates = [100.0 * c / episodes for c in per_ach_unlock_counts.values()]
+    return float(np.exp(np.mean(np.log1p(rates))) - 1.0)
+
+
 @torch.no_grad()
 def evaluate(enc, rssm, actor, n_act, episodes, length, device, seed_base=10_000):
-    """Mean episode reward, mean #achievements, and the SET of achievements unlocked across
-    eval episodes (greedy RSSMActorAgent). The set reveals DEPTH — count alone can't tell
-    {wake_up,collect_sapling} (trivial) from {collect_wood,place_table} (real progress)."""
+    """Mean reward, mean #achievements, the unlocked SET, and the official Crafter Score (%).
+    The set reveals DEPTH (count can't tell {wake_up} from {collect_stone}); the score makes us
+    directly comparable to the published leaderboard."""
     agent = RSSMActorAgent(enc, rssm, actor, n_act, device, epsilon=0.0, seed=seed_base)
     rewards, achievements = [], []
     unlocked: set[str] = set()
+    counts: dict[str, int] = {}
     for ep in range(episodes):
         env = make_crafter_env(length=length, seed=seed_base + ep)
         obs, info = env.reset(seed=seed_base + ep)
@@ -152,10 +162,15 @@ def evaluate(enc, rssm, actor, n_act, episodes, length, device, seed_base=10_000
             total += r
             done = term or trunc
         rewards.append(total)
+        if not counts:  # seed all 22 achievement keys (env exposes the full set every step)
+            counts = dict.fromkeys(info["achievements"], 0)
         ep_unlocked = {k for k, v in info["achievements"].items() if v > 0}
+        for k in ep_unlocked:
+            counts[k] += 1
         achievements.append(len(ep_unlocked))
         unlocked |= ep_unlocked
-    return float(np.mean(rewards)), float(np.mean(achievements)), unlocked
+    score = crafter_score(counts, episodes) if counts else 0.0
+    return float(np.mean(rewards)), float(np.mean(achievements)), unlocked, score
 
 
 def main() -> None:
@@ -185,6 +200,11 @@ def main() -> None:
     p.add_argument("--cr-c", type=float, default=1e4)
     p.add_argument("--cr-eps", type=float, default=0.01)
     p.add_argument("--cr-pmax", type=float, default=1e5)
+    # Self-imitation (exp 0030; AD-spirit actor-side lever): reinforce real achievement
+    # trajectories the imagined PG drowns out. --self-imitation on → sil-weight active.
+    p.add_argument("--self-imitation", action="store_true")
+    p.add_argument("--sil-weight", type=float, default=0.5)
+    p.add_argument("--sil-success-frac", type=float, default=0.5)
     p.add_argument("--ep-length", type=int, default=2000)  # collection episode cap
     p.add_argument("--eval-episodes", type=int, default=5)
     p.add_argument("--eval-length", type=int, default=1000)
@@ -297,14 +317,16 @@ def main() -> None:
             args.ent_coef,
             device,
             beta_repval=args.repval,
+            sil_weight=args.sil_weight if args.self_imitation else 0.0,
+            sil_success_frac=args.sil_success_frac,
         )
-        mean_r, mean_ach, unlocked = evaluate(
+        mean_r, mean_ach, unlocked, score = evaluate(
             enc, rssm, actor, n_act, args.eval_episodes, args.eval_length, device
         )
         print(
             f"  actor_loss={al:.3f} critic_loss={cl:.4f} imagined_return={ir:.3f} "
             f"eval_reward={mean_r:.2f} eval_achievements={mean_ach:.2f} "
-            f"unlocked=[{','.join(sorted(unlocked))}]",
+            f"crafter_score={score:.2f}% unlocked=[{','.join(sorted(unlocked))}]",
             flush=True,
         )
         if best["reward"] is None or mean_r >= best["reward"]:

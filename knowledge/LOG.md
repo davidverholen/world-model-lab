@@ -2,6 +2,8 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-14] ingest | Achievement Distillation (Moon et al., NeurIPS 2023) → papers/achievement-distillation-2023.md (full method depth: achievement segmentation rule, intra/cross-trajectory InfoNCE losses with formulas, Crafter per-achievement results, RSSM portability note)
+
 ## [2026-06-14] ingest | Curious Replay for Model-based Adaptation (Kauvar et al., ICML 2023) → papers/curious-replay-2023.md (method depth; priority formula, update rule, Crafter results, frozen-encoder applicability)
 
 ## [2026-06-14] curation | milestone: repo made public-ready — leaks scrubbed, README opened for third parties
@@ -1111,3 +1113,13 @@ Distillation = ACTOR-SIDE contrastive self-imitation on the achievement hierarch
 trick -> vindicates the 0029/0028 actor-side diagnosis. (scout agent stalled on a fetch; synthesis
 done inline via search.) Queued: 2507.04075 MLT, 2406.07381 LLM-hint WM. Next fork decision pending
 maintainer: actor-side AD-style capstone (target stone tier, NOT diamond) vs consolidate the rung.
+
+## [2026-06-14] experiment | exp 0030 self-imitation (SIL) implemented + Crafter Score metric
+
+Actor-side depth capstone. Added SIL to imagine_ac (reinforce real actions whose return beat the
+EMA-critic baseline, (R-V)_+ weighted; oversample achievement windows; opt-in, sil=0 byte-identical
+per reviewer). Added the official Crafter Score (geom-mean of 22 achievement rates) to evaluate().
+ANCHOR: our best agent (crafter_steps_s1) scores only 2.61% vs DreamerV3 14.5% / AD 21.8% / human
+50.5% -- the gap is BREADTH (we touch 8/22). Ingested Achievement Distillation (2307.03486) at method
+depth -> papers/achievement-distillation-2023.md (AD is contrastive representation, NOT SIL; its L_pred
+is the 0031 fallback). Reviewer SHIP. Dispatching 0030 = 0028 (curious) + SIL, 2 seeds.

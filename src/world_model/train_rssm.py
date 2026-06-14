@@ -133,10 +133,20 @@ def imagine_ac(
     ent_coef,
     device,
     beta_repval=0.0,
+    sil_weight=0.0,
+    sil_success_frac=0.0,
 ):
+    # Self-imitation (exp 0030; AD-spirit actor-side lever): when sil_weight>0, reinforce the
+    # REAL actions whose realized return beat the grounded critic — (R - V)_+ weighted log-prob —
+    # so rare achievement-unlocking trajectories aren't drowned by imagined policy-gradient. Needs
+    # the FULL real window (not just burn_in) to see reward-proximal states; oversample reward
+    # windows via sil_success_frac. sil_weight=0 → byte-identical to the pre-0030 loop.
+    sil = sil_weight > 0
+    roll_len = window if sil else burn_in
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
-        batch = buffer.sample_sequences(seq_batch, window)
+        sf = sil_success_frac if sil else 0.0
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=sf)
         obs = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         ret_real = torch.as_tensor(batch["return"], device=device)  # real MC returns
@@ -145,12 +155,12 @@ def imagine_ac(
             embed = encoder(obs.flatten(0, 1)).unflatten(0, (b, w))
             state = rssm.initial(b, device)
             prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
-            real_bels = []  # beliefs over REAL states (for the replay-grounded critic, b1)
-            for k in range(burn_in):
+            real_bels = []  # beliefs over REAL states (replay-grounded critic b1; + SIL if sil)
+            for k in range(roll_len):
                 state, _, _ = rssm.obs_step(state, prev_a, embed[:, k])
                 real_bels.append(rssm.belief(state))
                 prev_a = actions[:, k]
-            real_bel = torch.stack(real_bels)  # (burn_in,b,S), detached
+            real_bel = torch.stack(real_bels)  # (roll_len,b,S), detached
             beliefs, acts, rews, conts = [], [], [], []
             s = state
             for _t in range(horizon):
@@ -183,9 +193,21 @@ def imagine_ac(
             # DreamerV3 critic-on-replay (exp 0021): ground the critic in REAL returns so
             # the EMA target — and thus the actor's advantage baseline — can't drift with
             # the inflated imagined value. real_bel is detached, so grad flows to critic only.
-            rb = real_bel.flatten(0, 1)
+            rb = real_bel[:burn_in].flatten(0, 1)
             rt = ret_real[:, :burn_in].t().reshape(-1).detach()
             critic_loss = critic_loss + beta_repval * _critic_loss(critic, rb, rt)
+        if sil:
+            # Self-imitation (exp 0030): push the actor toward the REAL actions whose realized
+            # return beat the grounded target-critic baseline, (R - V)_+ weighted. real_bel is
+            # detached → grad flows to the actor only; the EMA target_critic is the stable
+            # baseline. Reinforces rare achievement trajectories the imagined PG drowns out.
+            real_flat = real_bel.flatten(0, 1)  # (roll_len*b, S), detached
+            real_acts = actions[:, :roll_len].t().reshape(-1)
+            real_ret = ret_real[:, :roll_len].t().reshape(-1)
+            with torch.no_grad():
+                adv_sil = (real_ret - target_critic(real_flat)).clamp(min=0.0)
+            sil_logp = Categorical(logits=actor(real_flat)).log_prob(real_acts)
+            actor_loss = actor_loss - sil_weight * (sil_logp * adv_sil).mean()
         opt_ac.zero_grad()
         (actor_loss + critic_loss).backward()
         opt_ac.step()

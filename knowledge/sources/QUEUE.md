@@ -293,10 +293,10 @@ tech-tree (0025 result; 0026 showed replay-ratio buys breadth not depth). These 
 the candidate anchors for 0028, branched on the 0027 outcome (data-bound → scale;
 exploration/hierarchy-bound → these). INGEST the matching one(s) once 0027 picks the fork.
 
-- [ ] arxiv:2307.03486 **Discovering Hierarchical Achievements via Contrastive Learning**
-      (Achievement Distillation, NeurIPS 2023) — directly targets Crafter's achievement
-      HIERARCHY (our exact depth problem); strong Crafter SOTA by exploiting
-      achievement structure. The single most on-target anchor for the hierarchy fork.
+- [x] arxiv:2307.03486 **Discovering Hierarchical Achievements via Contrastive Learning**
+      (Achievement Distillation, NeurIPS 2023) — INGESTED 2026-06-14 →
+      papers/achievement-distillation-2023.md (method depth; segmentation rule,
+      intra/cross InfoNCE losses, Crafter per-achievement results, RSSM portability).
 - [ ] arxiv:2305.00508 **Learning Achievement Structure for Structured Exploration in
       Domains with Sparse Reward** — learns the achievement dependency graph to drive
       structured exploration; the explicit "explore TOWARD the deep sequence" method.
