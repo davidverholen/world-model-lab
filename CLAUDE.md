@@ -58,6 +58,8 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
    run the checkpoint — verify (tests/lint) → knowledge curation → commit everything.
    No milestone leaves uncommitted changes behind; no commit carries an uncurated KB.
 
+**Cross-domain handoffs:** read `../commons/CONTRACT.md` before issuing or consuming a requirement/question/decision/status to or from the crafter-rtfm benchmark-env domain.
+
 ## Skills
 
 - `/context-architecture` — the full, reusable knowledge-base system (setup + operations);
