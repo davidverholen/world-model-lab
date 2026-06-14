@@ -59,11 +59,45 @@ Command per seed: `python -m world_model.train_crafter --pool cls+patch --rounds
 
 ## Result
 
-_pending (dispatched)_
+**NULL — self-imitation did not lift the Crafter Score or breadth.** 2 seeds, 20 rounds,
+`--curious --self-imitation` (vs 0028 = curious only). Proper 30-ep Crafter Score: **s0 2.06%,
+s1 2.77%** — vs the crafter_steps_s1 baseline **2.61%**, within noise, no lift. Distinct
+achievements unchanged (s0 7, s1 8), same wood-tier ceiling (`make_wood_sword` / `place_table`)
+— **no collect_stone, no stone_pickaxe, no furnace**. s1 best_eval_reward 3.85 (a marginal
+high) is more reliable exploitation of the *same shallow set*, not new breadth. behavior_report
+**PASS** both (moved_frac 0.13/0.15, entropy 1.9–2.1, no collapse), but `do:0.31–0.32` shows
+the drink/do-spam persists — SIL neither broke nor fixed the actor-side habit.
 
 ## Lesson
 
-_pending_
+**Self-imitation is the fourth actor-side/algorithmic lever to come back NULL for depth/breadth
+— the cheap-lever sweep on plain Crafter is now exhausted.** 0026 (replay-ratio), 0027 (data),
+0028 (curious replay), 0030 (SIL) all fail to move the frontier past the wood tier or the score
+past ~2.6%; 0029 cleared perception. SIL's specific failure is diagnostic: it can only imitate
+successes that *exist* in replay, and the agent so rarely reaches stone-tier states that there
+is nothing to consolidate — so it just reinforces the shallow set it already farms. This is the
+long-horizon **discovery** problem, not a credit-propagation problem SIL can fix: you can't
+self-imitate a trajectory you never produce.
+
+Triangulated with the leaderboard scout (deep tree near-universally unsolved from scratch; even
+AD reaches iron only ~3%), the honest read is that **plain-Crafter depth beyond ~2.6% / wood
+tier is at or near the ceiling our scale + the cheap levers reach** — and the remaining gap to
+the open-source band (DreamerV3 14.5%) is a *breadth/exploration-diversity* gap that more
+compute (0026/0027 ruled out) and self-imitation don't close. The standing instruction ("reach
+open-source range; if we cannot, think about the tutorial-driven method") has reached its
+**if-we-cannot** branch.
+
+→ fork (maintainer call): (a) one more for scientific closure — exp 0031 = the faithful AD
+`L_pred` contrastive auxiliary (the from-scratch SOTA's mechanism; *but* 0029 showed
+representation isn't our bottleneck, so expected value is modest), OR (b) declare rung-3
+"consistent non-degenerate Crafter agent achieved; depth is the known-hard frontier" and pivot
+to the **reading-to-learn** route (crafter-rtfm handoff domain) — the thesis-differentiating
+path that *sidesteps* the discovery wall by letting the agent READ the recipe it cannot explore
+its way to.
+
+## Links
+
+[[0028-curious-replay]] · [[0029-stat-perception-probe]] · [[0027-step-scaling]] · [[achievement-distillation-2023]] · [[crafter]] · [[hierarchy-and-credit]]
 
 ## Links
 

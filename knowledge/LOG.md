@@ -1134,3 +1134,15 @@ collection at n=6 on the laptop (scales better on many-core boxes/rentals). Unit
 invariants (no cross-boundary windows) + integration smoke; reviewer SHIP (one robustness fix
 applied: loop bounds total recorded to ~steps). Enables keeping rented GPUs ~100% utilized.
 Design note: design/compute-strategy.md.
+
+## [2026-06-14] experiment | exp 0030 self-imitation (SIL) — NULL; cheap actor-side lever sweep exhausted
+
+SIL (reinforce real achievement trajectories, (R-V)_+ weighted) did NOT lift the Crafter Score
+(30-ep: s0 2.06%, s1 2.77% vs 2.61% baseline) or breadth (7-8 distinct, wood-tier ceiling, no
+stone). behavior_report PASS both; drink-spam persists. Diagnostic failure: SIL can only imitate
+successes that EXIST in replay, and the agent rarely reaches stone-tier states -> nothing to
+consolidate. This is the DISCOVERY problem, not credit-propagation. Fourth NULL lever (after 0026
+replay-ratio, 0027 data, 0028 curious) + 0029 cleared perception => plain-Crafter depth ~2.6%/wood
+is at/near our ceiling. Standing instruction reached its "if-we-cannot -> tutorial-driven" branch.
+Fork (maintainer): (a) 0031 AD L_pred for closure (low EV, 0029 cleared representation) vs (b)
+declare rung-3 done + pivot to reading-to-learn (crafter-rtfm).
