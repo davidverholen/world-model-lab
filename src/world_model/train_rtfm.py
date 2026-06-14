@@ -131,11 +131,12 @@ def wm_train_rtfm(
     window,
     free_bits,
     device,
+    success_frac=0.5,
 ):
     recon = kl = torch.zeros(())
     w = window
     for _step in range(updates):
-        batch = buffer.sample_sequences(seq_batch, window)
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         rewards = torch.as_tensor(batch["reward"], device=device)
@@ -181,12 +182,13 @@ def imagine_ac_rtfm(
     ent_coef,
     device,
     beta_repval=0.3,
+    success_frac=0.5,
 ):
     from torch.distributions import Categorical
 
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
-        batch = buffer.sample_sequences(seq_batch, window)
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         ret_real = torch.as_tensor(batch["return"], device=device)  # real MC returns
