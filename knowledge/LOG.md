@@ -2,6 +2,8 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-14] ingest | Curious Replay for Model-based Adaptation (Kauvar et al., ICML 2023) → papers/curious-replay-2023.md (method depth; priority formula, update rule, Crafter results, frozen-encoder applicability)
+
 ## [2026-06-14] curation | milestone: repo made public-ready — leaks scrubbed, README opened for third parties
 
 Publication-prep pass on the maintainer's request (no research content changed). Internal/

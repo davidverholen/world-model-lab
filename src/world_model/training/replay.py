@@ -46,6 +46,13 @@ class ReplayBuffer:
         self.pos = 0
         self.total_adds = 0
         self.rng = np.random.default_rng(seed)
+        # Curious-Replay state (exp 0028; arxiv:2306.15934). Priority is per window-START
+        # index: p_i = c*beta^visits_i + (|loss_i|+eps)^alpha. New starts get p_max until
+        # first scored. Unused unless the prioritized methods are called → the uniform path
+        # (sample_sequences) is untouched.
+        self.priorities = np.zeros(capacity, dtype=np.float64)
+        self.visits = np.zeros(capacity, dtype=np.int64)
+        self._valid_cache: np.ndarray | None = None
 
     def add(self, t: Transition) -> None:
         i = self.pos
@@ -54,6 +61,7 @@ class ReplayBuffer:
         self.actions[i] = t.action
         self.rewards[i] = t.reward
         self.dones[i] = t.done
+        self.visits[i] = 0
         self.pos = (self.pos + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
         self.total_adds += 1
@@ -134,6 +142,9 @@ class ReplayBuffer:
             take = min(len(valid), batch_size - found)
             starts[found : found + take] = valid[:take]
             found += take
+        return self._window_batch(starts, length)
+
+    def _window_batch(self, starts: np.ndarray, length: int) -> dict[str, np.ndarray]:
         idx = starts[:, None] + np.arange(length)
         return {
             "obs": self._to_float(self.obs[idx]),
@@ -143,6 +154,50 @@ class ReplayBuffer:
             "done": self.dones[idx],  # terminations (windows may end in one)
             "next_obs": self._to_float(self.next_obs[starts + length - 1]),
         }
+
+    # --- Curious Replay (exp 0028; arxiv:2306.15934) -----------------------------------
+    def prepare_prioritized(self, length: int, p_max: float = 1e5) -> int:
+        """Cache the valid window starts for this length and seed never-scored starts to
+        p_max (highest priority → sampled first, à la PER new-transition init). Call once
+        per WM-train round; the buffer is fixed during training so the valid set is stable.
+        Returns the number of valid starts.
+        """
+        if self.total_adds > self.capacity:
+            raise NotImplementedError("prioritized sampling assumes an unwrapped buffer")
+        all_cand = np.arange(0, self.size - length + 1)
+        self._valid_cache = self._valid_starts(all_cand, length)
+        fresh = self._valid_cache[self.visits[self._valid_cache] == 0]
+        self.priorities[fresh] = p_max
+        return len(self._valid_cache)
+
+    def sample_sequences_prioritized(
+        self, batch_size: int, length: int
+    ) -> tuple[dict[str, np.ndarray], np.ndarray]:
+        """Sample windows with probability ∝ start priority (Curious Replay). Returns the
+        batch dict AND the chosen start indices (the caller scores them via
+        update_priorities). Requires prepare_prioritized() first."""
+        if self._valid_cache is None:
+            raise RuntimeError("call prepare_prioritized(length) before prioritized sampling")
+        v = self._valid_cache
+        p = self.priorities[v]
+        probs = p / p.sum()
+        starts = v[self.rng.choice(len(v), size=batch_size, p=probs)]
+        return self._window_batch(starts, length), starts
+
+    def update_priorities(
+        self,
+        starts: np.ndarray,
+        losses: np.ndarray,
+        alpha: float = 0.7,
+        beta: float = 0.7,
+        c: float = 1e4,
+        eps: float = 0.01,
+    ) -> None:
+        """p_i = c*beta^visits_i + (|loss_i|+eps)^alpha after a gradient step (CR Eq. 1).
+        Increments the visit count (count term decays repeatedly-sampled starts) and folds
+        in the fresh model loss (loss term up-weights surprising/high-error windows)."""
+        self.visits[starts] += 1
+        self.priorities[starts] = c * beta ** self.visits[starts] + (np.abs(losses) + eps) ** alpha
 
     def __len__(self) -> int:
         return self.size

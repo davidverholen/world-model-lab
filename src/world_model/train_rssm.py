@@ -35,11 +35,16 @@ def _sg(dist: Normal) -> Normal:
     return Normal(dist.mean.detach(), dist.stddev.detach())
 
 
-def kl_balanced(post: Normal, prior: Normal, free_bits: float) -> torch.Tensor:
-    """DreamerV3 KL balancing: beta_dyn*KL(sg(post)||prior) + beta_rep*KL(post||sg(prior))."""
+def kl_balanced(post: Normal, prior: Normal, free_bits: float, reduce: bool = True) -> torch.Tensor:
+    """DreamerV3 KL balancing: beta_dyn*KL(sg(post)||prior) + beta_rep*KL(post||sg(prior)).
+
+    reduce=False returns the per-element KL (B,) instead of the batch mean — used by the
+    Curious-Replay per-item curiosity signal (exp 0028); default preserves all callers.
+    """
     kl_dyn = kl_divergence(_sg(post), prior).sum(-1).clamp(min=free_bits)
     kl_rep = kl_divergence(post, _sg(prior)).sum(-1).clamp(min=free_bits)
-    return (0.5 * kl_dyn + 0.1 * kl_rep).mean()
+    per_elem = 0.5 * kl_dyn + 0.1 * kl_rep
+    return per_elem.mean() if reduce else per_elem
 
 
 def wm_train(

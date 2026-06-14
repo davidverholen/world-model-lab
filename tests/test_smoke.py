@@ -95,6 +95,36 @@ def test_sequence_sampling():
     assert batch["next_obs"].shape == (8, 3, 4, 4)
 
 
+def test_curious_replay_prioritized_sampling():
+    # Curious Replay (exp 0028): prioritized sampling biases toward high-priority starts,
+    # and update_priorities applies p = c*beta^visits + (|loss|+eps)^alpha.
+    buf = ReplayBuffer(capacity=60, obs_shape=(2,), seed=0)
+    obs = np.zeros((2,), dtype=np.float32)
+    for _ in range(60):
+        buf.add(Transition(obs, 0, 0.0, obs, done=False))
+    n_valid = buf.prepare_prioritized(length=4, p_max=1e5)
+    assert n_valid == 60 - 4 + 1
+    # fresh starts seeded to p_max; sampling returns valid starts + a batch of right shape
+    batch, starts = buf.sample_sequences_prioritized(8, length=4)
+    assert batch["obs"].shape == (8, 4, 2)
+    assert starts.shape == (8,) and starts.max() <= 56
+
+    # drive ALL priority to one start: give it low loss (small priority would lose), so
+    # instead give every OTHER start a huge loss=0 + many visits (decays count term to ~0),
+    # and the target start a fresh high loss → it dominates. Simpler: zero out all but one.
+    buf.priorities[:] = 0.0
+    buf.priorities[10] = 1.0
+    _, starts2 = buf.sample_sequences_prioritized(32, length=4)
+    assert set(starts2.tolist()) == {10}
+
+    # update_priorities: visits increment, priority follows the CR formula
+    before = buf.visits[10]
+    buf.update_priorities(np.array([10]), np.array([2.0]), alpha=0.7, beta=0.7, c=1e4, eps=0.01)
+    assert buf.visits[10] == before + 1
+    expected = 1e4 * 0.7 ** buf.visits[10] + (2.0 + 0.01) ** 0.7
+    assert abs(buf.priorities[10] - expected) < 1e-6
+
+
 def test_recurrent_world_model_and_agent():
     from world_model.agents import RecurrentMPCAgent
     from world_model.models import RecurrentDynamics, RewardHead

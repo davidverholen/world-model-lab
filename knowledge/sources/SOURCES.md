@@ -30,6 +30,7 @@ Citation rule: a manuscript may cite only sources whose page is at read depth
 | arxiv:1811.04551 | PlaNet: Learning Latent Dynamics for Planning from Pixels | https://arxiv.org/abs/1811.04551 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2010.02193 | DreamerV2: Mastering Atari with Discrete World Models | https://arxiv.org/abs/2010.02193 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2301.04104 | DreamerV3: Mastering Diverse Domains through World Models | https://arxiv.org/abs/2301.04104 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2306.15934 | Curious Replay for Model-based Adaptation (Kauvar et al., ICML 2023) | https://arxiv.org/abs/2306.15934 | paper | yes (2026-06-14, HTML full-text) | 2026-06-14 |
 | arxiv:1911.08265 | MuZero: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model | https://arxiv.org/abs/1911.08265 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2310.16828 | TD-MPC2: Scalable, Robust World Models for Continuous Control | https://arxiv.org/abs/2310.16828 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2209.00588 | IRIS: Transformers are Sample-Efficient World Models | https://arxiv.org/abs/2209.00588 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |

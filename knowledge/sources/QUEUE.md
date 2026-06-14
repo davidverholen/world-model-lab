@@ -300,8 +300,9 @@ exploration/hierarchy-bound → these). INGEST the matching one(s) once 0027 pic
 - [ ] arxiv:2305.00508 **Learning Achievement Structure for Structured Exploration in
       Domains with Sparse Reward** — learns the achievement dependency graph to drive
       structured exploration; the explicit "explore TOWARD the deep sequence" method.
-- [ ] arxiv:2306.15934 **Curious Replay for Model-based Adaptation** — prioritized
-      replay on surprising/novel transitions inside DreamerV3; +1.33× on Crafter.
+- [x] arxiv:2306.15934 **Curious Replay for Model-based Adaptation** — INGESTED
+      2026-06-14 → papers/curious-replay-2023.md (method depth; priority formula,
+      update rule, Crafter results, frozen-encoder applicability).
       KEY CONTRAST with 0026: uniform 2× replay failed (breadth not depth), but
       *curiosity-prioritized* replay reweights toward novelty — a different lever on
       the same axis. Cheapest of the three to graft onto our flywheel; read FIRST if
