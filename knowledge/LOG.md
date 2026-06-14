@@ -1205,3 +1205,16 @@ crafter-rtfm Policy). Added: ReplayBuffer per-transition tag channel (manual id)
 optional `rtfm` extra. 2-round toy smoke runs clean (scores 0.00 as expected, untrained). 27 tests
 pass. Next: a real training run on the desktop GPU to see if it LEARNS to ground (swap-following > 0
 on held-out r1) — the first reading-to-learn-dynamics result.
+
+## [2026-06-14] experiment | rung-4 first grounding attempt (0032/0033) — agent does NOT read content
+
+exp0032 (length-3): correct never lifted off zero, but a productive debugging arc calibrated the
+manual-conditioned WM training (value inflation->repval; sparse reward->AC success-oversampling;
+reward-head hallucination->WM trains unbiased). exp0033 (length-1 diagnostic, 4 seeds): DECISIVE
+NEGATIVE caught by the swap test. correct-none "grounding" appeared (s1 0.40 vs 0.05) but
+swapped~=correct (0.30-0.35) and swap_follow~=0 across all seeds => the agent ignores manual CONTENT,
+exploits manual PRESENCE + a VISION shortcut (staged visual state leaks the recipe). The swap-following
+metric caught a confound correct-none missed (methodology win, validates the anti-baking design).
+Two-domain finding: crafter-rtfm's reading-necessity gate (text-only stub grounds, swap_follow=1.0)
+does NOT hold for a vision+text learner -> handoff to crafter-rtfm (need a recipe-not-visually-inferable
+mode). Next: that handoff, then re-test (consider direct actor-conditioning). Run stopped, GPU free.
