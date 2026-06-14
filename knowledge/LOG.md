@@ -1041,3 +1041,38 @@ does more exploration data unlock depth? If not -> exploration/hierarchy-bound. 
 ## 2026-06-14 — exp 0027 dispatched + lit-gate prep for the depth fork
 - Dispatched exp 0027 (step/data scaling: 20 rounds, 1× replay, 2 seeds) at commit 755d902 on the desktop GPU. Tests whether crafting DEPTH is data/exploration-bound (the 0026 follow-up: replay-ratio bought breadth not depth).
 - Literature gate (autonomous research-cycle step 2) for the likely 0027 fork: queued 3 new on-target anchors under sources/QUEUE.md → new section "Crafter DEPTH / achievement-hierarchy fork (exp 0027 thread)": Achievement Distillation (2307.03486, contrastive achievement hierarchy — most on-target), Learning Achievement Structure (2305.00508, structured exploration via the dependency graph), Curious Replay (2306.15934, novelty-prioritized DreamerV3 replay, +1.33× Crafter — the contrast to 0026's failed uniform 2× replay). Ingest waits until 0027 picks the fork.
+
+## [2026-06-14] state-of-the-night | autonomous research-cycle: depth thread (0026→0027→0028)
+
+**Threads advanced tonight (all milestoned):**
+- **exp 0026** (replay-ratio scaling, 2× updates) → MIXED: breadth/reliability up, crafting
+  DEPTH unchanged, mild over-training (less movement). Milestone 207ff4a.
+- **exp 0027** (step/data scaling, 2× data @ 1× replay, 20 rounds) → NULL for depth: reward/
+  count rose (best 3.47/3.72, count 4.38/4.62 > 0025) with movement HEALTHY (behavior_report
+  PASS both; 1× replay avoided 0026's collapse), but frontier did NOT exceed 0025 (s0 stalls
+  at place_table, s1 one transient make_wood_pickaxe; no stone/furnace). Milestone b9fa258.
+- **Verdict:** both compute axes (gradient-steps AND env-steps) are ruled out as the depth
+  lever → depth is **exploration/hierarchy-bound**, not compute-bound. Stall rule fired
+  (same failure survived 2 redesigns) → switched thread from scaling to structured exploration.
+
+**Running now:** **exp 0028 — Curious Replay** (novelty/surprise-prioritized WM replay;
+arxiv:2306.15934, ingested at method depth → papers/curious-replay-2023.md). 2 seeds,
+dispatched at commit 997183a on the desktop GPU. One variable vs 0027: `--curious` (WM-train
+windows sampled by p=c·β^visits+(|recon+KL|+ε)^α instead of uniform). Reviewer-confirmed the
+optimized loss is identical to the 0027 baseline → clean attribution. Chosen because the paper
+reports its Crafter gains SPECIFICALLY on the deep nodes we're stuck on (stone pickaxe, iron).
+
+**Recommended next decision (for the maintainer):**
+- If 0028's eval union gains frontier achievements (collect_stone / make_stone_pickaxe /
+  place_furnace) with behavior_report still PASS → curiosity-on-WM IS a depth lever →
+  exp 0029 = extend Curious Replay to the imagination-AC burn-in sampling too (compounding).
+- If 0028 is NULL (frontier unchanged) → the bottleneck is the ACTOR not discovering the path,
+  not the WM not learning it → escalate to structured exploration / hierarchy: Achievement
+  Distillation (2307.03486) or achievement-graph structured exploration (2305.00508), both
+  queued. This is a bigger design step (achievement-conditioned policy/contrastive head) and
+  is a reasonable point to want maintainer input on direction.
+- Caveat to watch: DINO-embedding recon error may be lower-variance than the paper's pixel
+  loss → the curiosity signal could be weak. If 0028 shows priorities barely differentiating
+  (recon+KL near-uniform), that's the likely culprit, not the method.
+
+No paid resources used (desktop GPU only). No PAID-RESOURCE flag this cycle.
