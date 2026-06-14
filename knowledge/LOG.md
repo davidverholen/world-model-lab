@@ -1087,3 +1087,13 @@ credit problem (drinking at cap is a no-op with no penalty), not encoder blindne
 frozen-encoder-lean. Converges with 0026/0027 (depth is actor/exploration-bound). Side finding:
 health drops 0.79->0.35 in the belief (RSSM compresses the slow health stat). New diagnostic
 tool: world_model.stat_probe.
+
+## [2026-06-14] experiment | exp 0028 Curious Replay — NULL for depth (3rd confirmation actor-side)
+
+Curious Replay (WM-side novelty-prioritized replay) improved exploration (moved_frac 0.23/0.19
+vs 0027's 0.13/0.14, s1 behavior reward 4.10 = best yet) but did NOT move the crafting frontier:
+no stone/furnace; s1 reached one transient make_wood_sword (= 0027's wood-pickaxe depth). best
+3.22/3.73 ~= 0027. behavior_report PASS both; drink/do-spam persists. Three depth levers now NULL
+(0026 replay-ratio, 0027 data, 0028 curiosity) + 0029 cleared perception => actor/credit-side is
+the frontier. Scout launched on the Crafter leaderboard (is the deep tree solved by ANY SOTA, or
+universal ceiling?) to calibrate next-fork expectations.

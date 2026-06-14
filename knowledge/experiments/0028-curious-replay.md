@@ -62,11 +62,49 @@ Command per seed: `python -m world_model.train_crafter --pool cls+patch --rounds
 
 ## Result
 
-_pending (dispatched)_
+**NULL for depth — Curious Replay lifts exploration/movement but does NOT move the crafting
+frontier.** 2 seeds, 20 rounds, `--curious` (else identical to 0027). best_eval_reward s0 3.22
+(round 18), s1 3.73 (round 12) — ≈ 0027 (3.47/3.72), s0 slightly below. Eval-achievement
+*frontier* unchanged: full union s0 = {collect_wood, defeat_skeleton, defeat_zombie, eat_cow,
+place_plant} (no place_table!); s1 = {collect_wood, defeat_zombie, eat_cow, **make_wood_sword**,
+place_plant, place_table} — one transient wood-tier table craft (sword), same depth as 0027
+s1's wood pickaxe. **No collect_stone, no stone_pickaxe, no furnace on either seed.**
+
+The nuance: behavior_report **PASS** both, and Curious Replay measurably **improved
+exploration** vs 0027 — moved_frac **0.23 / 0.19** (vs 0027's 0.13/0.14), bbox span up to 25
+tiles, and s1's behavior_report reward **4.10** is the highest we've recorded. Faint frontier
+flicker: s1's behavior histogram shows `place_stone:0.08` (implies it occasionally collects +
+places stone in some episodes), but it never stabilizes into the eval union. The drink/do-spam
+persists (top action `do` 0.33–0.35) and s0 shows the no-op `make_iron_sword:0.08` residual —
+both consistent with the [[0029-stat-perception-probe]] actor-side finding. imagined_return
+stayed calibrated (~1.4–1.9).
 
 ## Lesson
 
-_pending_
+**Curious Replay does what it says — prioritizing surprising transitions increases exploration
+(more movement, wider bbox, faint stone-tier touches) — but it is a WM-side lever and does NOT
+crack the depth wall.** This is the predicted result: 0029 localized the bottleneck to the
+actor/credit side (the agent *perceives* its state fine; it lacks the incentive/credit path to
+value the long deep sequence), and CR improves the *world model's* coverage of rare dynamics,
+not the *actor's* propensity to pursue them. So the depth plateau has now survived THREE levers
+— replay-ratio (0026), data (0027), curiosity-prioritized replay (0028) — plus a perception
+probe (0029) that cleared the encoder/WM. Every thread converges on **actor-side
+exploration/credit-assignment** as the real frontier.
+
+CAVEAT being checked: the maintainer flagged the Crafter leaderboard — Curious Replay is the
+published *champion*, yet here it is NULL for depth. Resolving that tension (does the champion
+itself actually reach the deep tree, or does ALL of Crafter SOTA plateau at the mid tier?) is a
+scout task in flight — if even SOTA leaves stone_pickaxe→iron→diamond near-0%, our "stuck" is
+substantially the universal Crafter ceiling, not only our bug, and the honest next move is
+hierarchy/structured-exploration (Achievement Distillation 2307.03486 / 2305.00508) tempered by
+realistic expectations about how far the deep tree is reachable at our compute at all.
+
+→ next: gated on the leaderboard scout. If SOTA also plateaus → reset depth expectations + try
+ONE actor-side lever (structured exploration / hierarchy) as the capstone, not endless WM work.
+
+## Links
+
+[[0027-step-scaling]] · [[0026-replay-ratio-scaling]] · [[0029-stat-perception-probe]] · [[curious-replay-2023]] · [[crafter]] · [[hierarchy-and-credit]]
 
 ## Links
 
