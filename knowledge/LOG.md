@@ -1182,3 +1182,14 @@ right (displayed >> correct) but weak. Decision: condition on frozen TOKEN embed
 cross-attention (order/token-aware), NOT FiLM/concat on a pooled sentence vector. Updated
 design/rung4-manual-conditioned-agent.md (§2 architecture + §5 handoff DELIVERED + §6 resolved).
 Also: HO-0005 accepted (env consumable), HO-0004 acceptance confirmed valid.
+
+## [2026-06-14] rung-4 | manual-conditioning mechanism built (cross-attention into the RSSM prior)
+
+Core rung-4 research piece, built + tested. models/text_encoder.py (FrozenTextEncoder: frozen MiniLM,
+TOKEN-level, cached per manual) + models/manual_conditioning.py (ManualConditioner cross-attention;
+ConditionedRSSM whose PRIOR is conditioned on the manual tokens via the RSSM deter state as query).
+The manual conditions the DYNAMICS (prior), not the policy. Tests (tests/test_rung4.py): shapes, mask,
+gradient flow, and the LOAD-BEARING property -- swapping the manual CHANGES the predicted prior (so
+conditioning is used, not ignored). Real-MiniLM integration smoke: manual text -> 384-d tokens ->
+cross-attn -> conditioned prior, correct vs swapped manual differ. Next: rung-4 training loop on
+crafter-rtfm + swap-following eval on held-out r1.
