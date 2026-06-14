@@ -56,6 +56,21 @@ class ConditionedRSSM(RSSM):
         h = self._deter(h, z, prev_action)
         return h + self.ctx_to_h(self.conditioner(h, tokens, mask))
 
+    def deter_noctx(self, state, prev_action):
+        """The deterministic state of the *current* step WITHOUT the manual cross-attention
+        injection — i.e. the GRU output before ``+ ctx_to_h(conditioner(...))`` is added.
+
+        This is the anti-baking hook for the masked-manual-reconstruction aux loss
+        ([[dynalang-2023]] option A / option C): the conditioner folds the manual into ``h`` at
+        every step (``_deter_cond``), so the ordinary belief is a trivial copy-through of the
+        cross-attention input. Reconstructing the manual from ``deter_noctx`` instead forces the
+        signal through the RECURRENT carry — the manual content the GRU has *internalised* from
+        prior steps — not the current-step attention shortcut. See
+        knowledge/design/rung4-manual-conditioned-agent.md §2–3.
+        """
+        h, z = state
+        return self._deter(h, z, prev_action)
+
     def obs_step(self, state, prev_action, embed, tokens, mask=None):
         """One step WITH observation. Returns (state, prior, post). h carries the manual."""
         h, z = state

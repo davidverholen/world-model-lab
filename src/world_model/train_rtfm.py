@@ -21,6 +21,11 @@ from crafter_rtfm import ManualMode, harness, splits
 
 from world_model.models import Actor, FrozenDinoEncoder, ValueHead
 from world_model.models.continue_head import ContinueHead
+from world_model.models.manual_aux import (
+    MaskedManualHead,
+    manual_aux_loss,
+    manual_invariance_diagnostic,
+)
 from world_model.models.manual_conditioning import ConditionedRSSM
 from world_model.models.text_encoder import FrozenTextEncoder
 from world_model.models.twohot import TwoHotRewardHead, TwoHotValueHead
@@ -161,9 +166,20 @@ def wm_train_rtfm(
     device,
     success_frac=0.0,  # WM/reward head trains on the UNBIASED distribution (else it over-predicts
     # reward; success-oversampling is for the ACTOR's imagination start states only, in imagine_ac)
+    manual_aux_head=None,
+    manual_aux_coef=0.0,
+    manual_aux_mask_frac=0.4,
 ):
+    """Train the WM (recon/kl/reward/continue). When manual_aux_coef>0, ADD the dense
+    masked-manual-reconstruction reading gradient ([[dynalang-2023]] option A, see
+    world_model.models.manual_aux): at each step, reconstruct masked manual token embeddings from
+    the anti-baking belief (cross-attention blocked) so the belief must internalise the manual. The
+    aux term fires at every window step a manual is present — the dense signal Dynalang relies on.
+    coef=0.0 leaves all existing behaviour byte-for-byte unchanged (head not even invoked)."""
     recon = kl = torch.zeros(())
+    aux_last = 0.0
     w = window
+    use_aux = manual_aux_coef > 0.0 and manual_aux_head is not None
     for _step in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
@@ -174,8 +190,15 @@ def wm_train_rtfm(
         b, w = actions.shape
         state = rssm.initial(b, device)
         prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
-        recon = kl = r_l = c_l = torch.zeros((), device=device)
+        recon = kl = r_l = c_l = aux = torch.zeros((), device=device)
         for k in range(w):
+            if use_aux:
+                # Aux belief uses the PRE-step state + prev_a → deter_noctx (anti-baking). Compute
+                # before obs_step advances the state so the no-context carry is well-defined.
+                aux_k, _ = manual_aux_loss(
+                    rssm, manual_aux_head, state, prev_a, tok, mask, manual_aux_mask_frac
+                )
+                aux = aux + aux_k
             state, prior, post = rssm.obs_step(state, prev_a, embed[:, k], tok, mask)
             belief = rssm.belief(state)
             kl = kl + kl_balanced(post, prior, free_bits)
@@ -183,11 +206,14 @@ def wm_train_rtfm(
             r_l = r_l + rew.twohot_loss(belief, actions[:, k], rewards[:, k])
             c_l = c_l + F.binary_cross_entropy_with_logits(cont(belief), 1.0 - dones[:, k])
             prev_a = actions[:, k]
-        loss = (recon + kl + r_l + c_l) / w
+        loss = (recon + kl + r_l + c_l + manual_aux_coef * aux) / w
         opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_([p for g in opt.param_groups for p in g["params"]], 100.0)
         opt.step()
+        aux_last = float(aux.item() / w)
+    if use_aux:
+        return float(recon.item() / w), float(kl.item() / w), aux_last
     return float(recon.item() / w), float(kl.item() / w)
 
 
@@ -287,6 +313,26 @@ def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
     return out
 
 
+@torch.no_grad()
+def _manual_invariance_eval(buffer, registry, rssm, head, args, device) -> dict[str, float]:
+    """Burn a belief in over a replay sequence (real manual + obs), then run the manual-invariance
+    diagnostic (correct vs shuffled-manual reconstruction). See world_model.models.manual_aux."""
+    batch = buffer.sample_sequences(args.seq_batch, args.window)
+    embed = torch.as_tensor(batch["obs"], device=device)
+    actions = torch.as_tensor(batch["action"], device=device)
+    tok, mask = registry.tokens(batch["tag"])
+    b = actions.shape[0]
+    state = rssm.initial(b, device)
+    prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+    burn = min(args.burn_in, args.window - 1)
+    for k in range(burn):
+        state, _, _ = rssm.obs_step(state, prev_a, embed[:, k], tok, mask)
+        prev_a = actions[:, k]
+    return manual_invariance_diagnostic(
+        rssm, head, state, prev_a, tok, mask, args.manual_aux_mask_frac
+    )
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--rounds", type=int, default=10)
@@ -305,6 +351,10 @@ def main() -> None:
     # HO-0007: initial reading-shaping coefficient (dense reading-gated ignition gradient);
     # linearly annealed to 0 over the run. 0 disables shaping (the exp-0035 honest-but-sparse run).
     p.add_argument("--reading-shaping-coef", type=float, default=1.0)
+    # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
+    # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
+    p.add_argument("--manual-aux-coef", type=float, default=0.0)
+    p.add_argument("--manual-aux-mask-frac", type=float, default=0.4)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -336,6 +386,12 @@ def main() -> None:
     target_critic = copy.deepcopy(critic)
 
     wm_mods = [rssm, recon_head, rew, cont]
+    # Dynalang option A aux head (only trained / added to the optimizer when the loss is enabled, so
+    # coef=0 runs are byte-for-byte unchanged). The head regresses masked manual token embeddings.
+    manual_aux_head = None
+    if args.manual_aux_coef > 0.0:
+        manual_aux_head = MaskedManualHead(belief_dim=rssm.state_dim, text_dim=td).to(device)
+        wm_mods = wm_mods + [manual_aux_head]
     opt_wm = torch.optim.Adam([q for m in wm_mods for q in m.parameters()], lr=3e-4)
     opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
 
@@ -377,7 +433,7 @@ def main() -> None:
         )
         buffer.compute_returns(args.gamma)
         print(f"  -> {ev} tutorial events; {len(registry.manuals)} manuals; buffer {buffer.size}")
-        recon, kl = wm_train_rtfm(
+        wm_out = wm_train_rtfm(
             buffer,
             registry,
             rssm,
@@ -390,7 +446,12 @@ def main() -> None:
             args.window,
             args.free_bits,
             device,
+            manual_aux_head=manual_aux_head,
+            manual_aux_coef=args.manual_aux_coef,
+            manual_aux_mask_frac=args.manual_aux_mask_frac,
         )
+        aux_l = wm_out[2] if len(wm_out) == 3 else 0.0
+        recon, kl = wm_out[0], wm_out[1]
         al, cl, ir = imagine_ac_rtfm(
             buffer,
             registry,
@@ -427,6 +488,17 @@ def main() -> None:
             f"grounding={r['grounding']:.2f} swap_follow={r['swap_follow']:.2f}",
             flush=True,
         )
+        if manual_aux_head is not None:
+            # Manual-invariance diagnostic ([[rung4-manual-conditioned-agent]] §4c): wrong/correct
+            # reconstruction-loss ratio. ratio≈1 ⇒ TRIVIAL (belief ignores the manual); ratio≫1 ⇒
+            # genuine reading. Computed on a fresh replay batch with the burned-in belief.
+            inv = _manual_invariance_eval(buffer, registry, rssm, manual_aux_head, args, device)
+            print(
+                f"  manual_aux={aux_l:.4f} inv_correct={inv['correct']:.4f} "
+                f"inv_wrong={inv['wrong']:.4f} inv_ratio={inv['ratio']:.2f} "
+                f"(ratio>>1 = genuine reading; ~1 = trivial copy-through)",
+                flush=True,
+            )
 
     path = Path(args.save)
     path = path.with_name(f"{path.stem}_s{args.seed}{path.suffix}")
