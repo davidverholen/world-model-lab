@@ -1146,3 +1146,14 @@ replay-ratio, 0027 data, 0028 curious) + 0029 cleared perception => plain-Crafte
 is at/near our ceiling. Standing instruction reached its "if-we-cannot -> tutorial-driven" branch.
 Fork (maintainer): (a) 0031 AD L_pred for closure (low EV, 0029 cleared representation) vs (b)
 declare rung-3 done + pivot to reading-to-learn (crafter-rtfm).
+
+## [2026-06-14] experiment | exp 0031 semantic foundation probe — GREEN, frozen encoder validated
+
+Before the rung-4 pivot, stress-tested the frozen-encoder foundation: can the embedding AND the
+RSSM belief decode achievement-critical MATERIALS (stone/coal/iron/tree/table)? Decisive GREEN:
+emb AUC 0.99-1.00, and crucially they SURVIVE to the belief at 0.94-0.98 (stone 0.942, iron 0.979)
+-- unlike health which the RSSM crushed to 0.35 in 0029. The actor has the full tech-tree
+perception end-to-end; the plateau is exploration/discovery, NOT perception or architecture. Closes
+the rung-3 loop (0026/0027 compute, 0028 WM-curiosity, 0030 self-imitation, 0029+0031 perception all
+ruled out -> discovery wall). No adapter/custom encoder needed; frozen-encoder-lean holds. Foundation
+stable -> safe to build rung-4 reading-to-learn. 1M run unnecessary. New tool: world_model.semantic_probe.
