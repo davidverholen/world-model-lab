@@ -285,6 +285,30 @@ verify at ingest.
 - [ ] arxiv:2504.17490 Plasticine benchmark · arxiv:2410.07994 Neuroplastic
       Expansion — plasticity tooling/methods (lower priority)
 
+## Crafter DEPTH / achievement-hierarchy fork (exp 0027 thread; found 2026-06-14 via lit-gate, ids from search — verify at ingest)
+
+The published toolkit for exactly our remaining ceiling: the agent reaches ~3–6
+shallow/mid achievements but does NOT climb the wood→table→pickaxe→stone→iron
+tech-tree (0025 result; 0026 showed replay-ratio buys breadth not depth). These are
+the candidate anchors for 0028, branched on the 0027 outcome (data-bound → scale;
+exploration/hierarchy-bound → these). INGEST the matching one(s) once 0027 picks the fork.
+
+- [ ] arxiv:2307.03486 **Discovering Hierarchical Achievements via Contrastive Learning**
+      (Achievement Distillation, NeurIPS 2023) — directly targets Crafter's achievement
+      HIERARCHY (our exact depth problem); strong Crafter SOTA by exploiting
+      achievement structure. The single most on-target anchor for the hierarchy fork.
+- [ ] arxiv:2305.00508 **Learning Achievement Structure for Structured Exploration in
+      Domains with Sparse Reward** — learns the achievement dependency graph to drive
+      structured exploration; the explicit "explore TOWARD the deep sequence" method.
+- [ ] arxiv:2306.15934 **Curious Replay for Model-based Adaptation** — prioritized
+      replay on surprising/novel transitions inside DreamerV3; +1.33× on Crafter.
+      KEY CONTRAST with 0026: uniform 2× replay failed (breadth not depth), but
+      *curiosity-prioritized* replay reweights toward novelty — a different lever on
+      the same axis. Cheapest of the three to graft onto our flywheel; read FIRST if
+      0027 is null (exploration-bound).
+- NOTE DreamerV3-XP (2510.21418, queued below under directed exploration) is the
+      uncertainty-driven-exploration sibling; read as the pair to Curious Replay.
+
 ## Hierarchy / subgoal emergence (maintainer's credit-assignment brainstorm 2026-06-13; ids to verify)
 - [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
       noted under temporal-abstraction) — manager-worker subgoals INSIDE a Dreamer

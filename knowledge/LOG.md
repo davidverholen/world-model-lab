@@ -1035,3 +1035,7 @@ depth lever; dont push it higher. Depth (crafting->stone->iron) is data/explorat
 DoorKey long-horizon credit-assignment problem returning), not under-training. Caveat: crafting
 rare + 2 seeds = partial seed confound. -> exp 0027 step/data scaling (more rounds at 1x replay):
 does more exploration data unlock depth? If not -> exploration/hierarchy-bound. Pages: 0026, INDEX.
+
+## 2026-06-14 — exp 0027 dispatched + lit-gate prep for the depth fork
+- Dispatched exp 0027 (step/data scaling: 20 rounds, 1× replay, 2 seeds) at commit 755d902 on the desktop GPU. Tests whether crafting DEPTH is data/exploration-bound (the 0026 follow-up: replay-ratio bought breadth not depth).
+- Literature gate (autonomous research-cycle step 2) for the likely 0027 fork: queued 3 new on-target anchors under sources/QUEUE.md → new section "Crafter DEPTH / achievement-hierarchy fork (exp 0027 thread)": Achievement Distillation (2307.03486, contrastive achievement hierarchy — most on-target), Learning Achievement Structure (2305.00508, structured exploration via the dependency graph), Curious Replay (2306.15934, novelty-prioritized DreamerV3 replay, +1.33× Crafter — the contrast to 0026's failed uniform 2× replay). Ingest waits until 0027 picks the fork.
