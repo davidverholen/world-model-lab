@@ -72,7 +72,7 @@ or a custom DoorKey-with-manual) — Crafter is where grounded language PAYS OFF
 
 | # | mechanism | "new model" lives in | nearest literature | cost |
 |---|---|---|---|---|
-| 1 | **text-as-context** — tutorial embedding carried in the belief state; dynamics head conditions on it | in-context (no weight change) — world-model ICL | Dynalang; EMMA's entity attention (Messenger) | low — first Messenger experiment |
+| 1 | **text-as-context** — tutorial embedding carried in the belief state; dynamics head conditions on it | in-context (no weight change) — world-model ICL | Dynalang ([[dynalang-2023]]); EMMA's entity attention (Messenger) | low — first Messenger experiment |
 | 2a | **text-as-data, own dreams** — world model imagines rollouts from text; trains on them | gradients, via synthetic experience | (apparently unexplored in latent WMs — original-idea candidate, run wall protocol before claiming) | medium — but circular: requires text understanding first |
 | 2b | **text-as-data, external imagination engine** (maintainer, 2026-06-12) — text → domain video generator (Oasis / Dreamer-4-WM / Genie-3 class) → IDM action labels (VPT) → replay as trust-weighted synthetic experience → **corroboration gate**: real play validates/reinforces or discounts ("verstärkt oder nicht") | gradients, via externally generated experience | Oasis, Cosmos (synthetic-data platform), VPT IDM; gate ≈ MBPO's model-trust lessons | medium; breaks 2a's circularity — the external model carries the text grounding; unifies ADR-0005 signals 2+3 (text rides the video path) |
 | 3 | **text-as-weights** — hypernetwork: tutorial → Δθ of dynamics head | explicit fast weights | Schmidhuber 1991 fast-weight programmers ([[intellectual-lineage]]); knowledge-editing (ROME/MEMIT) | high |
@@ -188,8 +188,9 @@ sharpen HOW language should enter, and double as the reason the [[frozen-encoder
   matrix section) into the SAME belief space the world model uses, with the alignment
   LEARNED BY GROUNDING (text bound to the experiences it describes). Then imagination
   runs over a latent that is simultaneously experiential and symbolic. Closest existing
-  work: **Dynalang** (language as a predicted modality inside Dreamer); this thesis goes
-  past it on two axes — deep symbol↔belief *binding* (not just predicting tokens) and
-  *reusing the LLM prior* rather than learning symbolic structure from scratch. See
+  work: **[[dynalang-2023]]** (language as a predicted modality inside Dreamer, token-by-token
+  streaming — see that page for the static-manual mismatch with our rung-4 design); this
+  thesis goes past it on two axes — deep symbol↔belief *binding* (not just predicting tokens)
+  and *reusing the LLM prior* rather than learning symbolic structure from scratch. See
   PAN/GLP + Critiques-of-World-Models in [[QUEUE]] (the substrate-vs-source axis) and
   [[generative-vs-predictive]].

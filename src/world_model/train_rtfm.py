@@ -85,11 +85,23 @@ class RTFMAgent:
 
 @torch.no_grad()
 def collect_rtfm(
-    buffer, registry, agent, n_episodes, length, seeds, mode, device, use_agent, max_steps, one_shot
+    buffer,
+    registry,
+    agent,
+    n_episodes,
+    length,
+    seeds,
+    mode,
+    device,
+    use_agent,
+    max_steps,
+    one_shot,
+    shaping_coef=0.0,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
-    only path to reward (sparser, but the only honest grounding signal)."""
+    only path to the achievement (the honest grounding signal). shaping_coef>0 adds the env's dense
+    reading-gated shaping (HO-0007) as the ignition gradient — annealed → 0 by the caller."""
     rng = np.random.default_rng(0)
     events = 0
 
@@ -97,7 +109,9 @@ def collect_rtfm(
         return agent.enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
 
     for ep in range(n_episodes):
-        env = C.make_recipe_env(mode, length=length, one_shot=one_shot)
+        env = C.make_recipe_env(
+            mode, length=length, one_shot=one_shot, reading_shaping_coef=shaping_coef
+        )
         seed = int(seeds[ep % len(seeds)])
         obs, info = env.reset(seed=seed)
         mid = registry.intern(obs["manual"])
@@ -111,15 +125,21 @@ def collect_rtfm(
             # achievements (wood/food/drink — farmable WITHOUT reading) with the sparse tutorial
             # bonus, both magnitude 1.0. Training on `r` lets the agent farm the readingless base
             # reward and never read the manual (the exp 0034 all-zeros failure). Train on ONLY the
-            # tutorial component (newly-earned reading achievements this step) so reading the
-            # manual is the SOLE reward source — the env reward `r` is deliberately discarded.
-            r_read = float(len(info["tutorial_newly"]))
+            # tutorial component (newly-earned reading achievements this step) PLUS the env's
+            # reading-gated shaping (HO-0007, info["reading_shaping"]) — both require reading the
+            # displayed manual; the readingless base reward `r` is deliberately discarded. The
+            # shaping is the dense ignition gradient and is annealed → 0, so the final agent stands
+            # on the sparse honest reward alone (and eval always runs at shaping_coef=0).
+            r_read = float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
             buffer.add(
                 Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done), tag=mid
             )
-            events += int(r_read > 0)
+            # Count honest tutorial achievements only (NOT shaping steps, which are dense once
+            # shaping is on) — this stays the ignition diagnostic: are we EARNING the one_shot
+            # achievement, not merely collecting the reading-shaping gradient.
+            events += len(info["tutorial_newly"])
             emb = nemb
             if done:
                 break
@@ -282,6 +302,9 @@ def main() -> None:
     # one_shot (HO-0006): tutorial forfeit after the first gesture-length window → kills
     # within-episode search, so reading is the ONLY path to reward (the honest grounding test).
     p.add_argument("--one-shot", action=argparse.BooleanOptionalAction, default=True)
+    # HO-0007: initial reading-shaping coefficient (dense reading-gated ignition gradient);
+    # linearly annealed to 0 over the run. 0 disables shaping (the exp-0035 honest-but-sparse run).
+    p.add_argument("--reading-shaping-coef", type=float, default=1.0)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -329,7 +352,15 @@ def main() -> None:
         for m in wm_mods + [actor, critic]:
             m.train()
         use_agent = rnd > 0
-        print(f"round {rnd}: collecting {args.episodes_per_round} episodes ...", flush=True)
+        # HO-0007 reading-shaping: dense reading-gated ignition gradient, linearly annealed to 0 so
+        # the agent ends up standing on the sparse honest reward alone (eval always runs at coef=0).
+        denom = max(1, args.rounds - 1)
+        shaping_coef = args.reading_shaping_coef * max(0.0, 1.0 - rnd / denom)
+        print(
+            f"round {rnd}: collecting {args.episodes_per_round} episodes "
+            f"(shaping_coef={shaping_coef:.3f}) ...",
+            flush=True,
+        )
         ev = collect_rtfm(
             buffer,
             registry,
@@ -342,9 +373,10 @@ def main() -> None:
             use_agent,
             args.max_steps,
             args.one_shot,
+            shaping_coef,
         )
         buffer.compute_returns(args.gamma)
-        print(f"  -> {ev} reward events; {len(registry.manuals)} manuals; buffer {buffer.size}")
+        print(f"  -> {ev} tutorial events; {len(registry.manuals)} manuals; buffer {buffer.size}")
         recon, kl = wm_train_rtfm(
             buffer,
             registry,

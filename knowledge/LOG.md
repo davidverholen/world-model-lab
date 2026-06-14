@@ -2,6 +2,55 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-14] curation | exp 0036: reading-shaping IGNITES genuine (partial) reading-to-learn-dynamics → HO-0007 accepted
+
+The HO-0007 dense reading-gated shaping (crafter-rtfm 809d44f, `reading_shaping_coef`, annealed
+1.0→0, eval at c=0) broke the exp-0035 ignition deadlock. exp 0036 (4 seeds, length-1, held-out):
+tutorial events climbed 0–6 → 12–27/round and HELD at coef=0 (skill persists without the
+training-wheels); on 3/4 seeds `correct ≫ none` AND **swapped ≪ correct** (s1 0.00/s2 0.10/s3 0.15
+vs correct ~0.4) — genuine content-reading, the signal exp 0033 failed. The LRS-brittleness shortcut
+(swapped≈correct) did NOT fire. FIRST genuine reading-to-learn-dynamics result on this stack. Caveat:
+grounding is PARTIAL — swap_follow 0.15–0.40 (vs scripted reader 1.0), s0 didn't ground. → HO-0007
+ACCEPTED (env mechanism validated; strengthening swap_follow is our side). Next: strengthen
+swap_follow (more-training test, then Dynalang-aux / actor-conditioning), re-verifying swapped≪correct.
+
+## [2026-06-14] ingest | Dynalang: Learning to Model the World with Language (Lin et al., 2023) → papers/dynalang-2023.md (method depth)
+
+Trigger: rung-4 lit gate (HO-0007 sparse-reward ignition wall). Source arxiv:2308.01399
+already verified + registered in SOURCES.md. Full HTML paper read (two passes).
+
+Pages changed:
+- CREATED knowledge/papers/dynalang-2023.md — method depth including: exact RSSM
+  conditioning (token-by-token streaming, concatenation not cross-attention, T5-small per
+  token), full aux-loss formulas (β_reg=0.1, β_pred=0.5, language recon at unit weight),
+  training regime (online RL, optional text pretraining, no curriculum), Messenger results
+  (qualitative; beats EMMA on S3, no published table), dense-gradient mechanism (language
+  reconstruction fires at every token timestep, decoupled from sparse task reward), and
+  CRITICAL ANALYSIS of static-manual mismatch with four candidate adaptations.
+- UPDATED knowledge/sources/QUEUE.md — marked Dynalang ingested in three places
+  (Rung-4 anchor, Minecraft milestone, Language/imagination sections).
+- UPDATED knowledge/INDEX.md — added dynalang-2023.md entry under Papers.
+- UPDATED knowledge/concepts/language-grounding.md — added [[dynalang-2023]] wiki-link
+  in installation architectures table and LLM-as-aligned-source section.
+
+Key finding for HO-0007 decision: Dynalang's dense-gradient mechanism (stream text
+token-by-token through RSSM; reconstruct from belief) does NOT transfer directly to our
+static-manual / cross-attention design. The copy-through triviality risk is real: if M is
+already a cross-attention input, the decoder can route M to output without the RSSM
+encoding anything meaningful. Recommended analog: masked manual reconstruction from belief
+with cross-attention blocked at decode time (option A in the paper page), combined with
+the curriculum shaping from HO-0007. See [[dynalang-2023]] Critical analysis section.
+
+## [2026-06-14] scout | rung-4 reading-ignition lit gate: 9 found, 8 queued (High), 1 background
+
+Triggered by HO-0007 (sparse-reward ignition wall). Anchored on RTFM/Messenger citation walk;
+supplemented with S2+OpenAlex leads. Sources registered: arxiv:1910.08210 (RTFM), 2101.07393
+(Messenger/EMMA), 2308.01399 (Dynalang), 2511.22904 (LED-WM), 2210.00066 (LDD), 2305.16621
+(LRS brittleness), 2110.10661 (SILG), 1707.01495 (HER), icml:ng1999shaping (Ng et al.).
+New queue section: "Rung-4: reading-ignition literature gate". Cross-references updated in
+Minecraft/Language sections. Pages potentially affected: experiments/0035*, design/architecture-strategy.md,
+concepts/grounded-language-game.md (if it exists). Ingest order: RTFM → Messenger → Dynalang → LED-WM → LRS-brittleness.
+
 ## [2026-06-14] curation | exp 0034 (one_shot re-test): base-reward farming fixed → sparse-reward ignition wall → HO-0007
 
 Re-ran the rung-4 manual-conditioned agent under crafter-rtfm's `one_shot` fix (HO-0006, which

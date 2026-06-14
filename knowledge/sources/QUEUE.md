@@ -7,6 +7,81 @@ Corrections found in that pass: DINO-WM is 2411.04983 (2411.04958 is an astronom
 paper); "General agents CONTAIN world models" (not "need"); Sutton-lab plasticity
 paper is "MAINTAINING Plasticity in Deep Continual Learning".
 
+## Rung-4: reading-ignition literature gate (scouted 2026-06-14; all ids verified via arXiv API or abstract fetch)
+
+This cluster is the lit gate for HO-0007 (dense shaping to ignite reading) and the KEY RISK question
+(does shaping create a non-reading shortcut?). Read in the order listed; RTFM+Messenger are the
+mandatory anchors before any ignition experiment.
+
+### Anchor papers — reading-to-learn-dynamics (ingest these first)
+
+- [ ] arxiv:1910.08210 **RTFM** (Zhong, Rocktäschel & Grefenstette, ICLR 2020) — the paradigm paper
+      for reading-to-learn-DYNAMICS (not goal-following). Key mechanism: curriculum learning was
+      REQUIRED to ignite reading; without it, dense reward on simple subtasks forced grounding before
+      sparse reward on full tasks. Dense reward = enemies drop 1 point on contact (not a single sparse
+      bonus); curriculum graduates from 1-hop to 5-hop coreference. INGEST to confirm exact reward
+      function. HIGHEST PRIORITY — direct ancestor to our env design + shaping question.
+
+- [ ] arxiv:2101.07393 **Messenger / EMMA** (Hanjie, Zhong & Narasimhan, ICML 2021) — referent-swap
+      evaluation built in as the grounding gold standard (entities are symbolic tokens whose text
+      labels randomize per game; zero-shot eval = new entity names). Three-stage curriculum was
+      REQUIRED — end-to-end training on the full task "proved too difficult". Reward is sparse binary
+      (win=+1, lose=-1 per interaction). INGEST for: (a) exact curriculum stage design — compare to
+      our shaping anneal plan; (b) confirmation that sparse reward WITHOUT curriculum fails.
+
+- [x] arxiv:2308.01399 **Dynalang** (Lin, Du, Watkins, Hafner, Abbeel, Klein & Dragan, 2023) —
+      INGESTED 2026-06-14 → papers/dynalang-2023.md (method depth: RSSM conditioning, aux loss
+      formula, static-manual mismatch analysis + candidate adaptations for our setting).
+
+- [ ] arxiv:2511.22904 **LED-WM** (Nguyen & Lee, Nov 2025) — DreamerV3 + cross-attention grounding
+      on DYNAMICS descriptions (text = how-env-behaves, not goal). Tests on Messenger. The most
+      recent text-conditioned dynamics world model; likely the closest published baseline to our
+      rung-4 architecture. INGEST for: attention mechanism details, what reward structure was used,
+      whether a shaping or curriculum was applied, and comparison results on Messenger vs Dynalang.
+
+### Key risk: does shaped reward induce a non-reading shortcut?
+
+- [ ] arxiv:2305.16621 **Language Reward Shaping May Hinder Learning** (Huang, Lipovetzky & Cohn,
+      2023) — theoretical + empirical evidence that suboptimal LRS designs that reward PARTIALLY
+      MATCHED trajectories converge SLOWER than pure RL, because the shaped signal creates a
+      misaligned proxy. Directly relevant: our gesture-progress shaping signal could be exploited
+      WITHOUT reading if the agent discovers a partial-match sequence (e.g., a stereotyped gesture
+      that scores shaping reward on most manuals by coincidence). INGEST for: exact mechanism and
+      diagnostic tests they propose; map to our anneal+eval protocol.
+
+### Dense bridge / auxiliary loss alternatives (context before designing ignition fix)
+
+- [ ] arxiv:2210.00066 **Language Dynamics Distillation — LDD** (Zhong, Mu, Zettlemoyer,
+      Grefenstette & Rocktäschel, 2022) — two-stage: pretrain a model to PREDICT DYNAMICS from
+      language-annotated demos, THEN fine-tune with RL. Motivated explicitly by "sparse, delayed
+      rewards make grounding difficult." Provides a language-aware init that shortcuts the ignition
+      wall. INGEST for: whether demonstration data is required, how much it helps, and whether
+      the pretrain generalises to held-out manuals (swap-follow analog).
+
+- [ ] arxiv:1707.01495 **HER: Hindsight Experience Replay** (Andrychowicz et al., NeurIPS 2017) —
+      canonical technique for sparse-reward goal-conditioned RL: relabel failed episodes as successes
+      toward the achieved state. Relevant because a language-HER variant (relabel episode with the
+      gesture it actually performed) could give dense positives even when the manual is wrong.
+      Read as BACKGROUND — one page; no full ingest needed unless we plan a HER variant.
+
+### Theory: when does shaping preserve the optimal policy?
+
+- [ ] icml:ng1999shaping **Ng, Harada & Russell 1999 "Policy Invariance Under Reward Transformations"**
+      (ICML 1999) — proves potential-based shaping F = γΦ(s') - Φ(s) is necessary AND sufficient
+      to guarantee the shaped and original MDPs share the same optimal policy. Our gesture-progress
+      shaping is NOT obviously potential-based (it depends on the manual, which changes each episode).
+      Read to determine: (a) whether per-episode non-stationarity violates the guarantee; (b) whether
+      anneal-to-0 and eval-at-0 sidesteps the bias even if the guarantee fails during training.
+      One-page read; background level.
+
+### Unified benchmark for grounded language envs (context)
+
+- [ ] arxiv:2110.10661 **SILG** (Zhong et al., NeurIPS 2021) — unified interface over RTFM,
+      Messenger, NetHack, ALFWorld under one API. Useful as a map of the space (what tasks exist,
+      which are dynamics-reading vs goal-following) but not a method paper. Low-priority read.
+
+---
+
 ## High priority (directly on our experiment path)
 
 ### Retention / plasticity / interference (exp 0009–0011 thread; found 2026-06-12, ids from search results)
@@ -178,15 +253,13 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
       OpenAI) — the IDM pseudo-labeling recipe; the action-labeled-video signal
 - [ ] MineDojo (Fan et al. 2022) — task suite + YouTube/wiki/Reddit corpus; the
       text-signal data source
-- [ ] Dynalang: Learning to Model the World with Language (Lin et al.) — language
-      as a predicted modality INSIDE a Dreamer world model; closest published work
-      to our text-signal goal
+- [x] Dynalang: Learning to Model the World with Language (Lin et al.) — INGESTED
+      2026-06-14 → papers/dynalang-2023.md (see Rung-4 section above)
 - [ ] Voyager (Wang et al. 2023) — LLM-as-planner over Minecraft skills; the
       pragmatic fallback architecture
 - [ ] STEVE-1 — instruction-following Minecraft agent (text->behavior bridging)
-- [ ] RTFM: reading manuals to generalize to new dynamics (Zhong et al., FAIR ~2019)
-      + Messenger / EMMA (Hanjie et al. ~2021) — envs where reading is NECESSARY to
-      win; the cheap text-grounding testbeds (step i of the text staircase; ids to verify)
+- [x] RTFM (arxiv:1910.08210) + Messenger/EMMA (arxiv:2101.07393) — VERIFIED + QUEUED
+      in Rung-4 reading-ignition section above; ingest from there
 - [ ] Plan2Explore (Sekar et al. 2020) — world-model-uncertainty-driven exploration;
       ancestor of the self-generated-hypotheses horizon + candidate ignition fix
       (id to verify)
@@ -194,10 +267,10 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
 ## Language/imagination design space (scouted 2026-06-12 after the grounding discussion; ids url-verified)
 
 ### Binding/installation (text -> world model)
-- [ ] arxiv:2511.22904 Language-conditioned WM improves policy generalization by
-      reading ENVIRONMENTAL DESCRIPTIONS (Nov 2025) — closest to our binding goal
-      (dynamics text, not task instructions); read FIRST for the Messenger step
-- [ ] arxiv:2308.01399 Dynalang (id now confirmed) — language as predicted modality
+- [x] arxiv:2511.22904 LED-WM: Language-conditioned WM improves policy generalization by
+      reading ENVIRONMENTAL DESCRIPTIONS (Nov 2025) — VERIFIED + QUEUED in Rung-4
+      reading-ignition section above
+- [x] arxiv:2308.01399 Dynalang — INGESTED 2026-06-14 → papers/dynalang-2023.md
 - [ ] arxiv:2407.13466 LIMT · arxiv:2509.21797 MoWM · arxiv:2604.02097 LatentUM —
       conditioning variants
 
@@ -210,10 +283,8 @@ verify at ingest.
       conditioned **Craftax** instruction-following (3924 instructions). "Crafter+language"
       ALREADY EXISTS — but instruction-following, not read-to-learn-dynamics, AND it's JAX/Craftax
       (ADR-0006 interop wall). Read to confirm it is NOT our installation testbed.
-- [ ] **RTFM** (Zhong et al., ICLR 2020; id ~1910.08210 to verify) — read-manual-to-generalize-to-
-      new-DYNAMICS; the RIGHT paradigm for us but TOY grid scale. Our sketch = "RTFM-ify Crafter".
-- [ ] **Messenger / EMMA** (Hanjie et al., ICML 2021; id ~2101.07393 to verify) — referent-swap
-      built in (gold-standard grounding test); also under the lineage section above.
+- [x] **RTFM** (arxiv:1910.08210, ICLR 2020; VERIFIED) — QUEUED in Rung-4 reading-ignition section.
+- [x] **Messenger / EMMA** (arxiv:2101.07393, ICML 2021; VERIFIED) — QUEUED in Rung-4 reading-ignition section.
 - [ ] arxiv:2110.10661 **SILG** (NeurIPS 2021) — unified benchmark wrapping RTFM/Messenger/NetHack/
       ALFWorld under one interface; the map of the grounded-language-game space.
 - [ ] arxiv:2210.00066 **Language Dynamics Distillation** — pretrain to predict dynamics from

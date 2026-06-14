@@ -42,6 +42,7 @@ calls these elaborate).
 - [vjepa2-2025](papers/vjepa2-2025.md) — V-JEPA 2 + action-conditioned variant, zero-shot robot planning (stub)
 - [lejepa-2025](papers/lejepa-2025.md) — provable JEPA objective (SIGReg); companion world-model theory paper (stub)
 - [dreamerv3-2023](papers/dreamerv3-2023.md) — reference world-model RL baseline, one config for 150+ tasks (stub)
+- [dynalang-2023](papers/dynalang-2023.md) — DreamerV3-RSSM + streaming language tokens; auxiliary text-prediction loss as grounding ignition; static-manual mismatch analysis for rung-4 (draft)
 - [dreamer4-2025](papers/dreamer4-2025.md) — offline imagination training at scale, Minecraft diamonds (stub)
 - [ijepa-2023](papers/ijepa-2023.md) — the first JEPA: multi-block masking, EMA-teacher anti-collapse (vs our SIGReg), method depth (draft)
 - [nikishin-primacy-2022](papers/nikishin-primacy-2022.md) — primacy bias + reset protocol, implementation-grade (draft)
@@ -98,6 +99,7 @@ calls these elaborate).
 - [0032-rtfm-grounding](experiments/0032-rtfm-grounding.md) — rung-4 first grounding attempt (length-3 recipes): correct never lifts off zero; can't separate "can't ground" from "can't do 3-step sequence" → drop to length-1 (done)
 - [0033-rtfm-length1-grounding](experiments/0033-rtfm-length1-grounding.md) — DECISIVE NEGATIVE: the swap test caught a non-reading shortcut correct−none missed (swapped≈correct, swap_follow=0); vision reads the staged state → handoff HO-0006 (done)
 - [0034-rtfm-oneshot-ignition](experiments/0034-rtfm-oneshot-ignition.md) — one_shot re-test: fixed a base-reward-farming confound (train on tutorial-only reward), then hit a pure sparse-reward ignition wall (0–6 chance events, no gradient) → curriculum handoff HO-0007 (done)
+- [0036-rtfm-shaping-ignition](experiments/0036-rtfm-shaping-ignition.md) — FIRST genuine reading-to-learn-dynamics: HO-0007 reading-shaping (anneal→0) IGNITES reading; 3/4 seeds correct≫none AND swapped≪correct (content-sensitive, no LRS shortcut); grounding partial (swap_follow 0.15–0.40, s0 failed) → strengthen next (done)
 
 ## Wanted pages (linked but not yet written)
 
