@@ -180,6 +180,7 @@ def imagine_ac_rtfm(
     lam,
     ent_coef,
     device,
+    beta_repval=0.3,
 ):
     from torch.distributions import Categorical
 
@@ -188,13 +189,16 @@ def imagine_ac_rtfm(
         batch = buffer.sample_sequences(seq_batch, window)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
+        ret_real = torch.as_tensor(batch["return"], device=device)  # real MC returns
         tok, mask = registry.tokens(batch["tag"])
         b = actions.shape[0]
         with torch.no_grad():
             state = rssm.initial(b, device)
             prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+            real_bels = []  # beliefs over REAL burn-in states (critic-on-replay, exp 0021)
             for k in range(burn_in):
                 state, _, _ = rssm.obs_step(state, prev_a, embed[:, k], tok, mask)
+                real_bels.append(rssm.belief(state))
                 prev_a = actions[:, k]
             beliefs, acts, rews, conts = [], [], [], []
             s = state
@@ -223,6 +227,12 @@ def imagine_ac_rtfm(
         dist = Categorical(logits=actor(flat))
         actor_loss = -(dist.log_prob(a_s.flatten()) * adv).mean() - ent_coef * dist.entropy().mean()
         critic_loss = critic.twohot_loss(flat, returns.flatten().detach())
+        if beta_repval > 0:
+            # critic-on-replay (exp 0021): anchor the critic to REAL returns so it can't drift with
+            # the inflating imagined value (the rung-3 exploitation fix).
+            rb = torch.stack(real_bels).flatten(0, 1)
+            rt = ret_real[:, :burn_in].t().reshape(-1).detach()
+            critic_loss = critic_loss + beta_repval * critic.twohot_loss(rb, rt)
         opt.zero_grad()
         (actor_loss + critic_loss).backward()
         opt.step()
