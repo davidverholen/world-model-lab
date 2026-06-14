@@ -85,10 +85,12 @@ class RTFMAgent:
 
 @torch.no_grad()
 def collect_rtfm(
-    buffer, registry, agent, n_episodes, length, seeds, mode, device, use_agent, max_steps
+    buffer, registry, agent, n_episodes, length, seeds, mode, device, use_agent, max_steps,
+    one_shot
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
-    per-transition manual id (tag)."""
+    per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
+    only path to reward (sparser, but the only honest grounding signal)."""
     rng = np.random.default_rng(0)
     events = 0
 
@@ -96,7 +98,7 @@ def collect_rtfm(
         return agent.enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
 
     for ep in range(n_episodes):
-        env = C.make_recipe_env(mode, length=length)
+        env = C.make_recipe_env(mode, length=length, one_shot=one_shot)
         seed = int(seeds[ep % len(seeds)])
         obs, info = env.reset(seed=seed)
         mid = registry.intern(obs["manual"])
@@ -246,14 +248,14 @@ def imagine_ac_rtfm(
     return stats
 
 
-def evaluate_rtfm(agent, eval_seeds, length, max_steps):
+def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
     """Score in each of the four modes + swap-follow rate. Grounding = correct − none."""
     out = {}
     for mode in [ManualMode.CORRECT, ManualMode.NONE, ManualMode.SWAPPED]:
-        env = C.make_recipe_env(mode, length=length)
+        env = C.make_recipe_env(mode, length=length, one_shot=one_shot)
         scores = [harness.run_episode(env, agent, seed=s, max_steps=max_steps) for s in eval_seeds]
         out[mode.name] = float(np.mean(scores))
-    swap_env = C.make_recipe_env(ManualMode.SWAPPED, length=length)
+    swap_env = C.make_recipe_env(ManualMode.SWAPPED, length=length, one_shot=one_shot)
     out["swap_follow"] = float(harness.swap_follow_rate(swap_env, agent, list(eval_seeds), length))
     out["grounding"] = out["CORRECT"] - out["NONE"]
     return out
@@ -269,8 +271,11 @@ def main() -> None:
     p.add_argument("--window", type=int, default=12)
     p.add_argument("--burn-in", type=int, default=4)
     p.add_argument("--horizon", type=int, default=10)
-    p.add_argument("--length", type=int, default=3)  # recipe gesture length
+    p.add_argument("--length", type=int, default=2)  # recipe gesture length
     p.add_argument("--max-steps", type=int, default=48)
+    # one_shot (HO-0006): tutorial forfeit after the first gesture-length window → kills
+    # within-episode search, so reading is the ONLY path to reward (the honest grounding test).
+    p.add_argument("--one-shot", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -330,6 +335,7 @@ def main() -> None:
             device,
             use_agent,
             args.max_steps,
+            args.one_shot,
         )
         buffer.compute_returns(args.gamma)
         print(
@@ -372,7 +378,9 @@ def main() -> None:
         for m in [rssm, actor]:
             m.eval()
         eval_agent = RTFMAgent(enc, text_enc, rssm, actor, n_act, device, epsilon=0.0)
-        r = evaluate_rtfm(eval_agent, eval_seeds[: args.n_eval_seeds], args.length, args.max_steps)
+        r = evaluate_rtfm(
+            eval_agent, eval_seeds[: args.n_eval_seeds], args.length, args.max_steps, args.one_shot
+        )
         print(
             f"  recon={recon:.3f} kl={kl:.3f} actor_loss={al:.3f} critic_loss={cl:.3f} "
             f"imagined_return={ir:.3f}",
