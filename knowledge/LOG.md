@@ -1170,3 +1170,15 @@ randomization (memorization useless) + referent-swap & held-out-config eval (the
 + belief-probe diagnostic (mechanistic, our 0029/0031 method) + no architecture backdoor. Success =
 swap-following on held-out manuals, NOT task reward. Next: derive the crafter-rtfm handoff (env API
 needs) via commons once design settles.
+
+## [2026-06-14] rung-4 | encoder pre-check — pooled text vector INSUFFICIENT → token-level cross-attention
+
+First concrete rung-4 step (diagnose-before-build, our 0029/0031 habit). Pre-check via
+world_model.text_probe on held-out r1 recipe manuals (crafter-rtfm): a POOLED MiniLM-L6 sentence
+vector decodes the verbatim-in-text recipe gesture at only 0.23-0.37 (10-class, chance 0.17);
+token-level mean+max lifts to 0.42-0.55 (info is in the tokens, pooling dilutes it) but still not
+clean because the gesture is ORDERED and mean+max is order-invariant. Swap-tracking is directionally
+right (displayed >> correct) but weak. Decision: condition on frozen TOKEN embeddings via
+cross-attention (order/token-aware), NOT FiLM/concat on a pooled sentence vector. Updated
+design/rung4-manual-conditioned-agent.md (§2 architecture + §5 handoff DELIVERED + §6 resolved).
+Also: HO-0005 accepted (env consumable), HO-0004 acceptance confirmed valid.

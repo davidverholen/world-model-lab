@@ -33,19 +33,24 @@ manual, a *reading* agent follows the swap (does the swapped thing); a *baked* a
 ## 2. Architecture — condition the WORLD MODEL, not the policy
 
 ```
-manual text ─► [frozen text encoder] ─► m (manual code)
-                                          │
-frame ─► [frozen DINO] ─► embed ─► [RSSM dynamics | conditioned on m] ─► belief
+manual text ─► [frozen text encoder] ─► M (TOKEN embeddings, not a pooled vector)
+                                          │  (cross-attention — order/token-aware; pre-check §2)
+frame ─► [frozen DINO] ─► embed ─► [RSSM dynamics | conditioned on M] ─► belief
                                           │                                  │
-                                   reward head(·|m)                      [actor]  ← plans through
-                                                                                    the m-conditioned WM
+                                   reward head(·|M)                     [actor]  ← plans through
+                                                                                   the M-conditioned WM
 ```
 
 - **Frozen visual encoder (DINO)** — kept; validated ([[0031-semantic-foundation-probe]]).
-- **Text encoder — frozen / small, mirroring the visual side.** A frozen pretrained text
-  encoder (or a small learned head on frozen token embeddings) keeps the frozen-foundation
-  thesis ([[frozen-encoder-lean]]) and — important for anti-baking — resists overfitting to the
-  templated manual vocabulary. The manual becomes a code `m`, not memorized strings.
+- **Text encoder — frozen, TOKEN-LEVEL (not a pooled sentence vector).** A frozen pretrained
+  text encoder keeps the frozen-foundation thesis ([[frozen-encoder-lean]]) and resists
+  overfitting to the templated vocabulary. **Pre-check finding (2026-06-14, `world_model.text_probe`):
+  a POOLED MiniLM-L6 sentence vector is INSUFFICIENT** — on held-out r1 recipe manuals a linear
+  probe decoded the (verbatim-in-text) recipe gesture at only 0.23–0.37 (10-class, chance 0.17);
+  token-level mean+max lifted it to 0.42–0.55, confirming the info is in the TOKENS and pooling
+  dilutes it. So we use **token embeddings**, and — because a recipe is an *ordered* gesture and
+  even mean+max is order-invariant — the conditioning must be **order/token-aware** (see below),
+  not a single pooled code.
 - **The manual conditions the DYNAMICS (RSSM) and the reward head — NOT (primarily) the
   policy.** This is the central, deliberate choice and the strongest anti-baking lever:
   - *Why it's the grounded choice.* The manual is information about *how the world works* this
@@ -101,22 +106,23 @@ env just makes the rule un-discoverable that way, so reading remains necessary.
   add difficulty): R0World (world-conditioned) → R1 (randomized recipes) → R2 (referent-swap).
   Don't move up a rung until the swap test passes on the current one.
 
-## 5. What we need from crafter-rtfm (→ a commons handoff)
+## 5. What we need from crafter-rtfm — DELIVERED (HO-0005, accepted)
 
-To be derived precisely and opened as a handoff once this design settles ([[CONTRACT]]):
-manual in the observation (already `Dict{image, manual}`); the four-mode harness as the agent's
-eval API; **explicit train/test config splits** (held-out manuals) for the generalization test;
-the swapped-manual mode; and confirmation the no-text agent provably fails on each mechanism we
-target (so reading stays necessary). crafter-rtfm is paused at "scientifically complete" with the
-learnable stub in progress — rung-4 is its first real consumer.
+Opened and **accepted** via the commons handoff layer (HO-0005, resolving_commit 6f3d71e@crafter-rtfm;
+verified by an independent consumer smoke). Confirmed: `obs["manual"]` raw text (fixed per episode);
+`info["manual_facts"]` (true rule) + `info["displayed_facts"]` (shown rule) — privileged, no leak
+into obs; the four-mode harness as a programmatic eval API; **content-disjoint** train/test splits
+(`splits.split_seeds`, 0/0 rule overlap, ~1972 configs); seed reproducibility; no-text-fails gates
+for R0World/R1. (R2-*mechanism* deferred — the SWAPPED *mode* on r1 supplies the swap eval we need.)
 
 ## 6. Open questions (for review)
 
-- **Text encoder choice:** frozen sentence encoder vs small learned head on frozen token
-  embeddings — which best balances grounding vs baking-resistance at our scale?
-- **Conditioning mechanism:** how `m` enters the RSSM (FiLM on the GRU input? cross-attention?
-  concat?) — start with the simplest (FiLM/concat) that the swap test can validate.
-- **Does WM-conditioning alone suffice, or does the actor also need `m`** for tractable planning?
+- **Text encoder + conditioning — RESOLVED by the §2 pre-check.** A pooled sentence vector is out;
+  use frozen **token embeddings** + **cross-attention** (order/token-aware), since the recipe is an
+  ordered gesture pooling destroys. Open sub-question: which frozen encoder's tokens (MiniLM is
+  enough so far; DistilBERT/T5-small are token-level alternatives) — decide once cross-attention is
+  wired and the swap test runs end-to-end.
+- **Does WM-conditioning alone suffice, or does the actor also need `M`** for tractable planning?
   Default: WM-only first (maximally baking-resistant); add policy-conditioning only if planning
   through the m-conditioned WM is too weak, and re-verify the swap test if we do.
 - **Curriculum:** is there a reading-easy → reading-hard ordering that avoids the agent first
