@@ -27,7 +27,7 @@ levels treat whole time-series as units, low levels keep frame detail.
 |---|---|---|
 | RL: **options** (Sutton-Precup-Singh 1999) | policy + termination as one action | an extended action |
 | LeCun: **H-JEPA** ([[lecun-2022-path]]) | multi-timescale latent prediction | an abstract state transition |
-| Dreamer line: **Director** (Hafner 2022) | manager sets latent subgoals, worker executes | a subgoal episode |
+| Dreamer line: **Director** (Hafner 2022, [[director-2022]]) | manager sets VQ-VAE goal codes every K=8 steps, worker executes | a subgoal episode |
 | Cog-sci: **event segmentation theory** (Zacks) | humans chunk at prediction-error spikes | a surprise-bounded segment |
 | Robotics: **action chunking** (ACT) | predict action sequences as units | a motor chunk |
 

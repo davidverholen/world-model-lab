@@ -2,6 +2,33 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] ingest | Director: Deep Hierarchical Planning from Pixels (Hafner, Lee, Fischer, Abbeel — NeurIPS 2022, arxiv:2206.04114)
+
+Verified: arXiv abstract page confirms exact title, all four authors, submission 2022-06-08, NeurIPS 2022
+main conference. Source registered in SOURCES.md. Two QUEUE entries marked ingested (temporal-abstraction
+thread + hierarchy/subgoal thread). Paper page created at papers/director-2022.md (method depth).
+
+Key mechanism captured: DreamerV2 RSSM backbone; goal autoencoder is a VQ-VAE compressing RSSM states to
+discrete codes; manager selects goal code every K=8 steps; worker conditioned on decoded goal feature vector
+and trained on cosine/feature similarity reward (no task reward); manager trained in imagination on task
+reward + reconstruction-error exploration bonus; all training in imagined RSSM rollouts. Why raw latents fail:
+high-dimensional continuous goal space → intractable search and instability (ablation confirmed).
+
+Results: competitive on dense-reward tasks (Control Suite, Atari, DMLab); qualitative gain on sparse
+long-horizon tasks — Ant Maze XL (egocentric camera, no global position) solved by Director, failed by flat
+DreamerV2 and Plan2Explore; Visual Pin Pad solved by large margin.
+
+Pages touched: papers/director-2022.md (created), sources/SOURCES.md (new row), sources/QUEUE.md (two [x]
+marks), INDEX.md (new Papers entry), concepts/hierarchy-and-credit.md (Director section updated + [[director-2022]]
+link), concepts/temporal-abstraction.md (table row updated with link).
+
+Design section in paper page covers: (a) feasibility at our scale — FEASIBLE on 16 GB desktop (RSSM backbone
+already in stack; VQ-VAE + second actor-critic is modest overhead; 8× longer imagination horizon is
+wall-clock not memory); (b) reading-grounded manager — two strategies: hard manual→goal-code substitution
+(simpler, no manager RL) vs soft manual-conditioned manager (learns language→codebook); (c) minimal first
+experiment framed as exp 0044 pre-registration candidate: Director-style hierarchy on rtfm length-2 WITHOUT
+reading conditioning first (pure credit-assignment isolation test), then add reading conditioning in follow-up.
+
 ## [2026-06-15] curation | exp 0043: DECISIVE — length-2 is a PURE EXECUTION wall (WM reads it, actor can't do it)
 
 exp0043 (length-2 curriculum + aux ON to read inv_ratio): at length-2, inv_ratio = 1.13–1.25 on

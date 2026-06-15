@@ -359,8 +359,10 @@ verify at ingest.
 
 - [ ] Sutton, Precup & Singh 1999, "Between MDPs and Semi-MDPs: Options" — the
       extended-action formalism
-- [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels —
-      hierarchy inside a Dreamer world model
+- [x] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels —
+      INGESTED 2026-06-15 → papers/director-2022.md (method depth: VQ-VAE goal space,
+      K=8 temporal abstraction, worker cosine-similarity reward, manager task+exploration
+      reward; feasibility assessment + reading-grounded design section for our length-2 wall)
 - [ ] Zacks & Tversky — event segmentation theory (cog-sci; chunking at
       prediction-error boundaries — implementable in our stack)
 - [ ] Zhao et al. 2023, ACT action chunking (robotics) — extended actions as units
@@ -418,9 +420,8 @@ diagnosis. New sources to queue:
   the actor-side capstone; 2305.00508 structured-exploration is its sibling.
 
 ## Hierarchy / subgoal emergence (maintainer's credit-assignment brainstorm 2026-06-13; ids to verify)
-- [ ] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
-      noted under temporal-abstraction) — manager-worker subgoals INSIDE a Dreamer
-      world model; the most direct fit for a hierarchical actor
+- [x] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
+      noted under temporal-abstraction) — INGESTED 2026-06-15 → papers/director-2022.md
 - [ ] Vezhnevets et al. 2017, FeUdal Networks (FuN) — the feudal manager-worker
       origin for deep RL
 - [ ] Bacon et al. 2017, The Option-Critic Architecture — end-to-end option discovery

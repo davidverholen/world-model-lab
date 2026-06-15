@@ -49,6 +49,7 @@ calls these elaborate).
 - [ma-plasticity-2024](papers/ma-plasticity-2024.md) — FAU module diagnostics; critic-bottleneck in model-free; frozen encoders suffice → legitimizes our fenc finding; Adaptive-RR lever (draft)
 - [qiao-model-primacy-2023](papers/qiao-model-primacy-2023.md) — MBRL primacy bias lives in the WORLD MODEL; world-model resets help only at high UTD; confirms our 0011 negative; redesigned exp 0012 (draft)
 - [lecun-2022-path](papers/lecun-2022-path.md) — the umbrella position paper; module↔our-layer mapping (draft, skim depth)
+- [director-2022](papers/director-2022.md) — Director: manager proposes VQ-VAE subgoals every K=8 steps, worker reaches them in imagination; NeurIPS 2022; direct answer to our multi-step execution wall (draft)
 
 ## Labs
 

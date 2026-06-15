@@ -52,8 +52,11 @@ discovered, latent, conditional):
    Conditional for free: no door → no bottleneck.
 2. **Manager–worker (Director/feudal)** — manager emits a latent subgoal belief;
    worker rewarded for reaching it; manager rewarded by real sparse reward.
-   Subgoals are end-to-end-learned latent vectors. Director (Hafner 2022, QUEUE)
-   does exactly this inside a Dreamer world model.
+   Subgoals are VQ-VAE discrete codes decoded into RSSM feature-space goal vectors.
+   Director (Hafner 2022, [[director-2022]]) does exactly this inside a DreamerV2 RSSM:
+   K=8 temporal abstraction, worker conditioned on goal similarity reward, manager
+   on task + reconstruction-error exploration bonus. Cracked egocentric Ant Maze XL
+   that flat DreamerV2 cannot solve.
 3. **Empowerment / intrinsic motivation** — key-possession is valuable INDEPENDENT
    of the goal (it expands reachable states). Would make key-seeking emerge before
    any goal is reached — also a fresh angle on our ignition problem.
@@ -97,4 +100,5 @@ Never debug architecture on Crafter (~2 iterations/day).
 
 [[temporal-abstraction]] · [[language-grounding]] · [[agent-architecture]] ·
 [[lecun-2022-path]] · [[imagination-training]] · [[value-equivalent-planning]] ·
+[[director-2022]] ·
 exp 0004 (value-gradient evidence) · exp 0006 (value head carries beyond-horizon credit)
