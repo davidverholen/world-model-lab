@@ -9,16 +9,24 @@ last_reviewed: 2026-06-12
 
 # Compute Strategy
 
+> **Status note (2026-06-15): the desktop-remote path is retired.** The Windows
+> desktop GPU is no longer available and its dispatch machinery was removed (ADR 0004
+> superseded). Compute is now **local laptop GPU** + **on-demand rented cloud GPU**
+> (vast.ai, maintainer-triggered). The `desktop GPU` rows below are kept as *measured
+> reference data* (real benchmarks that still inform the latency-bound vs throughput-
+> bound reasoning and rental sizing) — read them as "a ~16 GB / ~44 TFLOPS card," which
+> now means a rented box, not a standing machine.
+
 ## What it is
 
-Predicted (not yet measured) cost/benefit of our three compute options per
+Predicted (not yet measured) cost/benefit of our compute options per
 environment-ladder rung. Prices checked 2026-06-12 (vast.ai: 4090 ~$0.31–0.44/hr,
 5090 ~$0.53/hr, H100 from ~$0.90/hr).
 
 | Option | VRAM / bandwidth / FP32 | Best for |
 |---|---|---|
-| laptop GPU (local) | 8 GB / 256 GB/s / ~15–20 TFLOPS | rungs 1–2: iteration speed, env-loop-bound work |
-| desktop GPU (idle) | 16 GB / ~900 GB/s / ~44 TFLOPS | rung 3: multi-hour GPU-bound training (~2.5–3× laptop) |
+| laptop GPU (local) | 8 GB / 256 GB/s / ~15–20 TFLOPS | rungs 1–2: iteration speed, env-loop-bound work; short (<~1 h) runs |
+| ~16 GB card (rented, e.g. 4090) | 16–24 GB / ~900 GB/s / ~44 TFLOPS | rung 3: multi-hour GPU-bound training (~2.5–3× laptop; measured on the retired desktop) |
 | vast.ai burst (4090/5090) | 24–32 GB, ~$0.35–0.55/hr | rung 3–4: parallel sweeps (N seeds × arms), baselines |
 | H100+ class | 80 GB, $1–2+/hr | rung 4+: ≥100M-param transformer world models only |
 
@@ -208,4 +216,4 @@ windows) + integration smoke; not bit-identical (parallel streams).
 
 ## Links
 
-[[environment-ladder]] · CLAUDE.md hardware section · future ADR: remote dispatch
+[[environment-ladder]] · CLAUDE.md hardware section · [[0004-remote-dispatch]] (superseded — desktop-remote retired)

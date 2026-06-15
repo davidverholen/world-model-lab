@@ -2,17 +2,14 @@
 
 Replaces the hand-written shell loops we kept rewriting for multi-seed/multi-arm
 experiments (exp 0002/0003 and the GPU benchmark). Cartesian product of --grid
-axes, sequential execution (local or via scripts/remote.sh), numeric metrics
-scraped from each run's final output lines, one markdown row per combo —
-ready to paste into a knowledge/experiments/ page.
+axes, sequential local execution, numeric metrics scraped from each run's final
+output lines, one markdown row per combo — ready to paste into a
+knowledge/experiments/ page.
 
     uv run python scripts/sweep.py \
         --grid seed=0,1,2 --grid sigreg-weight=0,0.05 \
         --name exp0003 \
         -- python -m world_model.collect --env-id MiniGrid-Empty-8x8-v0 --updates 1000
-
-    # remote (dispatches each combo through scripts/remote.sh run):
-    uv run python scripts/sweep.py --remote --grid seed=0,1 -- python -m ...
 
 Logs land in runs/sweeps/<name>/; the table is printed and saved alongside.
 """
@@ -48,7 +45,6 @@ def main() -> None:
         help="sweep axis; flag name without leading dashes",
     )
     parser.add_argument("--name", default="sweep", help="results dir name under runs/sweeps/")
-    parser.add_argument("--remote", action="store_true", help="dispatch via scripts/remote.sh run")
     parser.add_argument(
         "command",
         nargs=argparse.REMAINDER,
@@ -73,10 +69,7 @@ def main() -> None:
     for i, combo in enumerate(combos):
         params = dict(zip([p for p, _ in axes], combo, strict=True))
         extra = [x for p, v in params.items() for x in (f"--{p}", v)]
-        if args.remote:
-            cmd = ["./scripts/remote.sh", "run", *base, *extra]
-        else:
-            cmd = ["uv", "run", *base, *extra]
+        cmd = ["uv", "run", *base, *extra]
         label = " ".join(f"{p}={v}" for p, v in params.items())
         print(f"[{i + 1}/{len(combos)}] {label}", flush=True)
 

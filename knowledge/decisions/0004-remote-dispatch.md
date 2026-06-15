@@ -1,15 +1,23 @@
 ---
-status: current
+status: superseded
 owner: world-model
 scope: local
 sources: []
 verified: true
-last_reviewed: 2026-06-12
+last_reviewed: 2026-06-15
 ---
 
 # 0004: Remote GPU dispatch — SSH + git push over Tailscale, nothing fancier
 
-**Status:** accepted (2026-06-12)
+**Status:** SUPERSEDED (2026-06-15) — the Windows-desktop remote box was retired and
+all its machinery removed (`scripts/remote.sh`, `docs/REMOTE.md`, `.env.remote*`, the
+win32 torch index in `pyproject.toml`, `sweep.py --remote`). Reason: the desktop is no
+longer available/needed, and the measured latency-bound regime ([[compute-strategy]])
+meant local parallel seeds covered most multi-seed work anyway. The standing answer for
+"bigger than local" is now an **on-demand rented cloud GPU** (vast.ai), maintainer-
+triggered — no standing remote infrastructure. If unattended cloud sweeps are ever
+wanted, write a fresh ADR for that (the queue/orchestrator question this one deferred).
+The record below is kept for history.
 
 ## Context
 

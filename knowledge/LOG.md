@@ -2,6 +2,26 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | workflow retro → efficiency guardrails + remote-GPU retired
+
+Neutral retro of how we work (188 commits / 44 experiments / 17 sessions, all 06-12→06-15),
+done via two analysis subagents (transcripts + experiment record). Findings: the experiment
+engine is strong (pre-registration ~universal, healthy ~49% null rate, swap-tests/probes catch
+false wins, honest losses) but the meta-loop leaks — ~2 experiments slow to leave a wall
+(retention 0013–0015; length-2 0042–0044), answers walls with another diagnostic instead of
+building the capability the diagnostics keep pointing at (hierarchy, flagged by both 0031 and
+0043), and carries a heavy workflow tax (commit/verify cadence, post-compaction file-state
+desync = #1 wasted-call class). Acted on it:
+- **Efficiency guardrails** (PROCESS.md, new section + CLAUDE.md rule 7 + research-cycle skill):
+  countable stall rule (2 flat redesigns ⇒ wall), wall-relocation tripwire (diagnose twice then
+  build), `LADDER-EXIT`|`EXTRA-RIGOR` bar tagging (added to experiment template), lit-first
+  mandatory for borrowed mechanisms, pinned per-rung eval protocol, session-hygiene (fresh
+  session per milestone — the KB is the durable memory).
+- **Remote-GPU retired**: removed scripts/remote.sh, docs/REMOTE.md, .env.remote*, the win32
+  torch index in pyproject.toml, sweep.py --remote. ADR 0004 superseded; CLAUDE.md hardware +
+  compute-strategy + director/dreamer4 pages now read "local + on-demand rented cloud GPU"
+  (maintainer-triggered spend). Measured desktop benchmarks kept as reference data.
+
 ## [2026-06-15] curation | exp 0044: MPC ≈ reactive at length-2 — planning doesn't crack it; wall relocates to WM rollout fidelity
 
 exp0044 (CEM-MPC over the manual-conditioned WM vs the reactive actor, same trained WM, length-2,

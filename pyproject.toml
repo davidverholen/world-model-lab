@@ -28,16 +28,9 @@ rtfm = [
 requires = ["uv_build>=0.11.8,<0.12.0"]
 build-backend = "uv_build"
 
-# Windows needs CUDA wheels from the PyTorch index;
-# Linux gets CUDA-bundled wheels from PyPI as usual. See docs/REMOTE.md.
+# Linux gets CUDA-bundled torch wheels from PyPI as usual.
 [tool.uv.sources]
-torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'win32'" }]
 crafter-rtfm = { path = "../crafter-rtfm", editable = true }
-
-[[tool.uv.index]]
-name = "pytorch-cu130"
-url = "https://download.pytorch.org/whl/cu130"
-explicit = true
 
 [dependency-groups]
 dev = [

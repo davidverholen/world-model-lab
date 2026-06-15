@@ -11,6 +11,10 @@ last_reviewed: YYYY-MM-DD
 
 ## Hypothesis
 
+Falsifiable claim + named counter-outcome(s).
+**Bar:** `LADDER-EXIT` | `EXTRA-RIGOR` — the success criterion and which kind it is
+(PROCESS.md §Efficiency guardrails). Note the thread's stall count if this is a redesign.
+
 ## Setup
 
 env, model config, seeds, commit hash, command line.

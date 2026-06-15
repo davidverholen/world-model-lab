@@ -23,10 +23,12 @@ uv-managed (Python 3.12, PyTorch).
   tweaks over architecture growth when memory binds. Note: power-capped at ~45 W and
   thermally throttles within minutes of sustained load (measured — see
   knowledge/design/compute-strategy.md); don't schedule multi-hour training here.
-- **Remote (Windows desktop):** a 16 GB desktop GPU — available for bigger runs
-  (rung 3+, longer training). Not yet wired up: needs uv + CUDA PyTorch there and a
-  way to dispatch runs (simplest: git pull + `uv run` over SSH; decide when first
-  needed and record as an ADR).
+- **Bigger runs (when local binds):** rent a cloud GPU on demand (e.g. vast.ai —
+  see knowledge/design/compute-strategy.md). There is no standing remote machine;
+  the earlier Windows-desktop SSH dispatch was retired (ADR 0004 superseded). Cloud
+  spend stays the maintainer's explicit call — flag the cost, don't spend
+  autonomously. Local parallel seeds run as concurrent processes on the one GPU (it
+  idles on our latency-bound step), which covers most multi-seed work.
 
 ## Layout
 
@@ -56,6 +58,11 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
 6. **Milestone = curate + commit** (`/milestone`): after every meaningful unit of work,
    run the checkpoint — verify (tests/lint) → knowledge curation → commit everything.
    No milestone leaves uncommitted changes behind; no commit carries an uncurated KB.
+7. **Efficiency guardrails** (PROCESS.md §Efficiency guardrails): countable stall rule
+   (2 flat redesigns ⇒ wall), wall-relocation tripwire (diagnose twice, then build the
+   capability), tag every experiment bar `LADDER-EXIT`|`EXTRA-RIGOR`, lit-first for
+   borrowed mechanisms, pinned per-rung eval protocol. Start a **fresh session per
+   milestone** — the KB is the durable memory; long sessions compact and desync.
 
 **Cross-domain handoffs:** read `../commons/CONTRACT.md` before issuing or consuming a requirement/question/decision/status to or from the crafter-rtfm benchmark-env domain.
 

@@ -17,8 +17,10 @@ uv run python scripts/sweep.py \
     -- python -m world_model.collect --env-id MiniGrid-Empty-8x8-v0
 ```
 
-- `--remote` dispatches each combo through `scripts/remote.sh run` (clean tree
-  required; use for runs >~1h total — see knowledge/design/compute-strategy.md).
+- Runs sequentially on the local GPU. Keep total wall-clock under ~1 h (laptop
+  thermal cap — see knowledge/design/compute-strategy.md); for anything larger,
+  shrink the grid or flag a rented-GPU burst to the maintainer (spend stays the
+  maintainer's call). No remote-dispatch backend exists anymore.
 - Name the sweep after the experiment page (`exp0007`), so `runs/sweeps/exp0007/`
   links trivially from `knowledge/experiments/0007-*.md`.
 - Paste `RESULTS.md` into the experiment page's Result section and prune columns

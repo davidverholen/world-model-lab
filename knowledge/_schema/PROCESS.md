@@ -140,5 +140,54 @@ EVERY new learning — especially each specific failure — triggers a targeted 
 Always, not only when unsupervised. Exps 0011/0012 are the precedent (two redesigns
 from found papers, zero wasted GPU on mapped walls).
 
+## Efficiency guardrails (added 2026-06-15)
+
+Canonical home for the guardrails the `/research-cycle` skill enforces; they hold in
+BOTH supervised and autonomous mode (the loop is identical — see the note below).
+Origin: a neutral retro of the first 44 experiments found the process strong at
+*running* experiments (pre-registration, swap-tests, honest nulls) but ~2 experiments
+slow at *leaving a wall*, and prone to answering a wall with another diagnostic instead
+of building the capability the diagnostics keep pointing at.
+
+**1. Stall rule — countable, not vibe-based.** Count consecutive pre-registered
+redesigns of one sub-problem whose **headline metric does not move**. At **2**, the
+thread is a wall. A 3rd attempt is allowed ONLY with a one-line written justification
+that it is not a known-class repeat (a genuinely new mechanism, or a paper found
+since). Otherwise STOP: consolidated status note in LOG, switch threads or hand back.
+Catches: retention 0013–0015, length-2 0042–0044.
+
+**2. Wall-relocation tripwire — diagnose twice, then build.** If a localized wall keeps
+*moving* under successive probes (exp 0040→0044: actor → objective → execution →
+WM-fidelity), OR two independent threads converge on the same missing capability (0031
+and 0043 both → hierarchy), the next step is a **committed build of that capability**,
+not another diagnostic — unless a probe is <1 day AND decision-changing. Diagnostics
+localize a wall; they don't climb it.
+
+**3. Tag every pre-registered bar — `LADDER-EXIT` vs `EXTRA-RIGOR`.** LADDER-EXIT = the
+rung's actual exit criterion (e.g. beat PPO at equal budget). EXTRA-RIGOR = a
+self-imposed nicer target beyond it. The moment the LADDER-EXIT bar is met,
+EXTRA-RIGOR work on that rung is droppable on demand and must not consume the stall
+budget. (Retention 0013–0015 chased an EXTRA-RIGOR "both-bars" target after the rung-2
+LADDER-EXIT bar was already met at 0012.) Record the tag in the page's Hypothesis.
+
+**4. Lit-first is mandatory for borrowed mechanisms.** The literature-first rule is not
+optional when an experiment imports a *published mechanism* (SIL, resets, curious
+replay…): do the method-depth ingest BEFORE the run, not after the null. Foreseeable
+nulls (0030 SIL, after 0029 had already localized the wall to *discovery* — which SIL
+cannot manufacture) are exactly what this deletes.
+
+**5. Pin the eval protocol per rung.** Fix episode count + a fixed seed set as a
+rung-level constant at the START of each rung; state the variance bound on any
+sub-30-episode result. The rung-2 retention arc (0009–0015) was scored on noisy 10-ep
+estimates; the ≥20-ep fix landed at 0016, after the noisy thread had concluded. Noisy
+single-seed / <30-ep claims read as SOFT until repeated.
+
+**6. Session hygiene — start fresh sessions at milestone boundaries.** The KB (INDEX +
+LOG + experiment pages + ADRs) is the durable memory, so a fresh session loses no
+project state. Start a new Claude session at each milestone (or when context fills /
+after a compaction): long single sessions compact repeatedly, and post-compaction
+file-state desync was the #1 wasted-call class in the retro. Re-orient a fresh session
+from INDEX.md + the latest LOG entry, not from scrollback.
+
 Supervised vs autonomous operation differ in EXACTLY ONE thing: whether the human's go-ahead is awaited between iterations. The loop, gates, and guardrails are identical
 (/research-cycle skill).

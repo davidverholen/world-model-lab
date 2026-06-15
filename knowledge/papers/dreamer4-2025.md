@@ -247,8 +247,9 @@ clusters for training; it is about 40× slower than DreamerV3 at inference.
 
 The transformer WM's advantages (multi-frame context window, video-quality generation,
 scalability to 2B params) are real, but they come at enormous compute cost. Dreamer 4 trains on
-hundreds of TPUs and requires an H100 for real-time inference. Our desktop GPU has 16 GB; our
-laptop has 8 GB. The smallest transformer WM that would improve on RSSM at our scale would need
+hundreds of TPUs and requires an H100 for real-time inference. Our local laptop has 8 GB, and a
+rented ~16 GB card is our practical ceiling for bigger runs. The smallest transformer WM that
+would improve on RSSM at our scale would need
 extensive ablation work to identify (the Craftax/Crafter transformer WM literature — arxiv:2502.01591,
 arxiv:2605.16457 — is the more relevant comparison; both are much smaller than Dreamer 4 and
 explicitly target Craftax at home-lab-viable scale).

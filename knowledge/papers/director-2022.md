@@ -159,7 +159,7 @@ is competitive-to-superior performance vs the flat DreamerV2 baseline.
 
 ## Our scale feasibility assessment
 
-**Our stack (16 GB desktop, RSSM):** Director is built on DreamerV2, which is RSSM-based and
+**Our stack (~16 GB single GPU, RSSM):** Director is built on DreamerV2, which is RSSM-based and
 runs on a single GPU. The added cost of Director over a flat DreamerV2 is:
 
 - Goal autoencoder (VQ-VAE on RSSM states — small, the state dim is not large).
@@ -168,12 +168,12 @@ runs on a single GPU. The added cost of Director over a flat DreamerV2 is:
   longer per manager update cycle. However, the RSSM step is cheap, so this is not a memory
   bottleneck.
 
-**Verdict: feasible on our 16 GB machine.** The RSSM backbone is already in our stack (we run
+**Verdict: feasible on a ~16 GB GPU.** The RSSM backbone is already in our stack (we run
 DreamerV3 RSSM on 8 GB local). The additional VQ-VAE + second actor-critic does not require
 large parameter growth. The 8× imagination horizon increases wall-clock training time but not
-memory. A careful implementation should fit comfortably on 16 GB and train overnight on the
-desktop GPU. The local 8 GB machine could run a small-scale diagnostic (tier-1 MiniGrid) but
-might be tight for a full Crafter run.
+memory. A careful implementation should fit comfortably on 16 GB and train overnight on a
+rented ~16 GB card. The local 8 GB machine could run a small-scale diagnostic (tier-1 MiniGrid)
+but might be tight for a full Crafter run.
 
 ## Design section: reading-grounded Director for our rtfm wall
 
@@ -248,7 +248,8 @@ temporal-credit, not perception.
    component. Then a follow-up adds reading conditioning to the manager, testing the
    "manual-as-sequencer" variant.
 
-**Environment:** rtfm length-2, same setup as exp 0043. Four seeds, overnight on desktop (16 GB).
+**Environment:** rtfm length-2, same setup as exp 0043. Four seeds (local if it fits the ~1 h
+budget, else a rented ~16 GB card).
 The signal is the same as 0043: inv\_ratio (WM reads, expected to stay >1), correct (expected to
 lift from ≈0.05 toward ≈0.35+ if hierarchy helps), and swap\_follow (goal reachability under
 swapped manual — the definitive grounding test).
