@@ -25,5 +25,5 @@ Experiments are only real if they end as a page in `knowledge/experiments/`.
    ADR if an architectural choice fell out; new recurring concept → page candidate.
 5. **Bookkeep**: INDEX.md line, LOG.md entry, tick ROADMAP.md if it closes an item.
 
-GPU note: local RTX 4070 Laptop 8 GB — see CLAUDE.md hardware section for limits and
+GPU note: local laptop GPU (8 GB) — see CLAUDE.md hardware section for limits and
 the remote 16 GB option before sizing up models.

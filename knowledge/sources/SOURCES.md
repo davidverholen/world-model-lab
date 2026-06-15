@@ -47,7 +47,7 @@ Citation rule: a manuscript may cite only sources whose page is at read depth
 | web:minigrid-docs | MiniGrid documentation | https://minigrid.farama.org | docs | no | 2026-06-12 |
 | web:worldmodels-site | World Models interactive article | https://worldmodels.github.io/ | article | no | 2026-06-12 |
 | web:karpathy-llm-wiki | Karpathy: LLM Wiki gist | https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f | article | yes (2026-06-12) | 2026-06-12 |
-| pdf:context-arch-v1 | Context Architecture for Enterprise Agentic Software Delivery v1.0.0 (D. Verholen) | local PDF (not in repo); via author: https://www.linkedin.com/in/david-verholen-14aa23aa/ | whitepaper | yes (2026-06-12, read in full) | 2026-06-12 |
+| pdf:context-arch-v1 | Context Architecture for Enterprise Agentic Software Delivery v1.0.0 (D. Verholen) | local PDF (not in repo); via author: https://github.com/davidverholen/context-architecture | whitepaper | yes (2026-06-12, read in full) | 2026-06-12 |
 | news:ami-funding | AMI Labs raises $1.03B (TechCrunch, 2026-03-09) | https://techcrunch.com/2026/03/09/yann-lecuns-ami-labs-raises-1-03-billion-to-build-world-models/ | news | yes (2026-06-12) | 2026-06-12 |
 | arxiv:1910.08210 | RTFM: Generalising to Novel Environment Dynamics via Reading (Zhong et al., ICLR 2020) | https://arxiv.org/abs/1910.08210 | paper | yes (2026-06-14, title+authors via arXiv API) | 2026-06-14 |
 | arxiv:2101.07393 | Grounding Language to Entities and Dynamics for Generalization in RL — Messenger/EMMA (Hanjie et al., ICML 2021) | https://arxiv.org/abs/2101.07393 | paper | yes (2026-06-14, title+authors via arXiv API) | 2026-06-14 |

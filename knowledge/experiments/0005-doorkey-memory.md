@@ -29,7 +29,7 @@ Eval: `uv run python -m world_model.play --env-id MiniGrid-DoorKey-5x5-v0
 
 ## Result
 
-Run 2026-06-12, CUDA/RTX 4070. **Hypothesis refuted: eval 0/20** (both ε=0 and ε=0.25).
+Run 2026-06-12, CUDA/laptop GPU. **Hypothesis refuted: eval 0/20** (both ε=0 and ε=0.25).
 
 But the run decomposes informatively:
 

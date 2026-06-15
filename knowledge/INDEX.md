@@ -65,7 +65,7 @@ calls these elaborate).
 - [0001-pytorch-over-jax](decisions/0001-pytorch-over-jax.md) — PyTorch default (accepted)
 - [0002-knowledge-architecture](decisions/0002-knowledge-architecture.md) — Karpathy wiki × context architecture (accepted)
 - [0003-environment-ladder](decisions/0003-environment-ladder.md) — MiniGrid first, no rung-skipping (accepted)
-- [0004-remote-dispatch](decisions/0004-remote-dispatch.md) — SSH + git push over Tailscale to the 5070 Ti desktop; no orchestrator (accepted)
+- [0004-remote-dispatch](decisions/0004-remote-dispatch.md) — SSH + git push over Tailscale to the desktop GPU; no orchestrator (accepted)
 - [0005-minecraft-milestone](decisions/0005-minecraft-milestone.md) — rung 5b: Minecraft via self-play + action-labeled video + text staircase (accepted)
 
 ## Experiments

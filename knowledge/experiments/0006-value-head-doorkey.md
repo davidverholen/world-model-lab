@@ -25,13 +25,13 @@ the flywheel (8.5%→14.3% in 0005) compounds.
 
 `scripts/remote.sh run python -m world_model.train_recurrent --rounds 3
 --save runs/doorkey5x5_v.pt --seed 0` — first real training dispatched to the
-remote 5070 Ti (ADR 0004 pipeline). Window 24, burn-in 8, SIGReg λ=0.05,
+remote desktop GPU (ADR 0004 pipeline). Window 24, burn-in 8, SIGReg λ=0.05,
 pos_weight 100 (reward) / 20 (value), γ=0.98, per-round eval 10 episodes
 (seeds 10000+, greedy). Final eval locally: 20 episodes via play.py.
 
 ## Result
 
-Trained on the remote 5070 Ti (first dispatched training, commit 54f29fe, ~25 min).
+Trained on the remote desktop GPU (first dispatched training, commit 54f29fe, ~25 min).
 
 | round | collection (ε=0.3) | greedy eval (10 eps, seeds 10000+) |
 |---|---|---|

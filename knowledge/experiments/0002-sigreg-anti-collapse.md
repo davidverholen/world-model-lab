@@ -27,7 +27,7 @@ Probe: ridge (α=1e-3) from frozen latents to agent (x,y), 500 fresh steps, 80/2
 
 ## Result
 
-Run 2026-06-12, code as of milestone commit following 6692aa2, CUDA/RTX 4070, seed 0.
+Run 2026-06-12, code as of milestone commit following 6692aa2, CUDA/laptop GPU, seed 0.
 
 | arm | updates | latent_std (end) | probe R² (final protocol) |
 |---|---|---|---|

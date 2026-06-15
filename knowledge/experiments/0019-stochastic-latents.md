@@ -34,7 +34,7 @@ for embed anti-collapse. Imagination samples z~prior. Reuses continue predictor
 
 **Partial success — eval rose off zero for the first time on the imagination line.**
 3 seeds, DoorKey-6x6, commit b8fdb62 (run 2026-06-13, ~3 h wall, 3 seeds sharing the
-5070 Ti). Command per seed:
+desktop GPU). Command per seed:
 `OMP_NUM_THREADS=2 python -m world_model.train_rssm --env-id MiniGrid-DoorKey-6x6-v0
 --rounds 7 --round0-steps 20000 --actor-steps 15000 --updates-per-round 4000
 --ac-updates-per-round 4000 --success-frac 0.25 --ignition-events 5 --freeze-round 2

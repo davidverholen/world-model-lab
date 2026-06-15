@@ -30,7 +30,7 @@ instability is not a sampling problem → lr schedule / EMA weights next.
 python -m world_model.train_recurrent --env-id MiniGrid-DoorKey-6x6-v0 --rounds 7
 --round0-steps 20000 --mpc-steps 15000 --updates-per-round 1500
 --success-frac 0.25 --ignition-events 5 --save runs/doorkey6x6_ign.pt`
-(3 seeds, sequential on the 5070 Ti; checkpoints seed-suffixed; total_env_steps
+(3 seeds, sequential on the desktop GPU; checkpoints seed-suffixed; total_env_steps
 reported per seed — budget varies 110k–130k with ignition, compared honestly
 against PPO's curve at the matching checkpoint.)
 PPO comparator: exp 0008 sweeps (`runs/sweeps/exp0008-ppo/`), curves up to 110k.

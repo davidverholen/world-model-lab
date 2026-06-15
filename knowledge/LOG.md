@@ -2,6 +2,32 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | public-ready pass: owned-GPU model names and LinkedIn URL removed
+
+Mechanical depersonalization pass (no research content changed). Owned GPU model names
+genericized in all remaining tracked files → "laptop GPU" / "desktop GPU" (capacity
+numbers preserved where inline). The special-case 2026-06-14 LOG entry's parenthetical
+model names were reworded to "(owned laptop/desktop GPUs)". LinkedIn URL in
+sources/SOURCES.md replaced with the public GitHub repo URL for
+the context-architecture whitepaper. Historical LOG narrative "LinkedIn profile" phrasing
+neutralized to "the author's profile page". Rental/market GPUs (4090, 5090, H100, 3090,
+vast.ai) left untouched throughout. 14 files changed; `last_reviewed` dates not bumped
+(mechanical edits, not content re-review).
+
+Files changed: knowledge/LOG.md, knowledge/INDEX.md, knowledge/sources/SOURCES.md,
+knowledge/decisions/0001-pytorch-over-jax.md, knowledge/decisions/0004-remote-dispatch.md,
+knowledge/experiments/0001-naive-latent-regression.md,
+knowledge/experiments/0002-sigreg-anti-collapse.md,
+knowledge/experiments/0003-probe-protocol-8x8.md,
+knowledge/experiments/0004-mpc-agent-empty8x8.md,
+knowledge/experiments/0005-doorkey-memory.md,
+knowledge/experiments/0006-value-head-doorkey.md,
+knowledge/experiments/0008-doorkey6x6-vs-ppo.md,
+knowledge/experiments/0009-ignition-mechanics.md,
+knowledge/experiments/0010-retention-mechanics.md,
+knowledge/experiments/0019-stochastic-latents.md,
+.claude/skills/run-experiment/SKILL.md.
+
 ## [2026-06-15] ingest | Dreamer 4: Training Agents Inside of Scalable World Models (Hafner, Yan, Lillicrap, 2025) → papers/dreamer4-2025.md (method depth)
 
 Trigger: maintainer priority (direct successor to DreamerV3; transformer WM, shortcut forcing,
@@ -203,10 +229,10 @@ convention, scripts/dispatch_rtfm.sh, *.log gitignored). Next: await crafter-rtf
 Publication-prep pass on the maintainer's request (no research content changed). Internal/
 personal leaks removed from tracked files: `.vscode/settings.json` (bypass-permissions
 config) untracked + `.vscode/` gitignored; author email dropped from `pyproject.toml`;
-README "whitepaper" link repointed from a LinkedIn profile to the context-architecture
-GitHub repo. Depersonalized 142 "Dave" mentions → "the maintainer" across 28 files (LOG,
+README "whitepaper" link repointed from the author's profile page to the context-architecture
+GitHub repo. Depersonalized 142 first-name mentions → "the maintainer" across 28 files (LOG,
 CLAUDE.md, skills, experiment/concept/design pages) + softened one proton.me mention here.
-Owned-GPU model names (RTX 4070 Laptop / 5070 Ti) genericized to capacity/role descriptors
+Owned-GPU model names (owned laptop/desktop GPUs) genericized to capacity/role descriptors
 in CLAUDE.md and design/compute-strategy.md (all measurements/conclusions preserved; rental/
 market GPUs 4090/5090/H100/3090 left intact). Added MIT LICENSE. README quick-start
 restructured around the real third-party arc (collapse→SIGReg fix, then train DoorKey agent
@@ -338,19 +364,19 @@ continued training across rounds destabilized (pred_loss 0.46->0.59) -> per-roun
 checkpoints/eval + optimizer handling next time. New infra committed: RecurrentDynamics
 GRU belief model, burn-in/open-loop sequence training, RecurrentMPCAgent,
 play --epsilon + recurrent checkpoint auto-detection, RGB partial-obs wrapper.
-Also: compute-strategy concept page (local vs 5070 Ti vs vast.ai prediction, prices
+Also: compute-strategy concept page (local vs desktop GPU vs vast.ai prediction, prices
 checked 2026-06-12). Next: exp 0006 value head + per-round eval.
 
 ## [2026-06-12] curation | thermal measurement: laptop GPU power-capped + throttling
 
-90s load test after the maintainer noticed heat: 4070L capped at ~45W (TGP floor), 62->78C in
+90s load test after the maintainer noticed heat: laptop GPU capped at ~45W (TGP floor), 62->78C in
 90s, clocks ~1.2GHz vs 3.1 max, SW thermal slowdown already active ~396s cumulative
-today. compute-strategy page updated (5070 Ti advantage revised 2.5-3x -> 4-6x;
+today. compute-strategy page updated (desktop GPU advantage revised 2.5-3x -> 4-6x;
 desktop-dispatch trigger lowered 4h -> 1h); CLAUDE.md hardware note updated.
 
 ## [2026-06-12] curation | milestone: remote GPU dispatch live + benchmark validates compute strategy
 
-Windows desktop (RTX 5070 Ti) wired up end-to-end: OpenSSH + Git Bash default
+Windows desktop (desktop GPU) wired up end-to-end: OpenSSH + Git Bash default
 shell (cmd.exe breaks git transport), bare-repo push dispatch (scripts/remote.sh
 setup/gpu/run/pull), uv sync with marker-gated cu130 torch wheels, CUDA verified.
 First real dispatch = gpu_bench.py: matmul 4.5x (prediction 4-6x confirmed),
@@ -366,7 +392,7 @@ DefaultShell) documented in docs/REMOTE.md.
 Exp 0006 closed: 90% per-round eval / 75% post-hoc (20 eps) vs 8% random — value
 head makes beyond-horizon reward visible; collect->train->collect compounds
 (collection 8.5%->5%->36%). First training dispatched through the remote pipeline
-(5070 Ti, ~25 min). Eval-hygiene incident found and fixed: play.py tile_size=16
+(desktop GPU, ~25 min). Eval-hygiene incident found and fixed: play.py tile_size=16
 changed agent observations vs training tile 8 (4/20 -> 75% after fix); exp 0004
 re-verified at 20/20 matched; obs_shape now stored in checkpoints + asserted at
 load; minigrid.md gotcha section added. Process additions per the maintainer's request:
@@ -399,7 +425,7 @@ runs need >=2-3 seeds (round-0 luck is decisive). Rung 2b open; scoreboard PPO 2
 
 ## [2026-06-12] curation | milestone: ignition solved, retention isolated (exp 0009)
 
-3 parallel seeds on the 5070 Ti (first remote.sh shell use; ~2h wall, 82% util,
+3 parallel seeds on the desktop GPU (first remote.sh shell use; ~2h wall, 82% util,
 49C). Adaptive round 0 + success-window oversampling fixed ignition everywhere
 (seed 1: 6 success examples -> 60% greedy straight after round 0 — vs PPO 0% at
 that budget). But continued round training destroyed and only partly rebuilt that
@@ -415,7 +441,7 @@ runs survive ssh death on Windows — kill subcommand is the off switch.
 
 Log timestamps (12:04 launch -> 12:37-12:39 per-seed finish): 3 parallel seeds in
 35 min wall, contention nil. Estimate was 3.5x pessimistic (MPC collection per-step
-cost on the 5070 Ti overestimated). exp 0009 page + compute-strategy corrected;
+cost on the desktop GPU overestimated). exp 0009 page + compute-strategy corrected;
 rung-2 sweeps are coffee-break scale.
 
 ## [2026-06-12] curation + scout | agent-architecture page; plasticity-loss literature found

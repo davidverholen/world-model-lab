@@ -27,7 +27,7 @@ transitions (seed 2), MSE(f(z,a), z′)/Var vs MSE(z, z′)/Var.
 
 ## Result
 
-Run 2026-06-12, code at milestone commit following ec6188f, CUDA/RTX 4070.
+Run 2026-06-12, code at milestone commit following ec6188f, CUDA/laptop GPU.
 
 | seed | arm | latent_std | dynamics ratio (model/copy, <1 = learned) | probe R² |
 |---|---|---|---|---|

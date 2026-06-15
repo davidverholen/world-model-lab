@@ -14,7 +14,7 @@ last_reviewed: 2026-06-12
 ## Context
 
 The dev laptop's GPU is power-capped (~45 W) and thermally throttles within minutes
-([[compute-strategy]]); an otherwise idle Windows desktop (RTX 5070 Ti, 16 GB) is
+([[compute-strategy]]); an otherwise idle Windows desktop (desktop GPU, 16 GB) is
 ~4–6× faster for GPU-bound training and SSH-reachable (e.g. via Tailscale). Options
 considered: (a) SSH + git push + `uv run`; (b) a job queue / orchestrator (Ray,
 slurm-lite, custom daemon); (c) cloud-style CI runners; (d) file sync (Syncthing)

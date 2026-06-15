@@ -27,7 +27,7 @@ frozen-trunk arm next.
 
 ## Setup
 
-12 runs in 2 batches of 6 parallel processes on the 5070 Ti (`remote.sh shell`,
+12 runs in 2 batches of 6 parallel processes on the desktop GPU (`remote.sh shell`,
 OMP_NUM_THREADS=2). Per run: as exp 0009 (`--rounds 7 --round0-steps 20000
 --mpc-steps 15000 --updates-per-round 1500 --success-frac 0.25
 --ignition-events 5`) plus the arm's `--later-lr-scale {1.0|0.3}` /

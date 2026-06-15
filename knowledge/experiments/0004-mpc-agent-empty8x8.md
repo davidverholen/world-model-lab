@@ -29,7 +29,7 @@ Episode seeds 0–19 (fixed layout env; seeds vary agent start).
 
 ## Result
 
-Three iterations were needed (all 2026-06-12, CUDA/RTX 4070; random baseline: 3/20):
+Three iterations were needed (all 2026-06-12, CUDA/laptop GPU; random baseline: 3/20):
 
 | version | training | planner | success |
 |---|---|---|---|

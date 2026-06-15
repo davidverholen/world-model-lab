@@ -25,7 +25,7 @@ signal) become the next experiment instead.
 
 ## Setup
 
-World model (remote 5070 Ti): `scripts/remote.sh run python -m
+World model (remote desktop GPU): `scripts/remote.sh run python -m
 world_model.train_recurrent --env-id MiniGrid-DoorKey-6x6-v0 --rounds 7
 --round0-steps 20000 --mpc-steps 15000 --updates-per-round 1500
 --save runs/doorkey6x6_v.pt --seed 0` (single seed — runtime; noted as limitation).

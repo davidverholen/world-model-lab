@@ -15,7 +15,7 @@ last_reviewed: 2026-06-12
 
 The two serious ecosystems for world-model research are PyTorch and JAX. Official
 DreamerV3 and Craftax are JAX; I-JEPA, V-JEPA 2, LeJEPA, TD-MPC2, IRIS, DIAMOND are
-PyTorch. We have one consumer GPU (RTX 4070 Laptop, 8 GB) and value iteration speed
+PyTorch. We have one consumer GPU (laptop GPU, 8 GB) and value iteration speed
 over peak throughput.
 
 ## Decision
