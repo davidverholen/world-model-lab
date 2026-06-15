@@ -19,6 +19,7 @@ import torch
 import torch.nn.functional as F
 from crafter_rtfm import ManualMode, harness, splits
 
+from world_model.agents.rtfm_mpc import RTFMMPCAgent
 from world_model.models import Actor, ConditionedActor, FrozenDinoEncoder, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.manual_aux import (
@@ -388,6 +389,14 @@ def main() -> None:
     # test (swap_follow + swapped≪correct on held-out manuals) stays the unchanged acceptance gate.
     # OFF = byte-for-byte identical to the WM-only path. See models.actor.ConditionedActor.
     p.add_argument("--actor-cond", action=argparse.BooleanOptionalAction, default=False)
+    # exp 0044 execution test (knowledge/design/hierarchical-imagination-agent.md §5,§7): after the
+    # reactive eval, ALSO score the SAME trained rssm+rew with a CEM-MPC planner (search action
+    # sequences in imagination instead of an amortized reactive policy). OFF = byte-for-byte
+    # unchanged (no second eval, no extra prints). See agents.rtfm_mpc.
+    p.add_argument("--mpc-eval", action=argparse.BooleanOptionalAction, default=False)
+    p.add_argument("--mpc-horizon", type=int, default=5)
+    p.add_argument("--mpc-samples", type=int, default=200)
+    p.add_argument("--mpc-iters", type=int, default=3)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -530,6 +539,33 @@ def main() -> None:
             f"grounding={r['grounding']:.2f} swap_follow={r['swap_follow']:.2f}",
             flush=True,
         )
+        if args.mpc_eval and cur_len == args.length:
+            # exp 0044: same rssm+rew, same eval seeds, MPC search instead of the reactive actor.
+            # The A/B for the execution-pillar hypothesis (does planning crack length-2?). Gated to
+            # the target-length phase (the question lives at length-2; skip the length-1 warm-up,
+            # where MPC eval is expensive and uninformative).
+            mpc_agent = RTFMMPCAgent(
+                enc,
+                text_enc,
+                rssm,
+                rew,
+                n_act,
+                device,
+                horizon=args.mpc_horizon,
+                n_samples=args.mpc_samples,
+                n_iters=args.mpc_iters,
+                gamma=args.gamma,
+                seed=args.seed,
+            )
+            rm = evaluate_rtfm(
+                mpc_agent, eval_seeds[: args.n_eval_seeds], cur_len, args.max_steps, args.one_shot
+            )
+            print(
+                f"  MPC correct={rm['CORRECT']:.2f} none={rm['NONE']:.2f} "
+                f"swapped={rm['SWAPPED']:.2f} grounding={rm['grounding']:.2f} "
+                f"swap_follow={rm['swap_follow']:.2f}",
+                flush=True,
+            )
         if manual_aux_head is not None:
             # Manual-invariance diagnostic ([[rung4-manual-conditioned-agent]] §4c): wrong/correct
             # reconstruction-loss ratio. ratio≈1 ⇒ TRIVIAL (belief ignores the manual); ratio≫1 ⇒
