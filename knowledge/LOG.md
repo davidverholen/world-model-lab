@@ -2,6 +2,21 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | ADR 0007 PROPOSED: Crafter mastery = "directable competence" (rung-3 exit milestone)
+
+From a design conversation with the maintainer. Set the major milestone: master Crafter (the
+purpose-built 2D env) before advancing to 3D/Phase 4 — no-rung-skipping (ADR-0003). "Finish" defined
+as DIRECTABLE COMPETENCE: reliably reach ANY target achievement on demand (per-achievement
+success-rate across all 22, deep tree included), NOT aggregate score (gameable by easy-achievement
+farming) nor all-22-in-one-episode (impossible — survival vs deep-crafting compete for episode time).
+Mechanism = the thesis in 3 pillars: dynamics-manual (read the rules) + goal-conditioning (the target,
+NOT yet built) + imagination (plan through the grounded WM) → execution. Surpassing DreamerV3 on the
+deep tree IS the thesis ablation (Dreamer has no reading). Two tiers: WE set goal = directable
+(measurable milestone); ACTOR sets goal = autonomous (stretch). Staircase with per-rung
+swap/ablation checkpoints so we never grind blind. Drafted as knowledge/decisions/0007 (status:
+proposed — maintainer ratifies); ROADMAP Phase 3 refined to point at it. Also dispatched a scout for
+a possible recent DeepMind world-model breakthrough (maintainer saw a video) — pending.
+
 ## [2026-06-15] STATE OF THE NIGHT | rung-4 reading-to-learn-dynamics: DEMONSTRATED (genuine) + swap_follow strengthening PARKED
 
 **Headline: first genuine reading-to-learn-dynamics on this stack.** From the exp-0035 sparse-reward

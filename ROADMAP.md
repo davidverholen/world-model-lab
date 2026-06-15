@@ -6,9 +6,12 @@ ADR [0003](knowledge/decisions/0003-environment-ladder.md)). Distinct capabiliti
 their dependency order live in [capability-map](knowledge/design/capability-map.md); the
 durable experiment record is under [knowledge/experiments/](knowledge/experiments/).
 
-**Where we are:** rung 3 (Crafter). The agent learns and plays; current focus is fixing
-*reward exploitation* (the model imagining reward that isn't real) so it explores and
-climbs the tech tree instead of farming the trivial achievements.
+**Where we are:** rung 3 (Crafter). Reward exploitation is fixed (two-hot value + reward head,
+exp 0023–0025) and **reading-to-learn-dynamics is validated** at length-1 on crafter-rtfm
+(exp 0036: genuine, swap-test-proven). The proposed **major milestone** is now *directable Crafter
+competence* — reliably reach any target achievement on demand, via reading-conditioned imagination,
+surpassing DreamerV3 on the deep tree (ADR [0007](knowledge/decisions/0007-crafter-mastery-milestone.md),
+proposed). Master the purpose-built 2D game before advancing to 3D (Phase 4).
 
 ## Phase 1 — Pipeline + representation (rung 1) ✅
 
@@ -56,7 +59,15 @@ climbs the tech tree instead of farming the trivial achievements.
       wall — see [crafter](knowledge/environments/crafter.md))
 - [ ] **Hierarchy** for the deep tree (stone→iron→diamond), as a compute-*efficiency* lever
       ([hierarchy-and-credit](knowledge/concepts/hierarchy-and-credit.md))
-- [ ] DreamerV3-class score comparison; optionally Atari100k as a second rung-3 data point
+- [x] **Reading-to-learn-dynamics validated** (crafter-rtfm, exp 0036): a manual-conditioned agent
+      reads a per-episode rule and grounds it (swap-test-proven) — the thesis mechanism for the
+      milestone below
+- [ ] **MILESTONE (proposed, ADR [0007](knowledge/decisions/0007-crafter-mastery-milestone.md)) —
+      directable Crafter competence:** reliably reach *any* target achievement on demand (per-
+      achievement success-rate across all 22, deep tree included), via **reading** (dynamics manual)
+      + **goal-conditioning** (target) + **imagination** (plan) → execution; surpassing DreamerV3 on
+      the deep tree it can't reach. Staircase: rtfm read→executable-plan → reading lifts Crafter
+      depth (ablation) → whole-game manual → goal-conditioning → the milestone. *Gates Phase 4.*
 
 ## Phase 4 — Continuous control / 3D (rung 4)
 
