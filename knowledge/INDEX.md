@@ -108,6 +108,7 @@ calls these elaborate).
 - [0042-rtfm-length-curriculum](experiments/0042-rtfm-length-curriculum.md) — length-1→2 curriculum does NOT crack length-2 (warm-up ignites len-1, collapses at the switch, never recovers); 2nd failed len-2 lever → converges with swap_follow: reading is solved, the wall is multi-step EXECUTION (done)
 - [0043-rtfm-execution-wall](experiments/0043-rtfm-execution-wall.md) — DECISIVE: at length-2 inv_ratio>1 (= length-1, WM reads the 2-step gesture) but correct≈0 → PURE EXECUTION wall. Same bottleneck as the rung-3 Crafter plateau → next major capability = multi-step execution / hierarchy (done)
 - [0044-rtfm-mpc-execution](experiments/0044-rtfm-mpc-execution.md) — CEM-MPC ≈ reactive at length-2 (mean 0.09 vs 0.06, within noise; neither cracks it) → planning doesn't solve the wall; it relocates to WM multi-step rollout/reward FIDELITY (upstream of all planning/hierarchy). Next: oracle-gesture probe to localize (done)
+- [0045-rtfm-oracle-probe](experiments/0045-rtfm-oracle-probe.md) — oracle probe: WM reads+VALUES the gesture (pct≈0.88, ret 5–6× random) — NOT a fidelity wall. But ~12% of wrong sequences are overrated → reward-head OOD false positives the planner exploits = exp0017–0025 at the planning layer. Fix = reward calibration / robust planning (done)
 
 ## Wanted pages (linked but not yet written)
 

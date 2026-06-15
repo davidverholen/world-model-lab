@@ -2,6 +2,22 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | exp 0045: oracle probe — WM reads+values the gesture; wall is reward-head OOD calibration
+
+exp0045 (`--oracle-probe`, commit 692c233): scores the TRUE 2-action gesture (privileged manual_facts,
+eval-only) vs 200 random sequences by the same planner objective, reports the oracle's percentile.
+Result: oracle pct ≈ 0.82–0.93 (stable ~0.88), oracle return ~5–6× random — so the WM genuinely
+READS AND VALUES the gesture; NOT a fundamental fidelity wall (which would be pct≈0.5). But pct is
+0.88 not 1.0: ~12% of (wrong) sequences are scored ABOVE the only sequence that earns reward =
+reward-head FALSE POSITIVES on OOD action sequences. Naive MPC maximizes → chases those overestimates
+→ exactly why exp0044 MPC matched the reactive actor. This is the exp0017–0025 imagination-exploitation
+problem at the PLANNING layer (planner exploits reward-head OOD overestimation). Architecture's
+read→imagine→value chain is intact; gap = planner robustness to reward-head OOD false positives.
+Empirically motivates the calibrated-uncertainty/confidence-gating flagged in the hierarchical-
+imagination design §5. Next (calibration/robust-planning lever, NOT a new WM): reward-head OOD
+regularization to make the gesture ~argmax, and/or pessimistic/value-aware planning + sampled rollouts;
+re-run the MPC A/B expecting oracle pct→1 and MPC correct lifting. Maintainer checkpoint.
+
 ## [2026-06-15] curation | workflow retro → efficiency guardrails + remote-GPU retired
 
 Neutral retro of how we work (188 commits / 44 experiments / 17 sessions, all 06-12→06-15),
