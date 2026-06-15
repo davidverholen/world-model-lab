@@ -97,6 +97,12 @@ Candidate confidence signals we partly have: the **two-hot distributional** rewa
 uncertainty); ensemble-disagreement (Plan2Explore) if needed; the imagined plan's predicted
 goal-success probability. The open work is making these *trustworthy enough to gate on*.
 
+This is no longer hypothetical at the rung-4 execution layer: [[0045-rtfm-oracle-probe]] showed the
+reward head ranks the true gesture only ~88th percentile (~12% of OOD action sequences overrated above
+it), and [[0046-rtfm-robust-planning]] found robust *planning* (K=10 sampled-rollout averaging) only
+lifts that to ~0.92 — it discounts the optimism but cannot fix a head starved of length-2 positives.
+Empirical confirmation that calibration is a *training-time* prerequisite, not a planning-time patch.
+
 ## 6. Precedents (lineage)
 
 - [[director-2022]] — 2-level manager(VQ subgoal)/worker, both trained in imagination. Our structural

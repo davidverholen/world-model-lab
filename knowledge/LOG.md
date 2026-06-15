@@ -2,6 +2,22 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] experiment | rung-4 exp0046 — sampled-rollout MPC: PARTIAL (lever real but under-powered)
+
+Ran the pre-registered robust-planning v1: K=10 sampled-rollout MPC (average) vs the reward head's
+prior-mean optimism (`--mpc-rollout-samples`, commit 7901aaa; 4 seeds, 30 rounds, ~1h45m local).
+Result is a **partial positive**: oracle pct 0.88 → ~0.92 (all seeds >0.90, tight band), MPC correct
+0.05 → ~0.11 (~2× floor), and `swapped` ≈ 0 so anti-baking holds cleanly — the predicted direction,
+confirming averaging shaves *some* OOD false positives. But it does NOT clear the bar: oracle pct
+plateaus ~0.91, not ~1.0, and MPC correct is noisy/seed-dependent. The collection-signal panel
+explains why — length-2 positives are starved (~5/60), so the reward head never gets data to sharpen
+OOD calibration; robust *planning* can only discount optimism the head already shows, not fix a
+starved head. Per the pre-registered counter-outcome → escalate by COMPOSING v1 with pessimism
+(two-hot spread) / continue-gating / reward-head OOD regularization (the root fix). Wrote
+0046 page with trajectory plots (oracle-probe, mpc-eval, collection-signal); INDEX updated. The oracle
+probe stays the readout for every next variant (works iff pct → 1). Empirically reinforces the
+design's §5 calibration dependency ([[hierarchical-imagination-agent]]).
+
 ## [2026-06-15] SESSION HANDOFF | rung-4 execution thread → next = robust-planning / reward-calibration lever
 
 **Pick-up point for a fresh session.** Read order: this entry → experiments 0043/0044/0045 →
