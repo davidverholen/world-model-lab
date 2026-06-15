@@ -107,6 +107,7 @@ calls these elaborate).
 - [0041-rtfm-length2-generalization](experiments/0041-rtfm-length2-generalization.md) — the length-1 ignition recipe does NOT generalize to length-2 (events 3–6/round, correct ~0); length-1 is the current ceiling → lit-backed length curriculum (RTFM/Messenger) is the next step, pending human sign-off (done)
 - [0042-rtfm-length-curriculum](experiments/0042-rtfm-length-curriculum.md) — length-1→2 curriculum does NOT crack length-2 (warm-up ignites len-1, collapses at the switch, never recovers); 2nd failed len-2 lever → converges with swap_follow: reading is solved, the wall is multi-step EXECUTION (done)
 - [0043-rtfm-execution-wall](experiments/0043-rtfm-execution-wall.md) — DECISIVE: at length-2 inv_ratio>1 (= length-1, WM reads the 2-step gesture) but correct≈0 → PURE EXECUTION wall. Same bottleneck as the rung-3 Crafter plateau → next major capability = multi-step execution / hierarchy (done)
+- [0044-rtfm-mpc-execution](experiments/0044-rtfm-mpc-execution.md) — CEM-MPC ≈ reactive at length-2 (mean 0.09 vs 0.06, within noise; neither cracks it) → planning doesn't solve the wall; it relocates to WM multi-step rollout/reward FIDELITY (upstream of all planning/hierarchy). Next: oracle-gesture probe to localize (done)
 
 ## Wanted pages (linked but not yet written)
 

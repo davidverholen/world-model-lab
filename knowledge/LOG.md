@@ -2,6 +2,22 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | exp 0044: MPC ≈ reactive at length-2 — planning doesn't crack it; wall relocates to WM rollout fidelity
+
+exp0044 (CEM-MPC over the manual-conditioned WM vs the reactive actor, same trained WM, length-2,
+commit c679a4a). Final: reactive mean correct 0.06, MPC 0.09 — MPC consistently but MARGINALLY ahead
+(≥reactive on 3/4 seeds across rounds), within eval noise (n=20), and NEITHER cracks length-2 (both
+~0.05–0.10 vs length-1's 0.4). WM reads throughout (inv_ratio 1.10–1.23). Verdict = the 2nd
+pre-registered branch: swapping a search planner for the reactive policy barely moves the needle, so
+the binding constraint is NOT the policy's credit assignment but the WORLD MODEL's multi-step
+rollout/reward FIDELITY — the belief reads the manual but the imagined 2-step payoff isn't sharp
+enough to plan through. Implication: WM short-horizon fidelity is UPSTREAM of all planning/hierarchy
+(every planner inherits it as a ceiling) — sharpen WM predictive/reward accuracy before more planning
+machinery. Echoes exp0017–0025 (imagination calibration is the recurring limiter) + the design's §5
+calibration dependency. Confounds to rule out first (prior-mean vs sampled rollout, no value tail,
+shaping-shaped reward head, receding replan). Next: oracle-gesture reward-prediction probe to localize
+WM-fidelity vs MPC-search — maintainer checkpoint (meatier fork than another rtfm lever).
+
 ## [2026-06-15] curation | schema change: `owner:` is now a domain; discussion de-attributed
 
 Two schema/voice changes (no research content altered). (1) The `owner:` frontmatter
