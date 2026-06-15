@@ -337,6 +337,55 @@ def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
 
 
 @torch.no_grad()
+def oracle_gesture_probe(
+    rssm, rew, enc, text_enc, eval_seeds, length, one_shot, device, n_random=200, gamma=0.99
+):
+    """Localize the exp-0044 wall: does the reward head RANK the TRUE gesture above random ones?
+
+    exp 0044 found MPC ~= reactive at length-2 (neither cracks it) -> the wall relocated from the
+    policy to the world model's multi-step rollout/reward FIDELITY. This probe forks that: per eval
+    episode build the initial belief, then compare the predicted discounted return of the ORACLE
+    gesture (privileged ``info["manual_facts"]``, eval-only, never fed to the agent) against
+    ``n_random`` random action sequences of the same length, both scored by the SAME planner
+    objective (``agents.rtfm_mpc._rollout_returns``). Headline = the oracle's percentile among the
+    random ones: ~1.0 = the WM/reward-head DISCRIMINATES the gesture, so the gap is MPC SEARCH
+    (tunable); ~0.5 = it does not, so WM rollout/reward FIDELITY is the real wall. See
+    knowledge/experiments/0044-rtfm-mpc-execution.md.
+    """
+    from world_model.agents.rtfm_mpc import _rollout_returns
+
+    pcts, o_rets, r_rets = [], [], []
+    for s in eval_seeds:
+        env = C.make_recipe_env(ManualMode.CORRECT, length=length, one_shot=one_shot)
+        obs, info = env.reset(seed=int(s))
+        rituals = info["manual_facts"].get("rituals", {})
+        if not rituals:
+            continue
+        gesture = next(iter(rituals.values()))["gesture"]
+        names = env.action_names
+        try:
+            oracle = [names.index(g) for g in gesture]
+        except ValueError:
+            continue
+        h = len(oracle)
+        tok, mask = text_enc.encode([obs["manual"]])
+        state = rssm.initial(1, device)
+        prev_a = torch.full((1,), rssm.no_action, device=device)
+        embed = enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
+        state, _, _ = rssm.obs_step(state, prev_a, embed, tok, mask)
+        oa = torch.tensor(oracle, device=device).unsqueeze(0)  # (1, h)
+        o_ret = float(_rollout_returns(rssm, rew, state, tok, mask, oa, gamma)[0])
+        ra = torch.randint(0, len(names), (n_random, h), device=device)
+        r_ret = _rollout_returns(rssm, rew, state, tok, mask, ra, gamma)
+        pcts.append(float((r_ret < o_ret).float().mean()))
+        o_rets.append(o_ret)
+        r_rets.append(float(r_ret.mean()))
+    n = len(pcts)
+    mean = lambda xs: float(np.mean(xs)) if xs else float("nan")  # noqa: E731
+    return {"pct": mean(pcts), "oracle": mean(o_rets), "random": mean(r_rets), "n": n}
+
+
+@torch.no_grad()
 def _manual_invariance_eval(buffer, registry, rssm, head, args, device) -> dict[str, float]:
     """Burn a belief in over a replay sequence (real manual + obs), then run the manual-invariance
     diagnostic (correct vs shuffled-manual reconstruction). See world_model.models.manual_aux."""
@@ -397,6 +446,9 @@ def main() -> None:
     p.add_argument("--mpc-horizon", type=int, default=5)
     p.add_argument("--mpc-samples", type=int, default=200)
     p.add_argument("--mpc-iters", type=int, default=3)
+    # exp 0044 localizing diagnostic (default off): does the reward head rank the TRUE gesture above
+    # random ones? Forks the exp-0044 wall — MPC-search (oracle pct≈1) vs WM-fidelity (pct≈0.5).
+    p.add_argument("--oracle-probe", action=argparse.BooleanOptionalAction, default=False)
     p.add_argument("--n-train-seeds", type=int, default=400)
     p.add_argument("--n-eval-seeds", type=int, default=60)
     p.add_argument("--free-bits", type=float, default=1.0)
@@ -564,6 +616,24 @@ def main() -> None:
                 f"  MPC correct={rm['CORRECT']:.2f} none={rm['NONE']:.2f} "
                 f"swapped={rm['SWAPPED']:.2f} grounding={rm['grounding']:.2f} "
                 f"swap_follow={rm['swap_follow']:.2f}",
+                flush=True,
+            )
+        if args.oracle_probe and cur_len == args.length:
+            # exp 0044 fork: does the reward head rank the TRUE gesture above random ones?
+            op = oracle_gesture_probe(
+                rssm,
+                rew,
+                enc,
+                text_enc,
+                eval_seeds[: args.n_eval_seeds],
+                cur_len,
+                args.one_shot,
+                device,
+            )
+            print(
+                f"  ORACLE pct={op['pct']:.2f} oracle_ret={op['oracle']:.3f} "
+                f"rand_ret={op['random']:.3f} n={op['n']} "
+                f"(pct~1 = ranks true gesture = MPC-search; ~0.5 = WM-fidelity wall)",
                 flush=True,
             )
         if manual_aux_head is not None:
