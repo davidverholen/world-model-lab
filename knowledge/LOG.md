@@ -2,6 +2,39 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] STATE OF THE NIGHT | rung-4 reading-to-learn-dynamics: DEMONSTRATED (genuine) + swap_follow strengthening PARKED
+
+**Headline: first genuine reading-to-learn-dynamics on this stack.** From the exp-0035 sparse-reward
+ignition wall, the autonomous loop went: HO-0007 (crafter-rtfm shipped dense reading-gated shaping,
+`reading_shaping_coef`) → exp0036 IGNITES genuine reading (3/4 seeds correct≫none AND swapped≪correct
+on held-out, no LRS-brittleness shortcut; skill persists at coef=0). HO-0006 + HO-0007 both ACCEPTED.
+
+**Then a 4-experiment strengthening investigation of the one weakness — swap_follow only ~0.25
+(reads enough to be disrupted by a wrong manual, but doesn't reliably EXECUTE the displayed gesture):**
+- exp0037 (2× training): NULL — not undertraining.
+- exp0038/0039 (Dynalang masked-manual auxiliary, coef 1 & 3; new code `manual_aux.py`, anti-baking
+  `deter_noctx` + invariance diagnostic): the aux GROUNDS the WM (inv_ratio 0.87→1.1–1.4, all seeds
+  ground, worst seed fixed) but swap_follow stays flat → bottleneck is NOT WM reading.
+- exp0040 (actor-conditioning, §6.2 fallback; new code `ConditionedActor`): does NOT lift swap_follow
+  (mean ~0.18, high variance, 2 seeds collapse, 1 seed best-ever 0.40); no baking.
+
+**Diagnosis (3 architectural levers exhausted → it's the OBJECTIVE):** swap_follow ~0.25–0.40 is
+bounded by correct-mode reward training, where "follow the displayed manual" ≡ "do the true recipe"
+(the reward can't separate them; they diverge only at the swap). Reward-RL has no obedience pressure;
+a scripted reader hits 1.0 because it's hardwired to obey. So this is a task/objective question, not
+a model defect. **PARKED per the stall rule.** Maintainer call (see experiments/0040 §Decision):
+(1) partial-anneal the shaping (retain follow-displayed pressure), (2) train on mixed/swapped modes
+(needs a crafter-rtfm handoff), or (3) accept ~0.3 as "partial grounding," declare the reading thesis
+demonstrated, and move to length-2 / next rung. **My recommendation: (3)** — the reading result is
+secured; swap_follow→1.0 is a separate instruction-OBEDIENCE question.
+
+**Committed this session:** wm 51199b3 (exp0034 base-reward fix + housekeeping), 4696a71 (exp0036 +
+Dynalang ingest), 0b72bcd (aux infra), 209e19b (exp0037/0038), 43a77c5 (actor-cond infra), + this
+milestone; commons 93385fb/2edaa76 (HO-0006/0007 accepted). New infra (aux, actor-cond) is flag-gated
+OFF — exp0036 recipe is the default. Also: lit-gate (RTFM/Messenger/Dynalang/LRS-brittleness queued;
+Dynalang ingested method-depth). Cross-domain subagent autonomous-mode idea recorded to memory.
+**Nothing running at handoff; GPU idle.** Next decision is the maintainer's (objective fork above).
+
 ## [2026-06-15] curation | exp 0038: masked-manual aux grounds the WM, but swap_follow is ACTOR-bound
 
 Two swap_follow-strengthening levers (exp page 0038). exp0037 (2× training, 40 rounds): NULL —
