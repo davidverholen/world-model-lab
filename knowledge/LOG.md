@@ -2,6 +2,25 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-16] experiment | exp0048 validated-reading PHASE-1 POSITIVE — first lever to move length-2 swap_follow off zero
+
+The validated-reading intrinsic reward WORKS at 1 seed. Phase-1 coef sweep (5×1, fixed seed): the
+sweet-spot VR arms (α=0.1, 0.3) lift held-out length-2 `swap_follow` from a flat 0.00 (every prior
+experiment 0042–0047) to **0.16–0.18** with `swapped`=0.00 (clean anti-baking), while the α=0 control
+stays dead-zero. Coherent across FIVE metrics on the same arms: swap_follow↑, events 2.8→7.4 (~2.6×
+control, the flywheel turning), oracle_pct→0.92 (beats the entire 0044–0047 calibration thread that
+broke trying to push it there directly), oracle_ret ~2×, length-1 swap_follow ~2.6×. Clean inverted-U
+dose–response (α=1.0 dark-rooms — highest raw reward, task collapses), and the effect GREW over the
+length-2 phase (c03 0.10→0.18, peaks 0.25) rather than fading. The right lever (reward validated
+reading) did gracefully what the wrong levers (direct reward calibration) broke themselves on; the
+exp-0040 objective gap is addressable by changing the OBJECTIVE, not the architecture. Reality-as-judge
+keeps it anti-baking by construction. CAVEAT: 1 seed — the cross-arm dose–response can't be seed-luck
+(shared seed) but the trajectory could be a favourable draw → 4-seed control at α=0.3 (`runs/exp0048ctl`)
+is RUNNING; phase-1 = candidate until it lands. Wrote 0048 Result + compare plots (swap-follow/events/
+oracle), pre-registered [[0049-rtfm-sustained-vr]] (push past the plateau: α-ridge 0.2–0.5 + shaping
+floor), captured the [[mentored-learning-loop]] north-star design note. INDEX updated. Dashboards:
+sweep on :8000, live control on :8001.
+
 ## [2026-06-15] milestone | exp0047 NEGATIVE closes calibration thread → exp0048 validated-reading built + dispatched
 
 exp0047 (conservative reward head, CROP/CQL) concluded NEGATIVE: 6-coef sweep showed monotonic
