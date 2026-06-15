@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-15
@@ -56,7 +56,7 @@ execution failure; inv_ratio≈1 ⇒ the WM doesn't compose the 2-step reading e
 
 → next: exp 0043 (localizing diagnostic). Then the fix targets EXECUTION — the milestone's later
 pillars (goal-conditioning, hierarchy/[[hierarchy-and-credit]]) — which are bigger architectural
-bets for the maintainer to weigh (and echo Dreamer-4's per-subtask conditioning for the deep tree).
+bets to weigh (and echo Dreamer-4's per-subtask conditioning for the deep tree).
 
 ## Reproduction
 

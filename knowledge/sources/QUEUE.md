@@ -310,7 +310,7 @@ verify at ingest.
       class) reading-to-learn-DYNAMICS env. CrafText covers rich+instructions; RTFM covers
       dynamics+toy. The intersection (rich + dynamics) is the candidate gap → "Crafter-with-manuals"
       DEVELOPMENT testbed (referent-swap + tutorial-reveals-hidden-recipe), real Minecraft for DEPLOY.
-- SPEC (maintainer, 2026-06-14): = "CrafText's rich world + RTFM's MANDATORY reading + PyTorch",
+- SPEC (2026-06-14): = "CrafText's rich world + RTFM's MANDATORY reading + PyTorch",
       built as a manual-layer ON our existing CrafterEnv (not a new engine). The HARD part is the env
       design, not the plumbing: make reading mandatory by per-episode randomizing the crafting graph /
       referent map (RL can't discover, text can reveal) WITHOUT making it unsolvable. Verification =
@@ -347,7 +347,7 @@ verify at ingest.
 - [ ] arxiv:2506.09270 Uncertainty Prioritized Experience Replay (RLC 2025)
 - [ ] arxiv:2410.18082 Prioritized Generative Replay · arxiv:2602.14351 WIMLE
       — NOTE the gap that keeps 2b novel: all weight by the GENERATOR's
-      self-confidence; reality-corroborated cross-source priors (maintainer's gate)
+      self-confidence; reality-corroborated cross-source priors (the corroboration gate)
       appear uncovered
 ### Self-generated hypotheses / directed exploration
 - [ ] arxiv:2005.05960 Plan2Explore (id confirmed) — ensemble-disagreement
@@ -419,7 +419,7 @@ diagnosis. New sources to queue:
 - (already queued) 2307.03486 Achievement Distillation — PROMOTE to ingest if the next fork is
   the actor-side capstone; 2305.00508 structured-exploration is its sibling.
 
-## Hierarchy / subgoal emergence (maintainer's credit-assignment brainstorm 2026-06-13; ids to verify)
+## Hierarchy / subgoal emergence (credit-assignment brainstorm 2026-06-13; ids to verify)
 - [x] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
       noted under temporal-abstraction) — INGESTED 2026-06-15 → papers/director-2022.md
 - [ ] Vezhnevets et al. 2017, FeUdal Networks (FuN) — the feudal manager-worker

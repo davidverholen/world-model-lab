@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2301.08243, arxiv:2404.08471, arxiv:2506.09985, arxiv:2511.08544, openreview:lecun-path]
 verified: false

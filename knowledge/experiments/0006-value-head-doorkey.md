@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2310.16828, arxiv:2301.04104]
 verified: true

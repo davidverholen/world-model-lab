@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2301.04104]
 verified: true
@@ -68,7 +68,7 @@ The remaining ceiling (~3–6 achievements, shallow/mid tree) is now the **compu
 question, not an exploitation bug — we are ~10× under-trained vs DreamerV3's Crafter budget.
 → next: the scaling-slope experiment (does 2×/4× compute climb the tree? exp 0026).
 
-**Process win:** `behavior_report` (built from the maintainer's "it doesn't move"
+**Process win:** `behavior_report` (built from the "it doesn't move"
 observation) was the decisive metric. By eval_reward alone, 0025 s0 (2.35) ≈ 0024 s0 (2.47)
 — *flat*. The real win is invisible in the score and obvious in the behavior: all seeds now
 *move and craft* instead of farming saplings in place. Watching + the gate, not the number.

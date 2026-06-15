@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2306.15934]
 verified: true

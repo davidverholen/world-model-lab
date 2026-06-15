@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2411.04983]
 verified: true
@@ -56,7 +56,7 @@ because the **reward exploitation is unfixed** (imagined_return 8–22) and tips
 stationary collapse. ⇒ **both levers matter**: patch tokens for navigation, the two-hot
 reward head (exp 0025) for stability. Next experiment combines them (`cls+patch` + bounded
 reward), 3 seeds to measure the variance. Process win: the **behavior QA gate caught the
-s0/s1 split that aggregate eval-reward completely masked** — exactly why the maintainer's "it doesn't
+s0/s1 split that aggregate eval-reward completely masked** — exactly why the "it doesn't
 move" observation became a standing gate.
 
 ## Links

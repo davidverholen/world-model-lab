@@ -18,7 +18,7 @@ One iteration (repeat until a stop condition):
 
 1. **Harvest**: collect finished runs (remote logs/monitors), record results +
    lessons into the experiment page exactly as observed (negatives included).
-2. **Literature gate (MANDATORY, maintainer 2026-06-12)**: for every new learning —
+2. **Literature gate (MANDATORY, 2026-06-12)**: for every new learning —
    *especially every specific failure* — run a targeted search BEFORE designing
    the next iteration: WebSearch for the phenomenon + the hitting-a-wall protocol
    (scout skill: OpenAlex/S2 citation walk from the nearest anchor paper) when the
@@ -46,11 +46,11 @@ One iteration (repeat until a stop condition):
   and switch to the next queued thread (retention -> ignition/exploration ->
   text staircase prep) or pause with a summary for the maintainer.
 - **Honesty**: counter-outcomes recorded with the same care as wins; no frontier
-  claims without the deep-search protocol; owner:human pages only get proposals.
+  claims without the deep-search protocol; decisions/schema/results only get proposals.
 - **Report**: each milestone commit message is the journal; on session end leave
   a "state of the night" LOG entry: threads advanced, results, what's running,
   recommended next decision for the maintainer.
-- **PAID-RESOURCE IMPACT flag (maintainer, 2026-06-12)**: whenever a planned sweep or
+- **PAID-RESOURCE IMPACT flag (2026-06-12)**: whenever a planned sweep or
   run would gain >~3x wall-clock from rented GPUs (vast.ai), or env throughput
   becomes the bottleneck (Craftax/ADR-0001 revisit trigger), flag it explicitly
   in the report with a cost estimate — spend decisions stay the maintainer's.

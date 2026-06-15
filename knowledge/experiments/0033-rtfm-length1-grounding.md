@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-14
@@ -38,7 +38,7 @@ read the text — a swapped manual changes nothing about its behaviour.
 ## Lesson
 
 **The swap test worked — it caught a non-reading shortcut that `correct − none` could not.** This
-is the methodology payoff of insisting on swap-following as the success metric (maintainer, rung-4
+is the methodology payoff of insisting on swap-following as the success metric (rung-4
 design §1/§4): `correct − none = 0.35` screamed "grounding!", but `swap_follow = 0` revealed the
 agent never reads content. Had we used reward-gap alone we would have declared a false win. The
 anti-baking design did its job.

@@ -1,6 +1,6 @@
 """Behavioral QA gate — play a trained Crafter agent and flag DEGENERATE policies that
 eval-reward alone misses (stationary agent, action-collapse). Operationalizes the exp 0023
-diagnostic (maintainer: "the agent never moves; it spams mk_iron_sword") so every future run is
+diagnostic ("the agent never moves; it spams mk_iron_sword") so every future run is
 auto-checked instead of needing a human to watch a GIF. Telemetry > vision here: Crafter's
 egocentric render hides movement in pixels, but info['player_pos'] / the action stream make it
 exact and cheap.

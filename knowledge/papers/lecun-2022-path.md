@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [openreview:lecun-path]
 verified: true

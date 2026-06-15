@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2306.15934, arxiv:2301.04104]
 verified: true
@@ -91,7 +91,7 @@ not the *actor's* propensity to pursue them. So the depth plateau has now surviv
 probe (0029) that cleared the encoder/WM. Every thread converges on **actor-side
 exploration/credit-assignment** as the real frontier.
 
-CAVEAT being checked: the maintainer flagged the Crafter leaderboard — Curious Replay is the
+CAVEAT being checked: the Crafter leaderboard was flagged — Curious Replay is the
 published *champion*, yet here it is NULL for depth. Resolving that tension (does the champion
 itself actually reach the deep tree, or does ALL of Crafter SOTA plateau at the mid tier?) is a
 scout task in flight — if even SOTA leaves stone_pickaxe→iron→diamond near-0%, our "stuck" is

@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2509.24527]
 verified: true
@@ -239,7 +239,7 @@ clusters for training; it is about 40× slower than DreamerV3 at inference.
 
 ---
 
-## Strategic analysis for our program (flag for the maintainer)
+## Strategic analysis for our program
 
 ### (a) Should we migrate from RSSM to a transformer WM for rung-3/Crafter?
 

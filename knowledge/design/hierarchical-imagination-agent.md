@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: false
 last_reviewed: 2026-06-15
@@ -8,7 +8,7 @@ last_reviewed: 2026-06-15
 
 # Hierarchical imagination agent — dual-process planning over the world model
 
-**Status: draft, for the maintainer's review.** The agent-side design for the next major capability
+**Status: draft, for review.** The agent-side design for the next major capability
 after reading-to-learn-dynamics. Motivated by [[0043-rtfm-execution-wall]]: the world model *reads*
 a multi-step recipe but the flat reactive actor *cannot execute* it — the same bottleneck as the
 rung-3 Crafter depth plateau (exps 0026–0031, actor/discovery-bound). Targets the directable-

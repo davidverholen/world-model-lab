@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: []
 verified: false   # canonical classics from training knowledge; verify ids on ingest

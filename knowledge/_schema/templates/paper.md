@@ -1,6 +1,6 @@
 ---
 status: stub
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:XXXX.XXXXX]
 verified: false

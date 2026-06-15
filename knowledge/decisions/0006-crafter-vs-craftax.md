@@ -1,6 +1,6 @@
 ---
 status: current
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2402.16801, arxiv:2109.06780]
 verified: true
@@ -9,7 +9,7 @@ last_reviewed: 2026-06-13
 
 # 0006: Crafter (original) over Craftax for rung 3
 
-**Status:** accepted (2026-06-13, maintainer)
+**Status:** accepted (2026-06-13)
 
 ## Context
 

@@ -1,13 +1,13 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2301.04104, arxiv:1811.04551]
 verified: true
 last_reviewed: 2026-06-13
 ---
 
-# 0019: Stochastic latents (RSSM) — the exploitation fix [maintainer: invest now]
+# 0019: Stochastic latents (RSSM) — the exploitation fix [decision: invest now]
 
 ## Hypothesis
 
@@ -18,7 +18,7 @@ lineage) fixes this: imagination samples z from a prior p(z|h) trained (via KL) 
 match the posterior q(z|h,obs) over real data, so imagined rollouts stay near the
 real distribution and there is no single exploitable trajectory. Expect:
 imagined_return ≤ ~1.0 AND eval rises off 0, approaching the planner (~25-35%).
-The maintainer chose this over the DAgger shortcut ("invest now") — RSSM is needed for Crafter
+RSSM was chosen over the DAgger shortcut ("invest now") — RSSM is needed for Crafter
 regardless. Build incrementally (module → train loop → agents → smoke → dispatch),
 not big-bang, given it's the largest architecture change in the project.
 

@@ -21,7 +21,7 @@ operated under the context-architecture model from the whitepaper — see
 | `papers/` | One page per ingested paper | `<firstauthor-or-name>-<year>.md` |
 | `labs/` | Research groups and their agendas | `<lab-name>.md` |
 | `environments/` | RL environments / benchmarks we can train in | `<env-name>.md` |
-| `decisions/` | ADRs — human-owned decisions with rationale | `NNNN-<slug>.md`, numbered |
+| `decisions/` | ADRs — frozen project decisions with rationale | `NNNN-<slug>.md`, numbered |
 | `experiments/` | One page per experiment: hypothesis → setup → result → lesson | `NNNN-<slug>.md` |
 | `sources/` | Raw-source registry (`SOURCES.md`) + intake queue (`QUEUE.md`) | — |
 | `INDEX.md` | Catalog of every page with one-line summary | — |
@@ -34,7 +34,7 @@ Every wiki page starts with YAML frontmatter:
 ```yaml
 ---
 status: stub | draft | current | stale | deprecated
-owner: human | agent          # who may change the *meaning* of this page
+owner: world-model | crafter-rtfm   # the domain that owns this page (in this repo: always world-model)
 scope: local | shared          # local = this project only; shared = reusable beyond it
 sources: [arxiv:2506.09985]    # verified source ids from sources/SOURCES.md
 verified: true | false         # were the key claims checked against the source itself?
@@ -61,8 +61,12 @@ Body sections (in order, omit what's empty):
 
 ## Authority rules (the bounded-context part)
 
-- `decisions/` and anything `owner: human` — the agent may **propose** edits (as draft
-  or PR), never silently change meaning. ADRs are immutable once accepted; supersede instead.
+Authority is anchored on page **type** and **status** (not on an authorship role):
+
+- `decisions/` (ADRs) — the agent may **propose** edits (as draft or PR), never silently
+  change meaning. ADRs are immutable once accepted; supersede instead.
+- `design/` and `concepts/` meaning — change via an explicit curation step recorded in
+  LOG.md, not a silent rewrite; a `current` page stays authoritative until then.
 - `experiments/` results — facts; the agent records, never retro-edits outcomes.
 - A page with `verified: false` or `status: stub/stale` must **not** be cited as
   authority in code comments, decisions, or other pages' load-bearing claims.

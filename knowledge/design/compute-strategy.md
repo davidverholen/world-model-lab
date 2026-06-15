@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: []
 verified: false
@@ -65,7 +65,7 @@ step (kernel-launch latency dominates; the GPU idles either way). Consequences:
   projected > **~1 h** on the laptop (lowered from 4 h after the thermal
   measurement — long runs throttle AND cook the chassis).
 
-## Compute efficiency as the lab's strategy (maintainer, 2026-06-13)
+## Compute efficiency as the lab's strategy (2026-06-13)
 
 Stated principle, generalized from the architecture-testing tier ladder
 ([[hierarchy-and-credit]]) and a DeepMind talk's claim that for AGI compute
@@ -107,7 +107,7 @@ A standard UTD run (~30 min) breaks down as:
 | 4% | eval (full planner) | |
 | **0.4%** | env stepping | **a compiled/JAX MiniGrid would save ~nothing — question closed** |
 
-Acceleration verdict (maintainer's "reasonable effort only"): no big easy wins; we're
+Acceleration verdict ("reasonable effort only"): no big easy wins; we're
 already fleet-efficient via 6-wide parallelism (launch-bound runs overlap, GPU ~85%).
 Measured levers on the training step: TF32 1.02× (enabled anyway, free), bf16 1.23×,
 torch.compile reduce-overhead 1.33× **but CUDA-graph capture conflicts with our
@@ -116,7 +116,7 @@ on by default + `--amp` (bf16) opt-in flag (OFF by default to keep fp32 retentio
 results comparable; use for long actor/Crafter runs). **Deferred:** torch.compile
 until the actor work brings bigger models and drops the reset/freeze pattern.
 
-## Crafter-phase rental mapping (asked by the maintainer 2026-06-12)
+## Crafter-phase rental mapping (2026-06-12)
 
 - Actor *development* (MiniGrid-scale iterations): rental buys ~nothing
   (measured latency-bound regime; bottleneck is the redesign loop).
@@ -127,7 +127,7 @@ until the actor work brings bigger models and drops the reset/freeze pattern.
   (autonomous-mode guardrail).
 - Single long runs: 5090 ≈ 2–2.5× the desktop GPU (~$3/run) — nice, not strategic.
 - If the Python env loop becomes the wall: Craftax (JAX, env-on-GPU, ~100×)
-  is the radical option — would reopen ADR 0001 (the maintainer's call). Decision shape
+  is the radical option — would reopen ADR 0001 (decision pending). Decision shape
   pre-agreed (2026-06-12): NO framework-abstraction layer (JAX's value — fused
   jit/vmap/scan incl. the env — is exactly what abstractions can't express;
   meta-framework maintenance would displace research). Instead: hybrid dlpack
@@ -149,7 +149,7 @@ until the actor work brings bigger models and drops the reset/freeze pattern.
   and Minecraft (Java) can never fuse, so the hybrid IS the ladder's lasting
   pattern; a full port pays only under massive Craftax-native experiment volume.
 
-## JAX rewrite — consolidated revisit triggers (maintainer asked 2026-06-13; extends [[0001-pytorch-over-jax]])
+## JAX rewrite — consolidated revisit triggers (2026-06-13; extends [[0001-pytorch-over-jax]])
 
 Standing answer to "should we ever rewrite to JAX?": **not now, and the advantage
 SHRINKS as we climb.** JAX's one decisive lever is end-to-end on-GPU parallel-env

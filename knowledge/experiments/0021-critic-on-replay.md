@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2301.04104, arxiv:1906.08253]
 verified: true
@@ -77,7 +77,7 @@ imagined optimism → slower bootstrap (ignition delayed) but NOT prevented, and
 calibrated runs climb at the end where inflated runs collapse. For Crafter — denser
 rewards, deep tree, where value inflation would be far more damaging — calibrated value
 is what we want, so **critic-on-replay is kept as the recipe default** (`--repval` 0.0→0.3).
-DECISION (maintainer): bank the MiniGrid imagination loop as good-enough-and-now-calibrated;
+DECISION: bank the MiniGrid imagination loop as good-enough-and-now-calibrated;
 don't over-polish a stepping stone (the marginal DoorKey seed isn't our bottleneck);
 move to recipe-hardening → Crafter.
 

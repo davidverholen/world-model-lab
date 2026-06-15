@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-15
@@ -70,7 +70,7 @@ component — not a stalled repeat. Candidate next steps, in cost order: (1) **s
 cheap disambiguator: does a higher inv_ratio move swap_follow at all? (exp0039); (2) **actor-
 conditioning** (design §6.2) — give the actor direct access to M (targets the execution bottleneck;
 re-verify swapped≪correct on held-out for baking); (3) if both fail, swap_follow ~0.25 may be a
-fundamental limit of correct-mode reward training → a training-distribution change or a maintainer
+fundamental limit of correct-mode reward training → a training-distribution change or a
 research-direction call (park with this writeup).
 
 ## Reproduction

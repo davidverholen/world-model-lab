@@ -46,8 +46,7 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
 1. **Start from `knowledge/INDEX.md`**; load only pages relevant to the task
    (minimum needed context — never bulk-load the wiki).
 2. **Respect frontmatter**: `status: stub|stale` or `verified: false` pages must not
-   be cited as authority. `owner: human` pages (all of `decisions/`, schema, results
-   sections) — propose changes, don't silently rewrite meaning.
+   be cited as authority. `decisions/`, the schema, and experiment results — propose changes, don't silently rewrite meaning.
 3. **Unread material goes to `knowledge/sources/QUEUE.md`**, never directly into wiki
    pages. Ingestion = `/ingest-source`.
 4. **Route learnings before ending a session** that produced any: experiment outcomes →
@@ -75,7 +74,7 @@ model. Full conventions: `knowledge/_schema/SCHEMA.md`; process:
 ## Model delegation
 
 When spawning subagents, route by complexity (standing authorization from the maintainer):
-research design, training-failure debugging, and `owner: human` meaning stay in the
+research design, training-failure debugging, and meaning-bearing KB changes (decisions, schema, results) stay in the
 main loop (Fable); substantial implementation subagents and the **reviewer** agent
 (research-code diff review at milestones) → **opus**; structured
 KB work (ingest, lint, scout, experiment write-ups) → **sonnet** (curator and scout

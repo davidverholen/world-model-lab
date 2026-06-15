@@ -3,7 +3,7 @@
 Heavyweight artifacts for future rungs — registered like sources (verify, then
 retain by tier). Retained files live OUTSIDE the repo on the desktop
 (`~/minecraft-assets/`); this registry is the map. Rationale: research blob links
-and YouTube corpora rot; retention is availability insurance (maintainer, 2026-06-12).
+and YouTube corpora rot; retention is availability insurance (2026-06-12).
 
 ## Retention tiers
 

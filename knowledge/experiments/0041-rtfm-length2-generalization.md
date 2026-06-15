@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-15
@@ -43,9 +43,9 @@ it, and reward *shaping* of the kind we used has no precedent as the primary ign
 their harder settings. exp0041 is the empirical confirmation: shaping ignites length-1 but stalls at
 length-2. The principled next step is a **length curriculum** (length-1 → length-2, the agent
 carries the length-1 reading skill into the harder setting) — but that is a new design direction
-worth the maintainer's sign-off, not another autonomous lever.
+worth human sign-off, not another autonomous lever.
 
-→ next (maintainer's call): a length-1→length-2 curriculum (lit-backed: RTFM/Messenger), or treat
+→ next (open call): a length-1→length-2 curriculum (lit-backed: RTFM/Messenger), or treat
 length-1 as the demonstrated rung-4 result and consolidate before scaling.
 
 ## Reproduction

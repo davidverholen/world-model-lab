@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2109.06780]
 verified: false
@@ -77,7 +77,7 @@ updates). First local-GPU run (rounds 0→1): eval_reward 0.10→**1.10**, achie
 plain-MSE critic + critic-on-replay (β_repval 0.3). This is model exploitation resurfacing
 (cf. 0017/0018) — a long run now would just exploit the model.
 
-## Why Crafter onboards easier than DoorKey — and what the plateau really is (maintainer, 2026-06-13)
+## Why Crafter onboards easier than DoorKey — and what the plateau really is (2026-06-13)
 
 Crafter feels far easier than the MiniGrid DoorKey key→door→goal struggle. Honest decomposition,
 biggest first: (1) **reward density** — Crafter has a built-in 22-achievement reward curriculum
@@ -88,7 +88,7 @@ half the DoorKey fight, and gives navigation-grade features (exp 0024); (3) **ou
 improvements** (RSSM/critic-on-replay/two-hot) — necessary to *prevent failures*, but not the
 main "ease" driver.
 
-**The plateau is NOT a fundamental wall (the maintainer's correction to an over-dramatic "DoorKey returns"
+**The plateau is NOT a fundamental wall (correcting an over-dramatic "DoorKey returns"
 framing).** Three layers: (a) the *current* ~3-achievement plateau is the *exploitation bug*
 (stationary / drink-at-cap / mk_iron_sword), an artificial cap → exp 0025; (b) the *mid-tree*
 (stone→iron→crafting) is largely **compute scaling + tuning** — DreamerV3 reaches it with ~1M

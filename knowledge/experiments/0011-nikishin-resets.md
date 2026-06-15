@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2205.07802]
 verified: true
@@ -67,7 +67,7 @@ uint8 replay held 6-wide RAM at ~3.7 GB/process (no paging; ~45–55 min batches
    bar unchanged: no >20pp crash + mean ≥55%.
 4. **Horizon-rule status — CORRECTED 2026-06-12**: the original "no published
    work" claim was wrong; it was made from WebSearch only. The hitting-a-wall
-   protocol (S2 citation walk of Nikishin, prompted by the maintainer) found
+   protocol (S2 citation walk of Nikishin) found
    [[qiao-model-primacy-2023]] (arXiv:2310.15017): independently confirms our
    "agent resets harm MBRL" result, locates MBRL primacy bias in the *world
    model*, and shows world-model resets help ONLY at high model-UTD — ours is

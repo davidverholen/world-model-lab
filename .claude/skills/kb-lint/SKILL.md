@@ -23,5 +23,5 @@ Follow `knowledge/_schema/PROCESS.md` §3 (authoritative). Sweep all of `knowled
 9. SOURCES.md ids all used somewhere; QUEUE.md items not cited by pages.
 
 Output: fix what is mechanical (links, INDEX); list what needs judgment. Lint may
-downgrade status; only the human upgrades `owner: human` pages. Finish with a LOG.md
+downgrade status; only the human upgrades pages to `current`. Finish with a LOG.md
 entry: `## [date] lint | <n> issues, <m> fixed`.

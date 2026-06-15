@@ -1,6 +1,6 @@
 ---
 status: current
-owner: human
+owner: world-model
 scope: shared
 sources: [pdf:context-arch-v1, web:karpathy-llm-wiki]
 verified: true

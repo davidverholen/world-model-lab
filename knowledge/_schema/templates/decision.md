@@ -1,6 +1,6 @@
 ---
 status: current        # accepted ADRs are immutable; supersede instead of editing
-owner: human
+owner: world-model
 scope: local
 sources: []
 verified: true

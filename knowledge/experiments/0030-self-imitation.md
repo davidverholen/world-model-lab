@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2307.03486, arxiv:1806.05635]
 verified: true
@@ -87,7 +87,7 @@ compute (0026/0027 ruled out) and self-imitation don't close. The standing instr
 open-source range; if we cannot, think about the tutorial-driven method") has reached its
 **if-we-cannot** branch.
 
-→ fork (maintainer call): (a) one more for scientific closure — exp 0031 = the faithful AD
+→ fork (open call): (a) one more for scientific closure — exp 0031 = the faithful AD
 `L_pred` contrastive auxiliary (the from-scratch SOTA's mechanism; *but* 0029 showed
 representation isn't our bottleneck, so expected value is modest), OR (b) declare rung-3
 "consistent non-degenerate Crafter agent achieved; depth is the known-hard frontier" and pivot

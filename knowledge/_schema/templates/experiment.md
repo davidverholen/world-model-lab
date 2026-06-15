@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human          # results are facts; agent records, human owns interpretation
+owner: world-model       # results are facts; recorded, not retro-edited
 scope: local
 sources: []
 verified: true

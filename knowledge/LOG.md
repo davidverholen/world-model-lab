@@ -2,11 +2,29 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | schema change: `owner:` is now a domain; discussion de-attributed
+
+Two schema/voice changes (no research content altered). (1) The `owner:` frontmatter
+field now names the owning **domain** (`world-model` | `crafter-rtfm`), not an
+authorship role — everything in this repo is `owner: world-model` (88 pages + 4
+templates). The old `owner: human` / `owner: agent` distinction is gone; the
+edit-protection it used to gate is re-anchored on page **type/status** instead:
+`decisions/` (ADRs, immutable once accepted) and experiment **results** (facts) are
+propose-only; `current` design/concept meaning changes via a logged curation step.
+SCHEMA.md authority rules, PROCESS.md, CLAUDE.md, the curator/ingest/kb-lint/
+research-cycle/context-architecture skill+agent docs, and inline LOG references all
+updated to match. (2) Discussion in the documents is now framed as **project thoughts**,
+not attributed to a person/role: ~190 "the maintainer"/"(maintainer)" attributions
+across LOG.md and the wiki bodies were de-attributed (decisions stated as the project's;
+"(maintainer)" credit tags dropped). Genuinely operational human-in-the-loop references
+(delegation authorization, autonomous-mode go/spend guardrails) are kept. Verify: 38
+tests pass, ruff clean, publish_check clean.
+
 ## [2026-06-15] curation | design doc: hierarchical imagination agent (dual-process planning) — drafted from a design conversation
 
-New `design/hierarchical-imagination-agent.md` (draft, owner:human — for maintainer review). The
+New `design/hierarchical-imagination-agent.md` (draft — proposed for review). The
 agent-side design for the next major capability after reading, targeting the multi-step-EXECUTION wall
-(exp0043) and ADR-0007. Architecture co-designed with the maintainer: **System-1 reactive default**
+(exp0043) and ADR-0007. Architecture co-designed in a design session: **System-1 reactive default**
 (amortized policy, automatic, no language) / **System-2 deliberate fallback** (recursive read-grounded
 decomposition + imagination/MPC, sketched in language) / **compilation** (System-2 distills into
 System-1 — "done 100× → automatic", reuses exp0016 actor-distillation) / **confidence-gated
@@ -59,7 +77,7 @@ bottleneck as the rung-3 Crafter depth plateau (exps 0026–0031: actor/discover
 perception) — plain Crafter stalls on the deep tech tree, rtfm stalls on the 2-step gesture; both are
 multi-step-execution / credit-assignment / HIERARCHY. The next major capability (hierarchy / temporal
 abstraction / goal-conditioned credit assignment) pays off on BOTH fronts at once; echoes Dreamer-4's
-per-subtask staging. PARK rtfm length-scaling (reading demonstrated). Next = maintainer strategic call
+per-subtask staging. PARK rtfm length-scaling (reading demonstrated). Next = strategic call
 on the execution/hierarchy bet + ADR-0007 ratification (this is its later-pillar work).
 
 ## [2026-06-15] curation | exp 0042: length curriculum fails — the wall is multi-step EXECUTION, not reading
@@ -74,16 +92,16 @@ swap_follow ~0.25 even at length-1, and a 2-step gesture won't ignite cold OR wa
 path (Crafter deep tree is all multi-step). exp0042 had aux OFF so no inv_ratio at length-2 → can't
 yet tell reading-compositionality vs execution apart. Next: exp0043 (length-2 curriculum + aux ON) to
 localize the wall (inv_ratio>1 + correct≈0 ⇒ pure execution failure). Then the fix targets execution
-= the milestone's later pillars (goal-conditioning, hierarchy) — bigger bets, maintainer's call.
+= the milestone's later pillars (goal-conditioning, hierarchy) — bigger bets (open).
 
-## [2026-06-15] curation | public-ready pass: owned-GPU model names and LinkedIn URL removed
+## [2026-06-15] curation | public-ready pass: owned-GPU model names and personal profile URL removed
 
 Mechanical depersonalization pass (no research content changed). Owned GPU model names
 genericized in all remaining tracked files → "laptop GPU" / "desktop GPU" (capacity
 numbers preserved where inline). The special-case 2026-06-14 LOG entry's parenthetical
-model names were reworded to "(owned laptop/desktop GPUs)". LinkedIn URL in
+model names were reworded to "(owned laptop/desktop GPUs)". The personal profile URL in
 sources/SOURCES.md replaced with the public GitHub repo URL for
-the context-architecture whitepaper. Historical LOG narrative "LinkedIn profile" phrasing
+the context-architecture whitepaper. Historical LOG narrative "profile page" phrasing
 neutralized to "the author's profile page". Rental/market GPUs (4090, 5090, H100, 3090,
 vast.ai) left untouched throughout. 14 files changed; `last_reviewed` dates not bumped
 (mechanical edits, not content re-review).
@@ -104,7 +122,7 @@ knowledge/experiments/0019-stochastic-latents.md,
 
 ## [2026-06-15] ingest | Dreamer 4: Training Agents Inside of Scalable World Models (Hafner, Yan, Lillicrap, 2025) → papers/dreamer4-2025.md (method depth)
 
-Trigger: maintainer priority (direct successor to DreamerV3; transformer WM, shortcut forcing,
+Trigger: high priority (direct successor to DreamerV3; transformer WM, shortcut forcing,
 offline imagination RL, and Minecraft diamonds all bear on our rung-3 decision and ADR-0007).
 Source arxiv:2509.24527 already verified + registered in SOURCES.md (2026-06-12). Primary source:
 TalkRL podcast transcript with Danijar Hafner (direct author); secondary: Harold Benoit technical
@@ -141,7 +159,7 @@ Key findings for our program:
 
 ## [2026-06-15] scout | DeepMind world-model landscape 2025-2026: 4 verified items, 3 queued
 
-Scout triggered by maintainer seeing a possible breakthrough video. Searched the Genie family,
+Scout triggered by a possible breakthrough video (noted, pending verification). Searched the Genie family,
 Dreamer line, and adjacent players. Findings:
 
 - Dreamer 4 (arxiv:2509.24527) — already in SOURCES.md (added 2026-06-12). REAL paper, Hafner+Yan+
@@ -155,12 +173,12 @@ Dreamer line, and adjacent players. Findings:
   Gemini agent + Genie 3 worlds + self-generated task/reward loop. Closest published
   instantiation of "agent trains in dreamed worlds" thesis, but at pixel not latent level.
 
-No "Genie 4" or other 2026 DeepMind WM announcement found. The likely video the maintainer saw was
+No "Genie 4" or other 2026 DeepMind WM announcement found. The likely video noted was
 either Genie 3 (Aug 2025) or the SIMA 2 + Genie 3 demo. See final report for substance breakdown.
 
 ## [2026-06-15] curation | ADR 0007 PROPOSED: Crafter mastery = "directable competence" (rung-3 exit milestone)
 
-From a design conversation with the maintainer. Set the major milestone: master Crafter (the
+From a design conversation. Set the major milestone: master Crafter (the
 purpose-built 2D env) before advancing to 3D/Phase 4 — no-rung-skipping (ADR-0003). "Finish" defined
 as DIRECTABLE COMPETENCE: reliably reach ANY target achievement on demand (per-achievement
 success-rate across all 22, deep tree included), NOT aggregate score (gameable by easy-achievement
@@ -170,8 +188,8 @@ NOT yet built) + imagination (plan through the grounded WM) → execution. Surpa
 deep tree IS the thesis ablation (Dreamer has no reading). Two tiers: WE set goal = directable
 (measurable milestone); ACTOR sets goal = autonomous (stretch). Staircase with per-rung
 swap/ablation checkpoints so we never grind blind. Drafted as knowledge/decisions/0007 (status:
-proposed — maintainer ratifies); ROADMAP Phase 3 refined to point at it. Also dispatched a scout for
-a possible recent DeepMind world-model breakthrough (maintainer saw a video) — pending.
+proposed — ratification pending); ROADMAP Phase 3 refined to point at it. Also dispatched a scout for
+a possible recent DeepMind world-model breakthrough (noted from a video, pending verification).
 
 ## [2026-06-15] STATE OF THE NIGHT | rung-4 reading-to-learn-dynamics: DEMONSTRATED (genuine) + swap_follow strengthening PARKED
 
@@ -193,7 +211,7 @@ on held-out, no LRS-brittleness shortcut; skill persists at coef=0). HO-0006 + H
 bounded by correct-mode reward training, where "follow the displayed manual" ≡ "do the true recipe"
 (the reward can't separate them; they diverge only at the swap). Reward-RL has no obedience pressure;
 a scripted reader hits 1.0 because it's hardwired to obey. So this is a task/objective question, not
-a model defect. **PARKED per the stall rule.** Maintainer call (see experiments/0040 §Decision):
+a model defect. **PARKED per the stall rule.** Call (see experiments/0040 §Decision):
 (1) partial-anneal the shaping (retain follow-displayed pressure), (2) train on mixed/swapped modes
 (needs a crafter-rtfm handoff), or (3) accept ~0.3 as "partial grounding," declare the reading thesis
 demonstrated, and move to length-2 / next rung. **My recommendation: (3)** — the reading result is
@@ -208,8 +226,8 @@ Dynalang ingested method-depth). Cross-domain subagent autonomous-mode idea reco
 generalize to length-2 (events 3–6/round vs 12–27, correct ~0, no grounding). Length-1 is the
 current ceiling. This is the lit-backed curriculum case (RTFM/Messenger both needed complexity
 staging) — a length-1→length-2 curriculum is the principled next step but a new design direction for
-the maintainer to sign off, not another autonomous lever. **Stopping here: clean wall reached.**
-Three items now wait on the maintainer: (a) swap_follow objective fork; (b) length curriculum for
+sign-off required, not another autonomous lever. **Stopping here: clean wall reached.**
+Three items now wait for decision: (a) swap_follow objective fork; (b) length curriculum for
 length-2; (c) stale-remote-docs cleanup (touches accepted ADR-0004 → propose, don't rewrite).
 **Nothing running; GPU idle; all work committed.**
 
@@ -300,12 +318,12 @@ convention, scripts/dispatch_rtfm.sh, *.log gitignored). Next: await crafter-rtf
 
 ## [2026-06-14] curation | milestone: repo made public-ready — leaks scrubbed, README opened for third parties
 
-Publication-prep pass on the maintainer's request (no research content changed). Internal/
+Publication-prep pass (on request; no research content changed). Internal/
 personal leaks removed from tracked files: `.vscode/settings.json` (bypass-permissions
 config) untracked + `.vscode/` gitignored; author email dropped from `pyproject.toml`;
 README "whitepaper" link repointed from the author's profile page to the context-architecture
-GitHub repo. Depersonalized 142 first-name mentions → "the maintainer" across 28 files (LOG,
-CLAUDE.md, skills, experiment/concept/design pages) + softened one proton.me mention here.
+GitHub repo. Depersonalized 142 first-name mentions → project-neutral phrasing across 28 files (LOG,
+CLAUDE.md, skills, experiment/concept/design pages) + softened one personal-email mention here.
 Owned-GPU model names (owned laptop/desktop GPUs) genericized to capacity/role descriptors
 in CLAUDE.md and design/compute-strategy.md (all measurements/conclusions preserved; rental/
 market GPUs 4090/5090/H100/3090 left intact). Added MIT LICENSE. README quick-start
@@ -322,7 +340,7 @@ from 0019's inflated 2–7 down to ~1.0 (s1 clean 3.2→1.0) — independent val
 Dreamer mechanism AND our implementation. Ignition still occurs (s2 0.55, s0 0.15) but
 LATE (round 6 vs 0019's 3–5) and at honest value; endpoint trajectories opposite (0019
 inflated→collapse, 0021 calibrated→rising). Best evals seed-reshuffled wash
-(0019 0/0.55/0.35; 0021 0.15/0/0.55). DECISION (maintainer): mechanism confirms the Dreamer
+(0019 0/0.55/0.35; 0021 0.15/0/0.55). DECISION: mechanism confirms the Dreamer
 design → keep it; default flipped `--repval` 0.0→0.3 (recipe default now); bank the
 MiniGrid imagination loop as good-enough+calibrated, don't over-polish the stepping stone,
 move to recipe-hardening (two-hot/symlog/percentile-norm) → Crafter. Caveat logged: core
@@ -331,7 +349,7 @@ rewards. Process meta-lesson (2nd time): I read rounds 0–5 as "ignition vanish
 final round flipped it — partial-data conclusions burned us again (cf. 0019 smoke-test).
 Pages: experiments/0021 Result+Lesson (status CONFIRMED); code default flip.
 
-## [2026-06-13] curation | language-grounding: symbols-as-thought ideas (maintainer)
+## [2026-06-13] curation | language-grounding: symbols-as-thought ideas
 
 Added an "Ideas to look into later" section to concepts/language-grounding.md capturing
 three forward ideas from a conversation (flagged not-decisions): (1) pixels-for-percept /
@@ -408,8 +426,7 @@ then memory for partial observability (rung 2).
 
 Exp 0003 run (Empty-8x8, 3 seeds x 2 arms): SIGReg world model predicts held-out
 transitions at 0.20-0.30x the copy-baseline error (controls: 1.5-1.7x). Rung-1 exit
-criterion marked met on environment-ladder (owner: human — flagged to the maintainer for
-review). Linear probe demoted to diagnostic-only after persistent seed noise;
+criterion marked met on environment-ladder (flagged for review). Linear probe demoted to diagnostic-only after persistent seed noise;
 dynamics-vs-copy ratio promoted to primary metric (latent-collapse page updated).
 New tooling: world_model.play viewer (human render / GIF record), checkpoint saving
 (--save). Next: rung 2 — DoorKey partial obs, memory, then first acting agent.
@@ -443,7 +460,7 @@ checked 2026-06-12). Next: exp 0006 value head + per-round eval.
 
 ## [2026-06-12] curation | thermal measurement: laptop GPU power-capped + throttling
 
-90s load test after the maintainer noticed heat: laptop GPU capped at ~45W (TGP floor), 62->78C in
+90s load test after noticing heat: laptop GPU capped at ~45W (TGP floor), 62->78C in
 90s, clocks ~1.2GHz vs 3.1 max, SW thermal slowdown already active ~396s cumulative
 today. compute-strategy page updated (desktop GPU advantage revised 2.5-3x -> 4-6x;
 desktop-dispatch trigger lowered 4h -> 1h); CLAUDE.md hardware note updated.
@@ -455,8 +472,8 @@ shell (cmd.exe breaks git transport), bare-repo push dispatch (scripts/remote.sh
 setup/gpu/run/pull), uv sync with marker-gated cu130 torch wheels, CUDA verified.
 First real dispatch = gpu_bench.py: matmul 4.5x (prediction 4-6x confirmed),
 our recurrent train-step 0.93x (latency-bound prediction confirmed) ->
-compute-strategy page updated with measured table. Publishability pass on the maintainer's
-request: no machine names/keys/paths in tracked files; config via env vars +
+compute-strategy page updated with measured table. Publishability pass (on request):
+no machine names/keys/paths in tracked files; config via env vars +
 gitignored .env.remote (.env.remote.example committed); ADR 0004 records the
 design. Setup gotchas (bare HEAD main-vs-master, administrators_authorized_keys,
 DefaultShell) documented in docs/REMOTE.md.
@@ -469,7 +486,7 @@ head makes beyond-horizon reward visible; collect->train->collect compounds
 (desktop GPU, ~25 min). Eval-hygiene incident found and fixed: play.py tile_size=16
 changed agent observations vs training tile 8 (4/20 -> 75% after fix); exp 0004
 re-verified at 20/20 matched; obs_shape now stored in checkpoints + asserted at
-load; minigrid.md gotcha section added. Process additions per the maintainer's request:
+load; minigrid.md gotcha section added. Process additions (on request):
 reviewer agent (opus, research-code charter — first pass verified 0006 paths
 correct + caught sweep-scrapability gap), /sweep skill + scripts/sweep.py,
 scripts/publish_check.sh wired into /milestone verify. Next: PPO baseline
@@ -482,8 +499,7 @@ hits 100% on all 3 seeds by 80k steps, ahead of our agent at every budget; our
 agent burns 60k steps on random collection before the flywheel spins. Honest
 verdict recorded; rung-2 sample-efficiency criterion NOT met on this env.
 Escalation pre-registered in exp page: DoorKey-6x6/8x8 + earlier/smaller
-collection rounds (exp 0008); ladder-criterion split proposed for the maintainer's
-sign-off (owner: human). Infra: baselines/ppo as isolated uv project (sb3 caps
+collection rounds (exp 0008); ladder-criterion split proposed for sign-off. Infra: baselines/ppo as isolated uv project (sb3 caps
 gymnasium <1.3); first /sweep dogfood produced the results table directly.
 
 ## [2026-06-12] curation | milestone: 6x6 ignition failure — the real blockers identified (exp 0008)
@@ -522,7 +538,7 @@ rung-2 sweeps are coffee-break scale.
 
 New concept page: agent-architecture — our 4 optimization layers (CEM planning /
 belief-model / Adam joint training / data flywheel) as a mermaid diagram with a
-per-layer failure->experiment diagnosis table. Scout (maintainer's prompt): our retention
+per-layer failure->experiment diagnosis table. Scout: our retention
 problem IS the literature's "plasticity loss / primacy bias / churn" — 6 sources
 queued (Nikishin resets = top exp-0011 candidate: reset last layers, keep replay).
 QUEUE gained a themed retention section.
@@ -546,8 +562,7 @@ papers/nikishin-primacy-2022 (implementation-grade protocol; underpins running e
 0011), papers/lecun-2022-path (skim depth, module<->our-layer mapping table; full
 read queued), concepts/retention (fix-family table: smoothing ruled out by 0010,
 resets running, churn/continual-backprop/frozen-trunk untested). DINOv3 queued with
-frozen-encoder framing. PROCESS gained the literature-first rule (maintainer's request —
-flagged here since _schema is human-owned).
+frozen-encoder framing. PROCESS gained the literature-first rule (flagged here since _schema is human-owned).
 
 ## [2026-06-12] scout | AMI pair completed (WBench id), Causal-JEPA + VL-JEPA queued
 
@@ -558,7 +573,7 @@ item resolved. New: Causal-JEPA (2602.11389, object-level latent interventions),
 VL-JEPA (2512.10942, low priority). Dreamer/DeepMind side: nothing new beyond
 known Genie/Dreamer state; 2026 survey blogs noted but not queued (secondary).
 
-## [2026-06-12] curation | intellectual-lineage page (maintainer's request: decades of background)
+## [2026-06-12] curation | intellectual-lineage page (decades of background)
 
 New concept page organizing 4 threads: mental models (Craik 1943, Tolman, Kahneman
 S1/S2 -> Mode-1/2), predictive brain (Rao-Ballard, Friston), LeCun's arc (LeNet ->
@@ -584,7 +599,7 @@ H=15/lambda .95) — retention-relevant find: their critic-EMA is a TARGET
 (regularize toward slow copy), not acting weights like our failed 0010 arm; +
 training ratio up to 16 vs our 0.1. New page ijepa-2023: multi-block masking
 params, EMA-teacher 0.996->1.0 — the heuristic LeJEPA replaced. QUEUE marks.
-Maintainer's request: scripts/fetch_sources.sh -> 21 arXiv PDFs (183MB) in gitignored
+On request: scripts/fetch_sources.sh -> 21 arXiv PDFs (183MB) in gitignored
 knowledge/sources/files/ for personal reading; idempotent, documented in SOURCES.
 
 ## [2026-06-12] lint | 6-ingest checkpoint: graph closed, 1 INDEX gap fixed
@@ -597,21 +612,21 @@ scout-sources gained the arXiv-API batch-verification trick. Assessment: no new
 skills/agents needed at current KB size; ingestion stays on-demand per the
 literature-first rule (exceptions queued: Dyna, WBench).
 
-## [2026-06-12] curation | research loop codified as top-level process (maintainer)
+## [2026-06-12] curation | research loop codified as top-level process
 
 PROCESS.md gains "The research loop": experiment-verify <-> literature-first <->
 route-to-KB <-> skills-carry-procedure-not-knowledge. Point 4 sharpened from
-the maintainer's draft: maintenance trigger is process drift, not knowledge growth (thin
+a working draft: maintenance trigger is process drift, not knowledge growth (thin
 skills + INDEX navigation make new knowledge reachable without skill edits).
 
-## [2026-06-12] curation | research-loop horizon defined (maintainer)
+## [2026-06-12] curation | research-loop horizon defined
 
 Process holds until a blocking problem has no published solution; then step 2
 transforms (nearest-neighbor mapping + novel mechanism + our pages as primary
 record). Noted: the model-based retention transfer (exp 0011) may already sit
 on that edge.
 
-## [2026-06-12] curation | deep-search protocol added to scout skill (maintainer's G-Scholar question)
+## [2026-06-12] curation | deep-search protocol added to scout skill
 
 Tested live: Semantic Scholar API = the right semantic+citation tool (anonymous
 tier congested; free key recommended -> env S2_API_KEY); OpenAlex = instant but
@@ -647,7 +662,7 @@ would silently no-op. Checked all 9 exp-0011 checkpoint configs: ema_decay=0
 throughout -> negative result stands clean. Guard added (mutually exclusive
 flags); lr-rebuild fragility commented.
 
-## [2026-06-12] scout+ingest+correction | frontier claim overturned by the wall protocol (maintainer's prompt)
+## [2026-06-12] scout+ingest+correction | frontier claim overturned by the wall protocol
 
 Ran the hitting-a-wall protocol properly for the first time (OpenAlex anchor walk +
 S2 citation pages of Nikishin, ~300 citations triaged): found arXiv:2310.15017
@@ -661,7 +676,7 @@ arm, surgical-heads arm); PROCESS horizon rule hardened (deep-search mandatory
 for frontier claims); 6 more citation-walk finds queued. ./scripts/fetch_sources.sh
 to be re-run for the new PDF.
 
-## [2026-06-12] curation | ADR 0005: Minecraft milestone (maintainer) — three-signal training
+## [2026-06-12] curation | ADR 0005: Minecraft milestone — three-signal training
 
 New rung 5b before real-world transfer: self-play + VPT-style action-labeled video
 + text-in-world-model (open research; Dynalang/VL-JEPA direction). Ladder + ROADMAP
@@ -669,12 +684,12 @@ amended; 5 sources queued (ids to verify). Rationale: forces multi-modal/languag
 integration without robotics hardware; resource-rich (VPT corpus, MineRL/MineDojo,
 published reference agents incl. Dreamer 4 offline diamonds).
 
-## [2026-06-12] curation | text-signal staircase added to ADR 0005 (maintainer)
+## [2026-06-12] curation | text-signal staircase added to ADR 0005
 
 Messenger/RTFM (text necessary) -> text-augmented Crafter (text helpful; metric =
 sample-efficiency delta) -> Minecraft tutorials. Steps i-ii run on current hardware.
 
-## [2026-06-12] curation | language-grounding concept page (maintainer's binding/installation insight)
+## [2026-06-12] curation | language-grounding concept page (binding/installation insight)
 
 New page: text->world-model = binding (shared embedding geometry) + installation
 (declarative -> dynamics belief). Three architectures: text-as-context (Dynalang),
@@ -683,7 +698,7 @@ protocol required before claiming), text-as-weights (Schmidhuber fast weights /
 model editing). Pre-registered prediction: context suffices at Messenger scale;
 data/weights needed at wiki scale. Linked into ADR 0005 + lineage + retention.
 
-## [2026-06-12] curation | language-grounding 2b: external imagination engine (maintainer)
+## [2026-06-12] curation | language-grounding 2b: external imagination engine
 
 Text -> domain video generator (Oasis/Genie-3/Dreamer-4-WM class) -> VPT-IDM action
 labels -> trust-weighted synthetic replay -> corroboration gate (real play
@@ -692,7 +707,7 @@ cognitive analogy: Craik's mental simulation + belief corroboration. Gate is
 mandatory (video hallucination) and retention-adjacent (synthetic distribution
 shift).
 
-## [2026-06-12] curation | unified trust-weighted replay (maintainer): source priors + corroboration
+## [2026-06-12] curation | unified trust-weighted replay: source priors + corroboration
 
 Real vs imagined experience unified on one trust scale: source sets the prior,
 corroboration updates it, loss scales with it; imagination earns what real
@@ -700,7 +715,7 @@ experience gets at birth. Human analogy: imagination is inexact AND functional v
 constant verification. Prototype path: corrupted-synthetic injection on Crafter.
 Symmetry noted with the KB's own verified-flag epistemics.
 
-## [2026-06-12] curation | horizon: self-generated hypotheses (maintainer) — agent internalizes the research loop
+## [2026-06-12] curation | horizon: self-generated hypotheses — agent internalizes the research loop
 
 Text-installed beliefs -> imagination-generated beliefs -> active validation, all on
 the trust-gate substrate. Near-term echo: hypothesis-driven exploration as the
@@ -711,12 +726,12 @@ principled ignition fix (exp 0008 thread); Plan2Explore queued.
 Solved-vs-open verdict per thread: binding-by-conditioning substantially explored
 (2511.22904 reads dynamics descriptions — read before Messenger work); generated-
 video-as-experience active at platform level (survey 2603.28489); synthetic-
-transition reweighting mature BUT all generator-self-confidence based — the maintainer's
+transition reweighting mature BUT all generator-self-confidence based — the
 reality-corroborated cross-source gate stays novel; uncertainty-driven exploration
 covered (Plan2Explore, DreamerV3-XP) — compositional hypothesis generation beyond
 state-novelty stays open. language-grounding page to absorb refs at ingest time.
 
-## [2026-06-12] curation | paper-readiness check (maintainer): provenance chain confirmed, venue column added
+## [2026-06-12] curation | paper-readiness check: provenance chain confirmed, venue column added
 
 Claim -> page -> source id -> verified registry row chain is manuscript-grade by
 construction; read-depth labels gate citability (only `read` sources citable in a
@@ -725,13 +740,13 @@ at pre-paper lint); BibTeX export planned (mechanical from arXiv ids).
 
 ## [2026-06-12] curation | /research-cycle skill: autonomous loop with mandatory per-failure literature gate
 
-Prepared for overnight autonomous operation (the maintainer's standing instruction, to be
+Prepared for overnight autonomous operation (a standing instruction, to be
 activated later): harvest -> record -> mandatory failure-specific search ->
 pre-register -> implement -> dispatch -> milestone; guardrails (scope, spend,
 2-strike stall rule, honesty, state-of-the-night report). PROCESS gained the
 per-iteration literature gate.
 
-## [2026-06-12] curation | training-asset registry + tier-1 VPT retention (maintainer's availability insurance)
+## [2026-06-12] curation | training-asset registry + tier-1 VPT retention (availability insurance)
 
 New ASSETS.md registry (tiered retention: T1 now / T2 at rung-5b entry / T3 never-
 bulk). Tier-1 retained to desktop ~/minecraft-assets/ (~10GB, 1.28TB free): IDM 4x
@@ -748,7 +763,7 @@ All VPT tier-1 assets verified on desktop ~/minecraft-assets/vpt/ (first detache
 attempt died with its ssh session — Git Bash quoting; foreground-over-held-ssh
 pattern worked). ASSETS.md claims now confirmed-true.
 
-## [2026-06-12] curation | temporal-abstraction concept page (maintainer via Robbins/Bergson)
+## [2026-06-12] curation | temporal-abstraction concept page (via Robbins/Bergson)
 
 Events-not-ticks critique routed: converging lines table (options, H-JEPA,
 Director, Zacks event segmentation, action chunking); Zacks mechanism directly
@@ -768,16 +783,16 @@ trunk remains the only unprotected component. Exp 0013 pre-registered: UTD
 baseline + trunk-freeze arm (+optional round-0-at-x1 arm). retention.md fix table
 updated. No paid resources needed (~80-min desktop batches).
 
-## [2026-06-12] curation | AUTONOMOUS MODE ACTIVATED (maintainer, conditional)
+## [2026-06-12] curation | AUTONOMOUS MODE ACTIVATED (conditional)
 
-Standing instruction: if the maintainer doesn't respond after exp 0013 concludes, continue
+Standing instruction: if there is no response after exp 0013 concludes, continue
 the research cycle autonomously (/research-cycle skill — identical loop, no
-per-iteration go). Stop gates, per the maintainer: (1) hard wall that survives the
+per-iteration go). Stop gates: (1) hard wall that survives the
 literature gate (no resolution found AND no further research to ingest — i.e.,
 the skill's 2-strike stall rule across ALL queued threads), (2) token exhaustion.
 All other guardrails unchanged: desktop-only spend, current-rung scope, honesty
 rules, milestone discipline, PAID-RESOURCE flags recorded but not acted on,
-owner:human pages get proposals only. Reports: milestone commits as journal +
+decisions/schema/results get proposals only. Reports: milestone commits as journal +
 state-of-the-night LOG entry.
 
 ## [2026-06-13] curation | milestone: interference localized to the encoder (exp 0013) [autonomous]
@@ -789,7 +804,7 @@ return with encoder free). The 5-experiment retention arc resolves: interference
 ENCODER DRIFT. Literature gate: 2310.07418 (ICLR24) localizes to the critic in
 model-free visual RL — tension recorded, ingestion queued (augmentation lever
 noted). Exp 0014 pre-registered + launching: freeze-round sweep (fenc@3, fenc@4,
-3 seeds each, same budget) — if both bars clear, propose rung-2b closure to the maintainer
+3 seeds each, same budget) — if both bars clear, propose rung-2b closure (decision pending)
 and pivot to the actor thread.
 
 ## [2026-06-13] ingest | Ma et al. ICLR24 plasticity paper — the 0013 tension resolves [autonomous]
@@ -802,7 +817,7 @@ FAU per-module logging, Adaptive-RR scheduling atop our UTD finding.
 
 ## [2026-06-13] STATE OF THE NIGHT [autonomous]
 
-Threads advanced since the maintainer's last message:
+Threads advanced since last check-in:
 - exp 0013 CLOSED: interference localized to the ENCODER (freeze @r2 -> 6/6 seeds
   crash-free; GRU must stay plastic; warm arm confirms round-0 primacy dodgeable).
   Milestone 70ff51d.
@@ -814,12 +829,12 @@ Threads advanced since the maintainer's last message:
 - exp 0015 RUNNING: staged freeze (enc@2+gru@4, enc@2+gru@5), both bars targeted;
   --freeze2 mechanics shipped + smoke-verified.
 
-Decision queued for the maintainer: if 0015 clears both bars -> rung-2b closure proposal
-(ladder is owner:human) + pivot to the actor thread. If it caps like ftrunk ->
+Decision queued: if 0015 clears both bars -> rung-2b closure proposal
+(ladder is a roadmap-level decision) + pivot to the actor thread. If it caps like ftrunk ->
 budget-tier extension + PPO re-baseline proposal instead.
 No paid resources used or needed. No stop gates approached.
 
-## [2026-06-13] curation | milestone: staged freeze counter-outcome — frontier confirmed (exp 0015) [autonomous, pre-maintainer-return]
+## [2026-06-13] curation | milestone: staged freeze counter-outcome — frontier confirmed (exp 0015) [autonomous, pre-return]
 
 g4/g5 staged enc+GRU freeze caps at 30-37% (< ftrunk 40% < fenc@4 60% < utd 63%):
 freezing the GRU always recovers the ftrunk ceiling. Stability<->performance is a
@@ -827,21 +842,21 @@ genuine frontier at this budget, not out-tunable. Desktop suspended mid-run
 overnight, resumed clean (both freezes fired, no corruption). KEY STRATEGIC NOTE:
 rung-2b exit criterion (beat model-free on sample efficiency) was already MET at
 exp 0012 (63% vs PPO 37%); crash-free "both bars" was self-imposed extra rigor,
-now characterized. Recommendation logged for the maintainer: declare 2b met, pivot to actor
-thread. Autonomous mode PAUSED — the maintainer returned. Awaiting their strategic call.
+now characterized. Recommendation logged: declare 2b met, pivot to actor
+thread. Autonomous mode PAUSED — awaiting strategic call.
 
-## [2026-06-13] curation | hierarchy-and-credit concept page (maintainer brainstorm) + rung-2b MET accepted
+## [2026-06-13] curation | hierarchy-and-credit concept page + rung-2b MET accepted
 
-The maintainer's credit-assignment question routed to a new concept page: flat value head
+A credit-assignment question routed to a new concept page: flat value head
 already does implicit local credit (exp-0004 monotonic value gradient = 63%), but
 explicit reusable subgoals need hierarchy (H-JEPA/options). Conditional-subgoal
 constraint -> unsupervised discovery (bottlenecks/Director/empowerment), never
 hardcoded. KEY DESIGN DIRECTION: the Mode-1 actor we distill should be hierarchical
 (manager-worker), unifying actor + hierarchy + temporal-abstraction + language
 threads. 5 sources queued (Director, FuN, Option-Critic, empowerment, DIAYN).
-The maintainer accepted rung-2b as MET (63% > PPO 37%, stable) — pivot to actor confirmed.
+Rung-2b accepted as MET (63% > PPO 37%, stable) — pivot to actor confirmed.
 
-## [2026-06-13] curation | architecture-testing tier ladder added (maintainer)
+## [2026-06-13] curation | architecture-testing tier ladder added
 
 hierarchy-and-credit page gains a 3-tier testing ladder: (1) Empty/DoorKey =
 mechanism debugging (fast loop); (2) MiniGrid KeyCorridor/ObstructedMaze/MultiRoom
@@ -849,7 +864,7 @@ mechanism debugging (fast loop); (2) MiniGrid KeyCorridor/ObstructedMaze/MultiRo
 necessary-not-sufficient); (3) Crafter = the decisive skill-reuse claim. Principle:
 cheapest env that reveals the effect; never debug architecture on Crafter.
 
-## [2026-06-13] curation | compute efficiency elevated to stated operating principle (maintainer)
+## [2026-06-13] curation | compute efficiency elevated to stated operating principle
 
 Generalized the tier-ladder into a lab strategy: architecture and compute-efficiency
 are the same axis (judge architectures by capability-per-FLOP slope; our world-model
@@ -858,7 +873,7 @@ minimum-SUFFICIENT-scale (compute analog of whitepaper's minimum-needed-context)
 measure slopes not endpoints, literature-first/pre-registration as efficiency gates.
 Added to compute-strategy.md + PROCESS.md research loop.
 
-## [2026-06-13] curation | language-grounding sharpened (maintainer): order of operations + verification battery
+## [2026-06-13] curation | language-grounding sharpened: order of operations + verification battery
 
 Two refinements: (1) language is NOT the cause of the missing "get the key" subgoal
 — temporal abstraction is; language LABELS pre-existing nameless abstractions, so
@@ -870,16 +885,16 @@ cross-modal probe, REFERENT SWAP = gold standard / why Messenger-RTFM shuffle,
 compositional zero-shot, modality transfer). First grounding experiment = built
 around referent swap on a cheap env; Crafter is payoff not proving-ground.
 
-## [2026-06-13] curation | capability-map page — locking the capability separation (maintainer)
+## [2026-06-13] curation | capability-map page — locking the capability separation
 
 Consolidation: single orientation index of the 7 distinct capabilities (world
 modeling, flat credit, temporal abstraction/hierarchy, language grounding, language
 installation, trust-weighted imagination, self-generated hypotheses) — problem each
 solves, dependency order, status, test env. Explicitly records the separations that
 keep blurring (#3 subgoals != #4 language; #4 grounding != plugged LLM; #5
-installation != #4 grounding). owner:human (a roadmap-level artifact).
+installation != #4 grounding). A roadmap-level artifact.
 
-## [2026-06-13] curation | run profiled; acceleration verdict (maintainer)
+## [2026-06-13] curation | run profiled; acceleration verdict
 
 profile_run.py: training 79% (launch-bound), MPC collection 16%, eval 4%, env 0.4%.
 Verdict: faster env is pointless (0.4%); no big easy wins (TF32 1.02x, bf16 1.23x,
@@ -910,7 +925,7 @@ continue head). The rest works (WM, on-policy AC, fast actor-collection). Exp 00
 add continue predictor, train on replay dones, discount imagined returns by
 cumulative continue prob. Single-variable fix.
 
-## [2026-06-13] curation | generative-vs-predictive concept page (maintainer, LeCun vs Xing debate)
+## [2026-06-13] curation | generative-vs-predictive concept page (LeCun vs Xing debate)
 
 Sharpening: generative-vs-latent (what you produce) and hallucination/exploitation
 (intrinsic to optimizing any learned model) are ORTHOGONAL axes. Empirical anchor:
@@ -922,7 +937,7 @@ knowledge import. Unifying principle "real outweighs imagined" links trust-weigh
 replay + continue predictor + corroboration. Roadmap: LeCun-pure rungs 1-4,
 generative/Xing layer at 5b gated by verification.
 
-## [2026-06-13] curation | imagination-as-novelty (maintainer): hallucination is the raw material of ideas
+## [2026-06-13] curation | imagination-as-novelty: hallucination is the raw material of ideas
 
 Reframe added to generative-vs-predictive: an original idea = a hallucination that
 survives verification (variation+selection = creativity; Popper/Campbell/Dennett/
@@ -932,7 +947,7 @@ uncreative; target = regulated imagination (entropy/curiosity + verify). Closure
 agent creativity loop ≡ our research loop; capability #7 is this internalized.
 Suppression and creativity are ONE mechanism, two aims.
 
-## [2026-06-13] curation | architecture-strategy concept page (maintainer): modes, interfaces, reusable components
+## [2026-06-13] curation | architecture-strategy concept page: modes, interfaces, reusable components
 
 Design brainstorm routed. Key reframes: (1) external-learning is a MODE (source +
 verification regime), not the default loop = LeCun's configurator; (2) monolithic-
@@ -941,9 +956,9 @@ vs-modular is the wrong axis — the real decision is the stable INTERFACE
 pretrained Minecraft WM as a frozen module — backed by knowledge-import+compute AND
 our own encoder-freeze finding (components want different lifecycles). Decide
 joint-vs-staged empirically at rung 3/5b. Flagged: FULL read of lecun-2022-path is
-now design-critical (the maintainer re-derived its modular architecture 3x tonight).
+now design-critical (its modular architecture has been re-derived 3x in design sessions).
 
-## [2026-06-13] curation | generative-vs-predictive: does imagination need generative AI? (maintainer)
+## [2026-06-13] curation | generative-vs-predictive: does imagination need generative AI?
 
 Goals-divergence with LeCun (control-accuracy vs human-like-cognition). Sharpened:
 imagination != pixel generation (exp 0017 imagines latent, no decoder); generative
@@ -953,15 +968,15 @@ real case. Corrected over-attribution (3D-hard != generative-key; DreamerV3 does
 latent). Resolution: latent core + optional generative module per mode; testable
 (text->latent direct vs render-and-re-encode at Messenger scale).
 
-## [2026-06-13] curation | dreaming concept (maintainer) + lazy-generation refinement + text→video→latent
+## [2026-06-13] curation | dreaming concept + lazy-generation refinement + text→video→latent
 
-Dreaming page (backlog): the maintainer's relaxed-constraints + weak-writeback = Hoel
+Dreaming page (backlog): relaxed-constraints + weak-writeback framing = Hoel
 overfitted-brain (verified arXiv:2007.09560) — dreams = anti-overfitting augmentation;
 over-training triggers dreams = OUR primacy bias. Two functions: creativity-seeding +
 latent-dream-augmentation (cheap testable retention regularizer, no gen-AI). Also:
 generative-vs-predictive refined — generation is LAZY/attention-gated (latent tracks
 persistence/object-permanence; render on demand only), demoting last night's
-continuous-amodal-generative claim (maintainer's correction); text→latent solved by
+continuous-amodal-generative claim (corrected); text→latent solved by
 composition text→video→encoder (seams: domain video-gen, encoder robustness to
 generated frames, trust-gate). Hoel queued.
 
@@ -971,7 +986,7 @@ Exp 0018: continue predictor partially tamed exploitation (s0 2.06->1.13) but s1
 worsened (5.4) and eval still ~0 — actor exploits OTHER off-distribution model
 inaccuracies; root = deterministic WM can't imagine the 25-step chain (compounding
 error), no honest success gradient. Lack Dreamer's stochastic latents. Fork logged
-for the maintainer: (a) deepen (stochastic latents / H=5 / uncertainty penalty) vs (b) DAgger
+for decision: (a) deepen (stochastic latents / H=5 / uncertainty penalty) vs (b) DAgger
 on-policy distillation (reuse working planner, sidesteps imagination exploitation) —
 recommend cheap H=5 check then DAgger. Also: language-grounding gains word-association
 section — association matrix = word embedding (Levy-Goldberg, queued); don't rebuild
@@ -994,18 +1009,18 @@ both "open questions" answered by 0011-0013; added 7 missing links incl. orphane
 [[ma-plasticity-2024]] and [[dreaming]]); agent-architecture L3 interference "(open)"
 → localized-to-encoder/0013; orphan inbound links for 0019 (from 0018), 0015 (from
 0014), [[ijepa-2023]] (from jepa); language-grounding Links gained
-[[hierarchy-and-credit]]/[[temporal-abstraction]]. FLAGGED for the maintainer (owner:human, no
+[[hierarchy-and-credit]]/[[temporal-abstraction]]. FLAGGED (meaning-bearing, no
 silent rewrite): (1) "pension" terminology in exps 0014/0015 — reconstructed as a
 deliberate metaphor from the [autonomous]-run agent ("pension off" = retire a network
 component = freeze it permanently; encoder + GRU are the "two plasticity taps / drift
 sources" each needing to be pensioned). Coherent but obscure; keep-or-normalize is
-The maintainer's call. (2)
+an open call. (2)
 capability-map world-modeling status says "rungs 1-2 / SIGReg" — predates the
 0017-0019 imagination thread, may want an exp-range refresh.
 
-## [2026-06-13] curation | structural: new design/ directory (maintainer-approved plan)
+## [2026-06-13] curation | structural: new design/ directory
 
-Resolved a shelving seam the maintainer spotted: `concepts/` conflated field-knowledge
+Resolved a shelving seam: `concepts/` conflated field-knowledge
 explainers ("what is X") with this project's own design/strategy artifacts ("OUR X"),
 so titles like "capability-map" mismatched the generic-concept expectation. The
 `scope: local|shared` flag was meant to carry this distinction but isn't visible when
@@ -1014,13 +1029,12 @@ browsing by directory. Fix: new top-level `knowledge/design/` for project synthe
 agent-architecture, architecture-strategy, compute-strategy, environment-ladder);
 wikilinks survived (basename-resolved), 6 path-based refs updated (INDEX ×5 → new
 "Design & strategy" section, ROADMAP, sweep SKILL, gpu_bench.py, CLAUDE.md). SCHEMA.md
-(owner:human) directory table gained a `design/` row and `concepts/` was narrowed to
+directory table gained a `design/` row and `concepts/` was narrowed to
 "field concept". Hybrid pages (retention, temporal-abstraction, generative-vs-predictive,
 hierarchy-and-credit, language-grounding, dreaming) deliberately LEFT in concepts/ —
 reclassifying them is a separate judgment call (deferred). environment-ladder keeps its
 ADR-0003 (frozen decision) + design-page (living spec) split. Also resolved flag (1)
-above: "pension" wording normalized to "freeze/frozen" across exps 0014/0015 (maintainer
-approved a clearer word). Link graph re-verified closed post-move.
+above: "pension" wording normalized to "freeze/frozen" across exps 0014/0015 (clearer word adopted). Link graph re-verified closed post-move.
 
 ## [2026-06-13] curation | agent-architecture synced to code: 4 → 5 layers
 
@@ -1028,7 +1042,7 @@ Checked design/agent-architecture against the actual src/world_model/ (Explore m
 The page was an accurate snapshot of the exp-0001–0010 MPC+value system but stale
 across all layers vs the 0016–0019 code: missing the learned actor (second acting
 mode), the stochastic RSSM world model, the continue + reconstruction heads, and the
-entire imagination actor-critic training loop. Per the maintainer ("the model should follow the
+entire imagination actor-critic training loop. Per design intent ("the model should follow the
 architecture, not stick to 4 layers"), promoted the imagination actor-critic to a real
 **L4 BEHAVIOR** layer (policy gradient + λ-return critic w/ EMA target); the flywheel
 moved L4 → **L5**. Updates: title now count-agnostic ("Nested Optimization Layers");
@@ -1042,7 +1056,7 @@ now built (RSSM, 0019); that page wants a refresh too.
 
 ## [2026-06-13] queue | PAN / GLP (Eric Xing) — LLM-as-latent-backbone
 
-Queued two papers after a discussion sparked by the maintainer watching an Eric Xing talk:
+Queued two papers after a discussion sparked by an Eric Xing talk:
 PAN (arxiv:2511.09057) and its position paper "Critiques of World Models"
 (arxiv:2507.05169), under a new QUEUE subsection "LLM-as-latent-backbone (PAN/GLP)".
 Why they matter to us: PAN's Generative Latent Prediction (encoder→latents, an LLM
@@ -1057,7 +1071,7 @@ only). Pairs flagged: concepts/generative-vs-predictive, design/architecture-str
 
 ## [2026-06-13] queue | Teams to watch — Hassabis/DeepMind + Fan-Yun Sun/Moonlake
 
-Added a new QUEUE subsection "Teams to watch" after the maintainer asked who Xing credits in the
+Added a new QUEUE subsection "Teams to watch" after noting who Xing credits in the
 DataCamp podcast "Will World Models Bring us AGI?" (youtube VNyLNZunv9E). Transcript-
 confirmed: Xing names **Demis Hassabis / DeepMind** as near-perfectly aligned on what a
 world model (and virtual cell) is and how to build/test it, and expects "something
@@ -1106,7 +1120,7 @@ outcome. Live logs worked this run (PYTHONUNBUFFERED in the dispatched commit).
 
 ## [2026-06-13] scout+queue+curation | value-calibration toolkit; exp 0021 critic-on-replay
 
-After exp 0020 redirected us to value miscalibration, the maintainer asked to accelerate by reusing
+After exp 0020 redirected to value miscalibration, lit sweep run to accelerate by reusing
 established learnings. Lit sweep (4 searches) mapped the published toolkit for inflated
 imagined value / model exploitation — THE central MBRL failure mode, not exotic:
 b1 DreamerV3 **critic-on-replay** (β_repval 0.3, critic grounded in real returns) ·
@@ -1122,7 +1136,7 @@ Prediction: imagined_return falls 2–4 → ~1 and ignition broadens. Smoke-conf
 
 ## [2026-06-13] decision | ADR 0006 accepted — Crafter (original) over Craftax for rung 3
 
-The maintainer accepted ADR 0006. Crafter (original, PyTorch-native) for rung-3 first contact, NOT
+ADR 0006 accepted. Crafter (original, PyTorch-native) for rung-3 first contact, NOT
 Craftax. Three deciding facts: (1) Craftax 257x is a model-FREE PPO (1B-step) figure; we
 are model-based/sample-efficient (~1e6 steps) so env-stepping is not our wall; (2) Craftax
 is JAX-only, vs ADR 0001 PyTorch (interop friction / full rewrite), and 0001 pre-registered
@@ -1131,7 +1145,7 @@ encoder thesis), and Craftax fast mode is symbolic. Craftax kept as documented e
 with a measured trigger (env-stepping >=~30% wall-clock, or sample-hungry pivot). Next:
 Crafter env wrapper behind the MiniGrid interface -> hello-Crafter baseline.
 
-## [2026-06-13] curation | JAX rewrite revisit-triggers consolidated (maintainer asked)
+## [2026-06-13] curation | JAX rewrite revisit-triggers consolidated
 
 Added a consolidated "JAX rewrite revisit triggers" subsection to design/compute-strategy.md
 (extends ADR 0001; cross-links ADR 0006). Key framing: JAX advantage SHRINKS up the ladder —
@@ -1151,7 +1165,7 @@ crafter 1.8.3 added (light deps, no second CUDA framework). Smoke test added (19
 Hello-Crafter random rollout: 283 steps to death, 1/22 achievements (wake_up), reward ~0.1
 -- the expected random floor; env+reward+achievement+death/timeout all flow. New page
 environments/crafter.md (incl. the Crafter->Minecraft proxy->target transfer relationship
-The maintainer asked about: method+frozen-encoder transfer, WM weights do not; JAX corollary). INDEX
+Addressed question: method+frozen-encoder transfer, WM weights do not; JAX corollary). INDEX
 + environment-ladder additive pointer. Next: 64x64 encoder (frozen DINO/JEPA per lean) +
 port the calibrated imagination loop; harden DreamerV3 recipe here (denser rewards).
 
@@ -1228,9 +1242,9 @@ Best reward s0 2.10@r6, s1 1.97@r2. Next (reordered by data): exp 0024 DINO patc
 spatial features for navigation/gathering, attack the plateau) BEFORE the reward-head fix, since
 the plateau (not value) is the headline blocker. Pages: experiments/0023 Result+Lesson, INDEX.
 
-## [2026-06-13] diagnostic | exp 0023 agent is STATIONARY — reward-head exploitation (maintainer spotted it)
+## [2026-06-13] diagnostic | exp 0023 agent is STATIONARY — reward-head exploitation (live viewer observation)
 
-The maintainer noticed in the live viewer the player never moves relative to the (egocentric-scrolling)
+Observation in the live viewer: the player never moves relative to the (egocentric-scrolling)
 world. Quantified: 3 episodes, unique_tiles=1, player_pos bbox_span=(0,0) -- the agent NEVER
 changes position. Action histogram: do (chop adjacent), mk_iron_sword spammed 38-48x/ep (a no-op:
 no iron), sleep, place_plant. All 3 achievements are reachable without moving (wood/table/plant
@@ -1261,13 +1275,13 @@ reward exploitation is unfixed (imagined_return 8-22) and tips s1 into collapse.
 matter -> exp 0025 combines patch tokens + two-hot reward head, 3 seeds. PROCESS WIN: the
 behavior QA gate caught the s0/s1 split that aggregate eval masked. Pages: 0024, INDEX.
 
-## [2026-06-13] curation | why Crafter onboards easier than DoorKey + plateau is a scaling story (maintainer)
+## [2026-06-13] curation | why Crafter onboards easier than DoorKey + plateau is a scaling story
 
 Recorded an honest decomposition on crafter.md of why Crafter feels easier than the DoorKey
 struggle: (1) reward DENSITY (built-in achievement curriculum vs DoorKey single sparse goal --
 biggest factor), (2) frozen pretrained encoder (skips the from-scratch representation instability
 that was half the DoorKey fight), (3) our algorithmic improvements (prevent failures, not the main
-ease driver). Plus the maintainer correcting an over-dramatic "DoorKey wall returns" framing: the plateau
+ease driver). Plus a correction of an over-dramatic "DoorKey wall returns" framing: the plateau
 is NOT a fundamental wall -- (a) current ~3 plateau = the exploitation BUG (0025 fixes), (b)
 mid-tree = mostly COMPUTE SCALING (DreamerV3 reaches it at ~1M steps; we are ~10x under-trained),
 (c) only deepest chains might want hierarchy, as an efficiency lever. For a compute-efficiency lab
@@ -1283,7 +1297,7 @@ the public repo (no identity/hardware leaks; proper KB links). Phases map to lad
 
 ## [2026-06-14] scout+queue | does our grounding testbed already exist? — CrafText/RTFM/SILG/LDD
 
-The maintainer asked whether a custom Crafter-with-tutorials env exists or we should build it. Checked
+Checked whether a custom Crafter-with-tutorials env exists or needs to be built.
 the literature first (frontier-claim protocol). Found: CrafText (2505.11962, Craftax instruction-
 following — "Crafter+language" exists, but instructions not read-to-learn-dynamics, and JAX/Craftax
 per ADR-0006 wall); RTFM (right read-to-learn-dynamics paradigm, toy scale); Messenger (referent-swap
@@ -1296,7 +1310,7 @@ build started.
 
 ## [2026-06-14] design | two-domain split: CrafterManual grounding-env as a separate repo; this project authors requirements
 
-The maintainer framed the grounding testbed as a SECOND context-architecture DOMAIN: a separate
+The grounding testbed was framed as a SECOND context-architecture DOMAIN: a separate
 standalone GitHub repo (CrafterManual / Crafter-RTFM), built by its own Claude to spec, with THIS
 research project iteratively AUTHORING requirements for it. Clean inter-domain contract:
 requirements flow research->tool, capability reports flow tool->research; neither reaches into
@@ -1316,7 +1330,7 @@ furnace), s2 6 unique achievements / reward 3.77. imagined_return calibrated 1.3
 trended DOWN. Both levers needed: patch tokens (navigate) + bounded reward (dont hallucinate
 reward). The exploitation arc 0017->0025 is CLOSED. Residual: s0 minor make_iron_sword spam.
 Ceiling (~3-6 ach) now a COMPUTE-SCALING question (~10x under-trained vs DreamerV3) -> exp 0026
-scaling slope. Process win: behavior_report (from the maintainer s it-doesnt-move catch) was the
+scaling slope. Process win: behavior_report (from the it-doesnt-move live observation) was the
 decisive metric; eval_reward alone looked flat. Pages: experiments/0025 Result+Lesson, INDEX.
 
 ## [2026-06-14] experiment | exp 0026 replay-ratio scaling — breadth not depth (mixed)
@@ -1356,7 +1370,7 @@ windows sampled by p=c·β^visits+(|recon+KL|+ε)^α instead of uniform). Review
 optimized loss is identical to the 0027 baseline → clean attribution. Chosen because the paper
 reports its Crafter gains SPECIFICALLY on the deep nodes we're stuck on (stone pickaxe, iron).
 
-**Recommended next decision (for the maintainer):**
+**Recommended next decision:**
 - If 0028's eval union gains frontier achievements (collect_stone / make_stone_pickaxe /
   place_furnace) with behavior_report still PASS → curiosity-on-WM IS a depth lever →
   exp 0029 = extend Curious Replay to the imagination-AC burn-in sampling too (compounding).
@@ -1364,7 +1378,7 @@ reports its Crafter gains SPECIFICALLY on the deep nodes we're stuck on (stone p
   not the WM not learning it → escalate to structured exploration / hierarchy: Achievement
   Distillation (2307.03486) or achievement-graph structured exploration (2305.00508), both
   queued. This is a bigger design step (achievement-conditioned policy/contrastive head) and
-  is a reasonable point to want maintainer input on direction.
+  is a reasonable point to want input on direction.
 - Caveat to watch: DINO-embedding recon error may be lower-variance than the paper's pixel
   loss → the curiosity signal could be weak. If 0028 shows priorities barely differentiating
   (recon+KL near-uniform), that's the likely culprit, not the method.
@@ -1373,7 +1387,7 @@ No paid resources used (desktop GPU only). No PAID-RESOURCE flag this cycle.
 
 ## [2026-06-14] experiment | exp 0029 stat-perception probe — frozen encoder NOT blind; drink-spam is actor-side
 
-Triggered by the maintainer watching crafter_steps_s1 spam collect_drink at the cap. Probed
+Triggered by observing crafter_steps_s1 spam collect_drink at the cap. Probed
 linear decodability of Crafter vitals from the frozen DINO embedding AND the trained RSSM
 belief. Result: drink decodes at 0.95 (embedding, cls+patch) and 0.94 (belief) — the level
 survives end-to-end to the actor. Refutes the perception hypothesis: it is an actor/reward/
@@ -1404,7 +1418,7 @@ SOTA reaches moderate rates and we get ~0. The method credited with depth gains 
 Distillation = ACTOR-SIDE contrastive self-imitation on the achievement hierarchy, NOT a WM
 trick -> vindicates the 0029/0028 actor-side diagnosis. (scout agent stalled on a fetch; synthesis
 done inline via search.) Queued: 2507.04075 MLT, 2406.07381 LLM-hint WM. Next fork decision pending
-maintainer: actor-side AD-style capstone (target stone tier, NOT diamond) vs consolidate the rung.
+open fork: actor-side AD-style capstone (target stone tier, NOT diamond) vs consolidate the rung.
 
 ## [2026-06-14] experiment | exp 0030 self-imitation (SIL) implemented + Crafter Score metric
 
@@ -1436,7 +1450,7 @@ successes that EXIST in replay, and the agent rarely reaches stone-tier states -
 consolidate. This is the DISCOVERY problem, not credit-propagation. Fourth NULL lever (after 0026
 replay-ratio, 0027 data, 0028 curious) + 0029 cleared perception => plain-Crafter depth ~2.6%/wood
 is at/near our ceiling. Standing instruction reached its "if-we-cannot -> tutorial-driven" branch.
-Fork (maintainer): (a) 0031 AD L_pred for closure (low EV, 0029 cleared representation) vs (b)
+Open fork: (a) 0031 AD L_pred for closure (low EV, 0029 cleared representation) vs (b)
 declare rung-3 done + pivot to reading-to-learn (crafter-rtfm).
 
 ## [2026-06-14] experiment | exp 0031 semantic foundation probe — GREEN, frozen encoder validated
@@ -1453,7 +1467,7 @@ stable -> safe to build rung-4 reading-to-learn. 1M run unnecessary. New tool: w
 ## [2026-06-14] design | rung-4 manual-conditioned agent — proposed; anti-baking as the spine
 
 Pivoted to rung-4 (reading-to-learn-dynamics) after rung-3 closed + foundation validated (0031).
-New design page design/rung4-manual-conditioned-agent.md (proposed, owner:human). Core choices:
+New design page design/rung4-manual-conditioned-agent.md (proposed). Core choices:
 (1) condition the WORLD MODEL (RSSM dynamics + reward head) on the manual, NOT the policy -- the
 grounded "read-to-learn-dynamics" choice AND the strongest anti-baking lever (a WM can only
 shortcut by correctly predicting per-episode dynamics from the manual, which IS reading). (2)

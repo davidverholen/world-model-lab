@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-15
@@ -56,18 +56,18 @@ manual to find the reward-earning gesture," which **diverges from obedience exac
 swap_follow=1.0 because it is *hardwired* to obey; a reward-maximizing RL agent has no such pressure.
 So swap_follow ~0.25–0.40 may be a **ceiling of correct-mode reward training**, not a model defect.
 
-## Decision — PARK, per the stall rule; maintainer call on the objective
+## Decision — PARK, per the stall rule; open call on the objective
 
 Per the autonomous stall rule (a failure mode surviving multiple redesigns → stop the thread, write
 it up, don't keep throwing levers), I am **parking the swap_follow-strengthening thread**. It is not
-an architecture problem; the remaining moves change the *task/objective* and need the maintainer's
-research-direction judgment (they touch the anti-baking design and what swap_follow should measure):
+an architecture problem; the remaining moves change the *task/objective* and need a human
+research-direction decision (they touch the anti-baking design and what swap_follow should measure):
 
 1. **Partial-anneal the reading-shaping** (don't take coef fully to 0): the HO-0007 shaping already
    rewards *following the displayed gesture* — keeping a residual could retain "obey the manual"
    pressure, with eval still at coef=0 to test internalization. (Risk: blurs the honest-eval line —
-   is high swap_follow then "reading" or "trained to obey"? It IS reading, but the maintainer should
-   decide if that counts.)
+   is high swap_follow then "reading" or "trained to obey"? It IS reading, but the
+   project should decide if that counts.)
 2. **Train on mixed/swapped modes** so obeying the *displayed* manual is what's rewarded even when it
    differs from the true recipe — directly creates the follow-displayed pressure correct-mode lacks.
    (Changes task semantics; needs a crafter-rtfm handoff.)

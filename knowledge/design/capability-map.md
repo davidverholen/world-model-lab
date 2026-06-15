@@ -1,6 +1,6 @@
 ---
 status: current
-owner: human
+owner: world-model
 scope: local
 sources: []
 verified: true
@@ -9,7 +9,7 @@ last_reviewed: 2026-06-13
 
 # Capability Map: distinct capabilities, distinct problems
 
-Orientation index (maintainer, 2026-06-13). The agent needs several SEPARATE
+Orientation index (2026-06-13). The agent needs several SEPARATE
 capabilities, each solving a DIFFERENT problem. They interact and stack, but
 conflating them causes design errors (e.g. "the agent can't form 'get the key'
 because it lacks language" — wrong: it lacks temporal abstraction; language is a

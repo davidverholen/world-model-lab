@@ -1,6 +1,6 @@
 ---
 status: current
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2511.08544, arxiv:1811.04551]
 verified: true

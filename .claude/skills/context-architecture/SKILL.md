@@ -60,7 +60,7 @@ existence at ~3 pages; before that, file pages under `concepts/`.
 ```yaml
 ---
 status: stub | draft | current | stale | deprecated
-owner: human | agent        # who may change the page's MEANING
+owner: <domain>             # the domain/area that owns this page (single-domain projects: one value)
 scope: local | shared       # shared = reusable beyond this project
 sources: [arxiv:XXXX.XXXXX] # ids from sources/SOURCES.md
 verified: true | false      # key claims checked against the source itself?
@@ -75,8 +75,8 @@ markers for future work, not errors).
 **Authority rules (non-negotiable):**
 
 1. `stub`/`stale`/`verified: false` pages must not be cited as authority anywhere.
-2. `owner: human` pages: agent proposes (draft/PR), never silently rewrites meaning.
-   Accepted ADRs are immutable — supersede, don't edit.
+2. `decisions/` (ADRs) and the meaning of `current` design/concept pages: agent proposes
+   (draft/PR), never silently rewrites meaning. Accepted ADRs are immutable — supersede, don't edit.
 3. Precedence: raw source > paper page > concept page > INDEX summary.
 4. `scope: local` lessons need an explicit curation step (logged) to become `shared`.
 5. Unread material lives in QUEUE.md only. The queue may be long; the wiki may not be
@@ -85,7 +85,7 @@ markers for future work, not errors).
 **Bootstrap steps:** create tree → write SCHEMA.md + PROCESS.md (copy from this
 project or restate the rules above) → templates for concept/paper/decision/experiment →
 seed SOURCES.md with whatever the project already trusts → record the adoption itself
-as ADR 0001 or 0002 (`owner: human`, get it accepted) → first LOG.md entry → add the
+as ADR 0001 or 0002 (get it accepted) → first LOG.md entry → add the
 **binding rules** section to the project's CLAUDE.md:
 
 > 1. Start from INDEX.md; load only task-relevant pages (minimum needed context).
@@ -110,7 +110,7 @@ explorations become new pages.
 invalidate (→ `stale`); orphan pages; broken `[[links]]`; pages with
 `last_reviewed` > 90 days; concepts mentioned ≥3× without a page; stubs cited as
 authority (violation — fix the citer). Lint may downgrade status; only the human
-upgrades `owner: human` pages to `current`.
+upgrades pages to `current`.
 
 **Learning-signal routing** (the curation gate — run before ending any session that
 produced learnings):

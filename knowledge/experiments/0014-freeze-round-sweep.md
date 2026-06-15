@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: []
 verified: true
@@ -17,7 +17,7 @@ the flywheel improves the data) raises the ceiling without losing stability:
 **fenc@3 or fenc@4 clears BOTH bars** (mean ≥55%, no >20pp post-freeze crash) at
 the standard env budget. Counter-outcome: later freezes re-admit crashes before
 the freeze lands (rounds 1–3 are where they historically begin) — then the answer
-is freeze@2 + budget extension, a different trade to put to the maintainer.
+is freeze@2 + budget extension, a different trade to consider.
 
 Arms (3 seeds each, vs fenc@2 40/50/50 and utd 80/50/60):
 (a) fenc@3; (b) fenc@4. UTD ×4 throughout, standard protocol.

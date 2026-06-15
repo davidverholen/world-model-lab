@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: false
 last_reviewed: 2026-06-14
@@ -8,7 +8,7 @@ last_reviewed: 2026-06-14
 
 # Rung 4: manual-conditioned world model (reading-to-learn-dynamics)
 
-**Status: proposed design, for the maintainer's review.** The agent side of the grounding
+**Status: proposed design, for review.** The agent side of the grounding
 program; consumes the crafter-rtfm env ([[grounding-env-spec]]). Builds on the validated
 rung-3 foundation: frozen DINO encoder + RSSM, both shown to carry full tech-tree perception
 end-to-end ([[0031-semantic-foundation-probe]]).
@@ -19,7 +19,7 @@ end-to-end ([[0031-semantic-foundation-probe]]).
 (recipes / referents randomized per episode, hidden from pure exploration) and acts on it —
 *reading-to-learn-DYNAMICS*, not instruction-following (text = the rules, not text = the goal).
 
-**The load-bearing risk — "baking" (the maintainer's constraint).** The trivial-but-wrong
+**The load-bearing risk — "baking" (the anti-baking constraint).** The trivial-but-wrong
 solution is an agent that, during training, **compiles manual content into its weights** — a
 fixed manual-token → behavior mapping — so it *appears* to use the manual but never actually
 reads at test time. A baked agent succeeds on training manuals and **fails on a novel or

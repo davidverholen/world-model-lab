@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [arxiv:2508.10104]
 verified: true
@@ -11,7 +11,7 @@ last_reviewed: 2026-06-14
 
 ## Hypothesis
 
-Watching the 0027 agent (crafter_steps s1) play, the maintainer observed the **drink-at-cap
+Watching the 0027 agent (crafter_steps s1) play, we observed the **drink-at-cap
 spam** survives: at water it keeps issuing `do` (=collect_drink) even at the drink cap (9),
 a no-op. The two-hot reward head (0025) reduced but did not kill this. Proposed mechanism:
 the agent is **perceptually blind to its own vitals** — Crafter renders health/food/drink/
@@ -27,7 +27,7 @@ true stats with high R², the info IS present (the actor's fault, fixable AC-sid
 vitals are NOT linearly decodable (R² low, near the shuffled-control floor), the encoder drops
 them → architectural signal (need a stat-aware perception path; do NOT hardcode the cap).
 
-Predict (maintainer's lean + mine): the **vitals** (esp. `drink`) probe **low** (HUD washed
+Predict: the **vitals** (esp. `drink`) probe **low** (HUD washed
 out), while spatial/material structure the encoder was built for is fine. Patch pooling
 (cls+patch) may recover more than cls alone if the HUD survives in patch tokens.
 

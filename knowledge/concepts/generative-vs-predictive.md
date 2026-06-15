@@ -1,15 +1,15 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: []
-verified: false   # design brainstorm (maintainer, from a LeCun vs Eric Xing debate)
+verified: false   # design brainstorm (from a LeCun vs Eric Xing debate)
 last_reviewed: 2026-06-13
 ---
 
 # Generative vs Predictive (and why hallucination is a third axis)
 
-## The debate (maintainer, 2026-06-13, LeCun vs Eric Xing)
+## The debate (2026-06-13, LeCun vs Eric Xing)
 
 Xing: the encoder's latent is partial/lossy; some tasks need to reconstruct full
 reality → you need a generative decoder. LeCun: the partiality is a FEATURE —
@@ -75,7 +75,7 @@ dies on.
 [[world-models]] · [[jepa]] · [[0017-imagination-actor-critic]] ·
 [[0018-continue-predictor]] · [[lecun-2022-path]]
 
-## Imagination as the source of novelty (maintainer, 2026-06-13)
+## Imagination as the source of novelty (2026-06-13)
 
 The reframe: an original idea IS a hallucination that survived verification.
 Imagination = blind variation; reality-testing = selection; creativity = the loop
@@ -102,10 +102,10 @@ The machinery that SUPPRESSES bad imagination (continue predictor, trust-weighti
 corroboration) is the SAME machinery that, pointed at plausible-unexplored regions,
 CULTIVATES good imagination. Suppression and creativity are one mechanism, two aims.
 
-## Does imagination need generative AI? (maintainer, 2026-06-13 — goals-divergence with LeCun)
+## Does imagination need generative AI? (2026-06-13 — goals-divergence with LeCun)
 
 The divergence is about GOALS, not correctness: LeCun optimizes control/prediction
-accuracy (generation = liability); the maintainer optimizes human-like cognition/gaming
+accuracy (generation = liability); this project optimizes human-like cognition/gaming
 (imagination, tutorials, creativity). His "no generation" is right for his goal, not
 a law.
 
@@ -114,7 +114,7 @@ Sharpening "imagination requires generative AI":
   decoder/pixels. Imagination = forward simulation in *some* representation; it does
   not fundamentally need pixel generation. For the agent's own planning, latent
   suffices (LeCun right).
-- **Generative is PRACTICALLY needed for two of the maintainer's goals**, not fundamentally:
+- **Generative is PRACTICALLY needed for two of the project's goals**, not fundamentally:
   (a) **knowledge import / tutorials** — text→pixels is solved (Sora/SD), text→our-
   latent is not; routing through pixels borrows a solved generative model to turn
   language into experience (= arch 2b). (b) **interpretability** — a decoder lets us
@@ -137,7 +137,7 @@ either/or. And **testable**: can we map text→belief-latent DIRECTLY (LeCun-pur
 must we render→re-encode (generative)? Cheap test at Messenger/RTFM scale — earn the
 generative module with evidence rather than assume it.
 
-## Generation is lazy & attention-gated (maintainer, 2026-06-13 — refines the amodal case)
+## Generation is lazy & attention-gated (2026-06-13 — refines the amodal case)
 
 Correction to "3D occlusion ⇒ generative": what occlusion needs is the LATENT/belief
 to TRACK persistence (object permanence as a fact held in the belief vector: "person
@@ -147,7 +147,7 @@ the abstract latent suffices. Compute-efficient AND cognitively accurate (you do
 render the room behind you every tick). ⇒ persistent world-state stays latent
 (LeCun); generation is an occasional on-demand op, not a continuous requirement.
 
-Knowledge-import pipeline (maintainer): text→latent is solved by COMPOSITION —
+Knowledge-import pipeline: text→latent is solved by COMPOSITION —
 text→video (solved, domain-specific text-conditioned gen) → video→latent (our
 encoder). Seams: (1) needs a domain video generator (Oasis/Genie-class for
 Minecraft, text-hooked); (2) encoder must survive generated-frame distribution shift

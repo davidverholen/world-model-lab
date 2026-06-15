@@ -1,6 +1,6 @@
 ---
 status: proposed
-owner: human
+owner: world-model
 scope: local
 sources: []
 verified: false
@@ -9,15 +9,15 @@ last_reviewed: 2026-06-15
 
 # 0007: Crafter mastery = "directable competence" (the rung-3 exit milestone)
 
-**Status: PROPOSED (2026-06-15) — for the maintainer to ratify.** Drafted from a design
+**Status: PROPOSED (2026-06-15) — pending ratification.** Drafted from a design
 conversation; captures a major-milestone commitment so the autonomous loop has a concrete target
 to optimize against instead of a vibe.
 
 ## Context
 
 We have validated **reading-to-learn-dynamics** at length-1 on crafter-rtfm (exp 0036: genuine,
-content-sensitive, `swapped ≪ correct` on held-out, ignited from scratch). The maintainer set the
-strategic frame: **master Crafter — the purpose-built 2D RL env — before advancing to 3D (Phase 4).**
+content-sensitive, `swapped ≪ correct` on held-out, ignited from scratch). The strategic
+frame: **master Crafter — the purpose-built 2D RL env — before advancing to 3D (Phase 4).**
 This is the no-rung-skipping discipline of [[0003-environment-ladder]], applied: don't climb to 3D
 before we've actually finished the 2D game built for exactly this.
 

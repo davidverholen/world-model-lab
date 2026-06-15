@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: agent
+owner: world-model
 scope: local
 sources: [arxiv:2206.04114]
 verified: true
@@ -258,7 +258,7 @@ the manual supplying the recipe and hierarchy supplying the credit channel), the
 to a representation / policy-gradient problem, not a temporal-abstraction problem.
 
 **Pre-registration note:** this experiment should be registered under [[0044]] once the
-maintainer confirms the direction and architecture choices are settled in ADR-0007.
+direction and architecture choices are settled in ADR-0007.
 
 ## Open questions
 

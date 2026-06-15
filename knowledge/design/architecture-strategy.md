@@ -1,17 +1,16 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 sources: [openreview:lecun-path]
-verified: false   # design strategy (maintainer, 2026-06-13); resolve empirically at rung 3/5b
+verified: false   # design strategy (2026-06-13); resolve empirically at rung 3/5b
 last_reviewed: 2026-06-13
 ---
 
 # Architecture Strategy: modes, interfaces, reusable components
 
 How the SYSTEM is composed (vs [[agent-architecture]] = what the current system IS,
-vs [[capability-map]] = what capabilities it needs). Design brainstorm with the maintainer;
-the calls here are resolved empirically at rung 3/5b, not committed abstractly.
+vs [[capability-map]] = what capabilities it needs). Design brainstorm; the calls here are resolved empirically at rung 3/5b, not committed abstractly.
 
 ## Epistemic modes (not the default loop)
 
@@ -58,8 +57,7 @@ Shape: **reusable components + stable interfaces + a per-mode orchestrator**
 once; = LeCun's Path-paper architecture). Decide joint-vs-staged and
 frozen-pretrained-vs-from-scratch EMPIRICALLY at rung 3/5b via the tier ladder
 ([[hierarchy-and-credit]]), not abstractly. Literature-first next move: FULL read of
-[[lecun-2022-path]] (the reference for modular cognitive architecture — the maintainer has now
-re-derived its configurator/modules from first principles 3×).
+[[lecun-2022-path]] (the reference for modular cognitive architecture — its configurator/modules have been re-derived from first principles 3×).
 
 ## Links
 

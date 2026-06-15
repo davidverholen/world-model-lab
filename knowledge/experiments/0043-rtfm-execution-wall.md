@@ -1,6 +1,6 @@
 ---
 status: draft
-owner: human
+owner: world-model
 scope: local
 verified: true
 last_reviewed: 2026-06-15
@@ -51,7 +51,7 @@ It also echoes Dreamer-4, which needed explicit per-subtask staging to get *its*
 
 → This is not another rtfm lever — it is the **next major capability** (multi-step execution:
 hierarchy / temporal abstraction / goal-conditioned credit assignment), and it pays off on BOTH the
-reading-execution AND the plain-Crafter-depth fronts at once. Maintainer's strategic call + ADR-0007
+reading-execution AND the plain-Crafter-depth fronts at once. A strategic project call + ADR-0007
 ratification (this is its later-pillar work). Park rtfm length-scaling here; reading is demonstrated.
 
 ## Reproduction
