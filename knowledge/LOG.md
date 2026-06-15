@@ -2,6 +2,36 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] SESSION HANDOFF | rung-4 execution thread → next = robust-planning / reward-calibration lever
+
+**Pick-up point for a fresh session.** Read order: this entry → experiments 0043/0044/0045 →
+design/hierarchical-imagination-agent.md (§5) → decisions/0007.
+
+**The arc this session (all committed, working tree clean, 38 tests pass, nothing running):**
+reading-to-learn-dynamics is DEMONSTRATED (exp0036, swap-tested). Then the multi-step-EXECUTION wall:
+exp0043 (WM reads a length-2 gesture, reactive actor can't execute) → exp0044 (CEM-MPC ≈ reactive,
+planning alone doesn't crack it) → exp0045 oracle probe DECISIVE: the WM READS AND VALUES the true
+gesture (oracle pct ≈ 0.88, return 5–6× random) — NOT a fidelity wall — but ~12% of wrong sequences
+are overrated (reward-head OOD false positives) and the planner chases them. **= exp0017–0025
+imagination-exploitation at the PLANNING layer.** Architecture's read→imagine→value chain is intact.
+
+**EXACT next experiment (exp0046): a robust-planning / reward-calibration lever (NOT a new WM).**
+Tools: (a) pessimistic/value-aware MPC — penalize predicted reward by WM uncertainty (two-hot spread /
+ensemble), use the continue head, average over SAMPLED rollouts instead of the prior-mean argmax;
+and/or (b) reward-head OOD regularization so the gesture becomes ~argmax. Re-run the exp0044 MPC A/B
++ the `--oracle-probe`; SUCCESS = oracle pct → 1 AND MPC `correct` lifts off the floor (~0.05). All
+machinery exists: `agents/rtfm_mpc.py` (planner), `--mpc-eval`/`--oracle-probe` flags, curriculum+aux
+config from exp0044/0045 (`dispatch_rtfm.sh exp0046 4 --rounds 30 --curriculum-rounds 10 ... --length
+2 --one-shot --reading-shaping-coef 1.0 --manual-aux-coef 1.0`).
+
+**Parked for the maintainer (owner pages — propose, don't rewrite):** ratify decisions/0007
+(Crafter-mastery milestone) + design/hierarchical-imagination-agent.md (both proposed/draft).
+
+**Playable artifact:** best watchable agent = rung-3 Crafter `runs/_legacy/crafter_rew_s2.pt`
+(`uv run python -m world_model.play --checkpoint runs/_legacy/crafter_rew_s2.pt`) — survival breadth,
+not deep tree. The rtfm reading agents are NOT wired into `play` (would need text-enc + ConditionedRSSM
++ manual rendering); optional small build if a visual of the reading agent is wanted.
+
 ## [2026-06-15] curation | exp 0045: oracle probe — WM reads+values the gesture; wall is reward-head OOD calibration
 
 exp0045 (`--oracle-probe`, commit 692c233): scores the TRUE 2-action gesture (privileged manual_facts,
