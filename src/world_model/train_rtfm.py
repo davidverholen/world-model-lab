@@ -365,7 +365,12 @@ def main() -> None:
     p.add_argument("--window", type=int, default=12)
     p.add_argument("--burn-in", type=int, default=4)
     p.add_argument("--horizon", type=int, default=10)
-    p.add_argument("--length", type=int, default=2)  # recipe gesture length
+    p.add_argument("--length", type=int, default=2)  # recipe gesture length (the TARGET length)
+    # Length curriculum (RTFM/Messenger lineage + Dreamer-4 "deep tree needs staging"): for the
+    # first N rounds, train+eval at length 1 (where reading IGNITES, exp 0036) so the agent carries
+    # the reading skill into the harder --length target. 0 = OFF (fixed --length throughout, the
+    # exp-0041 cold-start that did NOT ignite at length-2).
+    p.add_argument("--curriculum-rounds", type=int, default=0)
     p.add_argument("--max-steps", type=int, default=48)
     # one_shot (HO-0006): tutorial forfeit after the first gesture-length window → kills
     # within-episode search, so reading is the ONLY path to reward (the honest grounding test).
@@ -446,9 +451,12 @@ def main() -> None:
         # the agent ends up standing on the sparse honest reward alone (eval always runs at coef=0).
         denom = max(1, args.rounds - 1)
         shaping_coef = args.reading_shaping_coef * max(0.0, 1.0 - rnd / denom)
+        # Length curriculum: length-1 warm-up for the first --curriculum-rounds, then the --length
+        # target. cur_len drives BOTH collection and eval, so the round line shows the regime.
+        cur_len = 1 if rnd < args.curriculum_rounds else args.length
         print(
             f"round {rnd}: collecting {args.episodes_per_round} episodes "
-            f"(shaping_coef={shaping_coef:.3f}) ...",
+            f"(len={cur_len} shaping_coef={shaping_coef:.3f}) ...",
             flush=True,
         )
         ev = collect_rtfm(
@@ -456,7 +464,7 @@ def main() -> None:
             registry,
             agent,
             args.episodes_per_round,
-            args.length,
+            cur_len,
             train_seeds,
             ManualMode.CORRECT,
             device,
@@ -510,7 +518,7 @@ def main() -> None:
             m.eval()
         eval_agent = RTFMAgent(enc, text_enc, rssm, actor, n_act, device, epsilon=0.0)
         r = evaluate_rtfm(
-            eval_agent, eval_seeds[: args.n_eval_seeds], args.length, args.max_steps, args.one_shot
+            eval_agent, eval_seeds[: args.n_eval_seeds], cur_len, args.max_steps, args.one_shot
         )
         print(
             f"  recon={recon:.3f} kl={kl:.3f} actor_loss={al:.3f} critic_loss={cl:.3f} "
