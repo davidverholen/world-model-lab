@@ -2,6 +2,24 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | design doc: hierarchical imagination agent (dual-process planning) — drafted from a design conversation
+
+New `design/hierarchical-imagination-agent.md` (draft, owner:human — for maintainer review). The
+agent-side design for the next major capability after reading, targeting the multi-step-EXECUTION wall
+(exp0043) and ADR-0007. Architecture co-designed with the maintainer: **System-1 reactive default**
+(amortized policy, automatic, no language) / **System-2 deliberate fallback** (recursive read-grounded
+decomposition + imagination/MPC, sketched in language) / **compilation** (System-2 distills into
+System-1 — "done 100× → automatic", reuses exp0016 actor-distillation) / **confidence-gated
+arbitration** (escalate when the WM can't confidently imagine a path to the goal → fetch language
+read/LLM → re-plan). Key principles: depth via RECURSIVE decomposition (HTN), not fixed N-levels;
+the recipe DAG is READ, not learned (Director's VQ-manager = fallback); text is the System-2 *sketch*
+interface (read now, frozen/commodity LLM far seam) NOT the runtime default; reading becomes
+demand-driven (read your knowledge gaps). LOAD-BEARING RISK called out: arbitration needs CALIBRATED
+uncertainty — the exp0017–0025 overconfidence dragon — else an overconfident WM never asks for help.
+Near-term staircase pinned to exp0044 (CEM-MPC executes the length-2 leaf the reactive actor couldn't),
+then compile-back, then 1-level decomposition on a Crafter state-chain. Folds into ADR-0007 later
+pillars. Next: pre-register + run exp0044.
+
 ## [2026-06-15] ingest | Director: Deep Hierarchical Planning from Pixels (Hafner, Lee, Fischer, Abbeel — NeurIPS 2022, arxiv:2206.04114)
 
 Verified: arXiv abstract page confirms exact title, all four authors, submission 2022-06-08, NeurIPS 2022
