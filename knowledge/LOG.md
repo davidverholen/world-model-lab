@@ -2,6 +2,62 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] ingest | Dreamer 4: Training Agents Inside of Scalable World Models (Hafner, Yan, Lillicrap, 2025) → papers/dreamer4-2025.md (method depth)
+
+Trigger: maintainer priority (direct successor to DreamerV3; transformer WM, shortcut forcing,
+offline imagination RL, and Minecraft diamonds all bear on our rung-3 decision and ADR-0007).
+Source arxiv:2509.24527 already verified + registered in SOURCES.md (2026-06-12). Primary source:
+TalkRL podcast transcript with Danijar Hafner (direct author); secondary: Harold Benoit technical
+writeup + EmergentMind summary + unofficial PyTorch implementation README. PDF compressed/inaccessible.
+
+Pages changed:
+- REPLACED knowledge/papers/dreamer4-2025.md stub → method-depth draft. Sections: full
+  transformer WM architecture (tokenization, spatial/temporal factored attention, context window,
+  action conditioning, comparison to RSSM); shortcut forcing mechanism (step-size conditioning,
+  x-prediction vs v-prediction, ramp weighting, 16× speedup from 64→4 denoising steps);
+  offline agent training pipeline (3 phases: WM pretraining → BC finetuning with agent tokens →
+  imagination RL with PMPO + KL-to-BC prior); compute/data table; explicit strategic analysis for
+  our program on all three questions (RSSM vs transformer, shortcut forcing adoption,
+  offline-imagination-to-diamond implications for ADR-0007).
+- UPDATED knowledge/INDEX.md — promoted dreamer4-2025.md line from stub to draft with
+  substantive description.
+- UPDATED knowledge/sources/QUEUE.md — marked dreamer4 ingested in High priority section.
+- UPDATED knowledge/concepts/imagination-training.md — expanded Dreamer 4 entry in lineage
+  section with technical detail; promoted verified: false → true + bumped last_reviewed.
+
+Key findings for our program:
+1. RSSM is NOT obsolete at our scale. The transformer WM (2B params, 256–1024 TPUs, H100 for
+   inference) is a scale result; the ideas (sparse temporal attention, x-prediction) are
+   portable but the architecture itself isn't home-lab viable. The small-transformer WM line
+   (arxiv:2502.01591, arxiv:2605.16457) is the right comparison before any rung-3 pivot.
+2. Shortcut forcing does NOT subsume our exps 0017–0025 fixes. It addresses denoising artifacts
+   in diffusion WMs; our fixes (continue predictor, critic-on-replay, two-hot) address
+   actor-calibration in RSSM WMs. The problems are at different layers; both sets of fixes remain
+   valid in their respective architectures.
+3. The offline-imagination-to-diamond pipeline validates ADR-0007's structure, specifically the
+   multitask achievement-hierarchy training (their ~20 subtasks = our directable-competence goal
+   conditioning). Their KL-to-BC prior serves the same exploitation-guard role as our
+   critic-on-replay, but is only available when an offline dataset with BC prior exists.
+
+## [2026-06-15] scout | DeepMind world-model landscape 2025-2026: 4 verified items, 3 queued
+
+Scout triggered by maintainer seeing a possible breakthrough video. Searched the Genie family,
+Dreamer line, and adjacent players. Findings:
+
+- Dreamer 4 (arxiv:2509.24527) — already in SOURCES.md (added 2026-06-12). REAL paper, Hafner+Yan+
+  Lillicrap, Sep 2025. First agent to get Minecraft diamonds from offline data. Relevant to our stack.
+- Genie 2 (Dec 2024, blog-only) — added as web:genie2-blog to SOURCES.md. Generative pixel WM, no
+  paper, no planning substance. NOTE TO: hype / not our architecture.
+- Genie 3 (Aug 2025, blog-only) — added as web:genie3-blog to SOURCES.md. Real-time 720p/24fps,
+  no paper. Generative pixel WM + SIMA 2 integration. Substance is real but it is a video generator,
+  not a latent-predictive planner; not relevant to our architecture.
+- SIMA 2 (arxiv:2512.04797, Nov 2025) — added to SOURCES.md and QUEUE.md (Medium). Real paper.
+  Gemini agent + Genie 3 worlds + self-generated task/reward loop. Closest published
+  instantiation of "agent trains in dreamed worlds" thesis, but at pixel not latent level.
+
+No "Genie 4" or other 2026 DeepMind WM announcement found. The likely video the maintainer saw was
+either Genie 3 (Aug 2025) or the SIMA 2 + Genie 3 demo. See final report for substance breakdown.
+
 ## [2026-06-15] curation | ADR 0007 PROPOSED: Crafter mastery = "directable competence" (rung-3 exit milestone)
 
 From a design conversation with the maintainer. Set the major milestone: master Crafter (the

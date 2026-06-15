@@ -40,6 +40,9 @@ Citation rule: a manuscript may cite only sources whose page is at read depth
 | arxiv:2506.01622 | General agents contain world models (Richens et al.; title corrected at verification) | https://arxiv.org/abs/2506.01622 | paper | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
 | arxiv:2109.06780 | Crafter: Benchmarking the Spectrum of Agent Capabilities (Hafner) | https://arxiv.org/abs/2109.06780 | paper | yes (2026-06-12, abstract) | 2026-06-12 |
 | arxiv:2411.14499 | Survey: Understanding World or Predicting Future? | https://arxiv.org/abs/2411.14499 | survey | yes (2026-06-12, title via arXiv API) | 2026-06-12 |
+| arxiv:2512.04797 | SIMA 2: A Generalist Embodied Agent for Virtual Worlds (DeepMind, Dec 2025) | https://arxiv.org/abs/2512.04797 | paper | yes (2026-06-15, title+authors+abstract via arXiv page) | 2026-06-15 |
+| web:genie2-blog | Genie 2: A large-scale foundation world model — Google DeepMind blog (Dec 2024, no paper) | https://deepmind.google/blog/genie-2-a-large-scale-foundation-world-model/ | blog | yes (2026-06-15, fetched) | 2026-06-15 |
+| web:genie3-blog | Genie 3: A new frontier for world models — Google DeepMind blog (Aug 2025, no paper) | https://deepmind.google/blog/genie-3-a-new-frontier-for-world-models/ | blog | yes (2026-06-15, fetched) | 2026-06-15 |
 | web:gym-docs | Gymnasium documentation | https://gymnasium.farama.org | docs | no | 2026-06-12 |
 | web:minigrid-docs | MiniGrid documentation | https://minigrid.farama.org | docs | no | 2026-06-12 |
 | web:worldmodels-site | World Models interactive article | https://worldmodels.github.io/ | article | no | 2026-06-12 |

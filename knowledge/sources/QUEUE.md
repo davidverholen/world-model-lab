@@ -101,7 +101,7 @@ mandatory anchors before any ignition experiment.
 - [x] arxiv:2301.04104 DreamerV3 — INGESTED 2026-06-12 → papers/dreamerv3-2023.md
       (implementation-grade; symlog/two-hot/free-bits + critic-EMA-target noted for retention)
 - [ ] arxiv:1803.10122 World Models (Ha & Schmidhuber) + https://worldmodels.github.io/
-- [ ] arxiv:2509.24527 Dreamer 4 — read fully (id verified)
+- [x] arxiv:2509.24527 Dreamer 4 — INGESTED 2026-06-15 → papers/dreamer4-2025.md (method depth: transformer WM architecture, shortcut forcing mechanism, offline imagination RL, strategic analysis)
 - [ ] arxiv:2511.08544 LeJEPA + code https://github.com/rbalestr-lab/lejepa (id verified)
 - [ ] arxiv:2605.26379 When Does LeJEPA Learn a World Model? (id verified; conditions under which JEPA recovers true environment structure)
 - [~] openreview:lecun-path — INGESTED at skim depth 2026-06-12 →
@@ -149,8 +149,25 @@ Read both neutrally; the decision (if any) belongs to a later ADR, not this note
 - [ ] arxiv:2209.00588 IRIS (token-based WM) · arxiv:2405.12399 DIAMOND (diffusion WM)
 - [ ] arxiv:1911.08265 MuZero · arxiv:2310.16828 TD-MPC2 (value-equivalent line)
 - [ ] arxiv:2506.01622 "General agents need world models" (theory; id moderately confident)
-- [ ] arxiv:2402.15391 Genie + Genie 2/3 blogs (deepmind.google)
+- [ ] arxiv:2402.15391 Genie 1 (original; paper on arXiv) + the two successor blog posts (no arXiv papers):
+      web:genie2-blog Genie 2 (Dec 2024, blog-only, no paper; autoregressive latent-diffusion WM, 3D
+      environments from single image, ~60 s consistency, key claim: first playable 3D generative WM) and
+      web:genie3-blog Genie 3 (Aug 2025, blog-only, no paper; 720p / 24 fps / several-minute consistency,
+      text-promptable world events, integrated with SIMA 2 agent training; claim: first real-time
+      interactive general-purpose WM). NOTE: neither Genie 2 nor Genie 3 released a technical paper —
+      blog posts with BibTeX only. Hype ratio is HIGH for the marketing framing; generative-video-WM
+      substance is real but there is NO agentic/planning contribution beyond the demo. Do NOT chase the
+      architecture for our Crafter agent — these are pixel-generators, not latent-predictive planners.
+      Read Genie 1 arXiv paper for the technical baseline; skim the blogs for context only.
 - [ ] arxiv:2109.06780 Crafter · Craftax (github.com/MichaelTMatthews/Craftax)
+- [ ] arxiv:2512.04797 SIMA 2: A Generalist Embodied Agent for Virtual Worlds (DeepMind, Dec 2025) —
+      Gemini-backed embodied agent trained inside Genie 3–generated worlds + self-generated task/reward
+      loop (Gemini proposes tasks, estimates rewards). The "Infinite Training Loop" framing: agent trains
+      inside a generative WM without human data beyond bootstrap. Relevance: this is the closest
+      published instantiation of our reading+imagination thesis (agent gets better in imagined worlds),
+      but at pixel/video level not latent-predictive level. Ingest to understand what the agent-in-WM
+      loop actually contributes vs what is Gemini prior knowledge. Low urgency for Crafter rung; HIGH
+      relevance once we reach the rung-5 "agent trains in dreamed episodes" milestone.
 - [ ] arxiv:2411.14499 world-model survey · arxiv:2405.03520 Sora-as-world-simulator survey
 - [ ] arxiv:2605.25874 WBench (confirmed 2026-06-12 as the late-May AMI-circle
       companion to 2605.26379): multi-turn interactive video world-model benchmark,

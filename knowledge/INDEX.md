@@ -43,7 +43,7 @@ calls these elaborate).
 - [lejepa-2025](papers/lejepa-2025.md) — provable JEPA objective (SIGReg); companion world-model theory paper (stub)
 - [dreamerv3-2023](papers/dreamerv3-2023.md) — reference world-model RL baseline, one config for 150+ tasks (stub)
 - [dynalang-2023](papers/dynalang-2023.md) — DreamerV3-RSSM + streaming language tokens; auxiliary text-prediction loss as grounding ignition; static-manual mismatch analysis for rung-4 (draft)
-- [dreamer4-2025](papers/dreamer4-2025.md) — offline imagination training at scale, Minecraft diamonds (stub)
+- [dreamer4-2025](papers/dreamer4-2025.md) — transformer WM + shortcut forcing, offline imagination RL, Minecraft diamonds; strategic analysis for RSSM-vs-transformer rung-3 decision (draft)
 - [ijepa-2023](papers/ijepa-2023.md) — the first JEPA: multi-block masking, EMA-teacher anti-collapse (vs our SIGReg), method depth (draft)
 - [nikishin-primacy-2022](papers/nikishin-primacy-2022.md) — primacy bias + reset protocol, implementation-grade (draft)
 - [ma-plasticity-2024](papers/ma-plasticity-2024.md) — FAU module diagnostics; critic-bottleneck in model-free; frozen encoders suffice → legitimizes our fenc finding; Adaptive-RR lever (draft)
