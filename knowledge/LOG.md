@@ -23,7 +23,7 @@ WM-fidelity vs MPC-search — maintainer checkpoint (meatier fork than another r
 Two schema/voice changes (no research content altered). (1) The `owner:` frontmatter
 field now names the owning **domain** (`world-model` | `crafter-rtfm`), not an
 authorship role — everything in this repo is `owner: world-model` (88 pages + 4
-templates). The old `owner: human` / `owner: agent` distinction is gone; the
+templates). The old human/agent owner distinction is gone; the
 edit-protection it used to gate is re-anchored on page **type/status** instead:
 `decisions/` (ADRs, immutable once accepted) and experiment **results** (facts) are
 propose-only; `current` design/concept meaning changes via a logged curation step.
