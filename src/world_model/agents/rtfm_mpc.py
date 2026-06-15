@@ -28,35 +28,50 @@ def _rollout_returns(
     mask: torch.Tensor | None,
     actions: torch.Tensor,
     gamma: float,
+    n_rollout_samples: int = 1,
 ) -> torch.Tensor:
     """Discounted predicted return of each action sequence, rolled forward in imagination.
 
     ``state`` is a single belief state (batch 1) broadcast to ``actions.shape[0]`` candidates;
     ``tokens``/``mask`` (the episode manual) are likewise broadcast and threaded into EVERY
     imagined step so the conditioned prior depends on the manual at each rollout step — the same
-    per-step conditioning the WM was trained under. Imagination uses the prior **mean** (not a
-    sample) so candidate scores are not perturbed by rollout sampling noise (a deterministic search
-    surface; see RETURN note in the exp-0044 dispatch).
+    per-step conditioning the WM was trained under.
+
+    ``n_rollout_samples`` (K) controls the rollout estimator (exp 0046). **K=1** (default) uses the
+    prior **mean** — a single deterministic, optimistic point estimate per candidate (the
+    exp-0044/0045 behaviour). **K>1** rolls each candidate forward K times sampling z ~ prior
+    (``.rsample``) and scores by the **mean** return across the K samples: averaging regresses
+    high-variance/unreliable OOD predictions toward the baseline, so the reward head's OOD *false
+    positives* (exp 0045: ~12% of random sequences overrated above the true gesture) are penalised
+    relative to the gesture the WM values *consistently*. See
+    knowledge/experiments/0046-rtfm-robust-planning.md.
 
     Reward at step ``t`` is ``rew(belief_t, a_t)`` — the predicted reward of taking ``a_t`` from the
     current belief — matching the imagination AC's ``rew(bel, a)``-then-step ordering in
     ``train_rtfm.imagine_ac_rtfm``. No value tail: the horizon is meant to cover the short gesture.
     """
     n = actions.shape[0]
+    k = max(1, n_rollout_samples)
     h, z = state
-    h = h.expand(n, -1).contiguous()
-    z = z.expand(n, -1).contiguous()
-    tok = tokens.expand(n, *tokens.shape[1:]).contiguous()
-    msk = mask.expand(n, *mask.shape[1:]).contiguous() if mask is not None else None
-    returns = torch.zeros(n, device=actions.device)
-    for t in range(actions.shape[1]):
-        a_t = actions[:, t]
+    h = h.expand(n * k, -1).contiguous()
+    z = z.expand(n * k, -1).contiguous()
+    tok = tokens.expand(n * k, *tokens.shape[1:]).contiguous()
+    msk = mask.expand(n * k, *mask.shape[1:]).contiguous() if mask is not None else None
+    # Each candidate occupies a contiguous block of k rows (repeat_interleave), so a later
+    # ``.view(n, k)`` groups the k samples of one candidate together.
+    act = actions.repeat_interleave(k, dim=0) if k > 1 else actions
+    returns = torch.zeros(n * k, device=actions.device)
+    for t in range(act.shape[1]):
+        a_t = act[:, t]
         belief = torch.cat([h, z], dim=-1)
         returns = returns + (gamma**t) * rew(belief, a_t)
-        # One imagination step WITHOUT sampling: fold the manual into h (the conditioned
-        # deterministic state), then take the prior MEAN as the next stochastic latent.
+        # One imagination step: fold the manual into h (the conditioned deterministic state), then
+        # advance the stochastic latent — prior MEAN for K=1, a prior SAMPLE per rollout for K>1.
         h = rssm._deter_cond(h, z, a_t, tok, msk)
-        z = rssm._dist(rssm.prior_net(h)).mean
+        dist = rssm._dist(rssm.prior_net(h))
+        z = dist.rsample() if k > 1 else dist.mean
+    if k > 1:
+        returns = returns.view(n, k).mean(dim=1)
     return returns
 
 
@@ -75,6 +90,7 @@ def plan_action(
     device: str,
     gamma: float,
     rng: torch.Generator | None = None,
+    n_rollout_samples: int = 1,
 ) -> int:
     """CEM-MPC: search action sequences in imagination, return the best first action.
 
@@ -94,7 +110,9 @@ def plan_action(
     for _ in range(n_iters):
         # (horizon, n_actions) → sample n_samples per step → (n_samples, horizon) action sequences.
         actions = torch.multinomial(probs, n_samples, replacement=True, generator=rng).T.to(device)
-        returns = _rollout_returns(rssm, rew, state, tokens, mask, actions, gamma)
+        returns = _rollout_returns(
+            rssm, rew, state, tokens, mask, actions, gamma, n_rollout_samples
+        )
         elites = actions[returns.topk(min(n_elites, n_samples)).indices].cpu()
         counts = torch.zeros(horizon, n_actions)
         for t in range(horizon):
@@ -132,11 +150,13 @@ class RTFMMPCAgent:
         n_elites: int = 20,
         gamma: float = 0.99,
         seed: int = 0,
+        n_rollout_samples: int = 1,
     ):
         self.enc, self.text_enc, self.rssm, self.rew = enc, text_enc, rssm, rew
         self.n_act, self.device = n_act, device
         self.horizon, self.n_samples, self.n_iters = horizon, n_samples, n_iters
         self.n_elites, self.gamma = n_elites, gamma
+        self.n_rollout_samples = n_rollout_samples
         self.rng = torch.Generator(device="cpu").manual_seed(seed)
         self._tok = self._mask = self._state = self._prev_a = None
 
@@ -169,6 +189,7 @@ class RTFMMPCAgent:
             self.device,
             self.gamma,
             self.rng,
+            self.n_rollout_samples,
         )
         self._prev_a = torch.tensor([a], device=self.device)
         return a

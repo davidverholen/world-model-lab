@@ -338,7 +338,17 @@ def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
 
 @torch.no_grad()
 def oracle_gesture_probe(
-    rssm, rew, enc, text_enc, eval_seeds, length, one_shot, device, n_random=200, gamma=0.99
+    rssm,
+    rew,
+    enc,
+    text_enc,
+    eval_seeds,
+    length,
+    one_shot,
+    device,
+    n_random=200,
+    gamma=0.99,
+    n_rollout_samples=1,
 ):
     """Localize the exp-0044 wall: does the reward head RANK the TRUE gesture above random ones?
 
@@ -374,9 +384,11 @@ def oracle_gesture_probe(
         embed = enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
         state, _, _ = rssm.obs_step(state, prev_a, embed, tok, mask)
         oa = torch.tensor(oracle, device=device).unsqueeze(0)  # (1, h)
-        o_ret = float(_rollout_returns(rssm, rew, state, tok, mask, oa, gamma)[0])
+        o_ret = float(
+            _rollout_returns(rssm, rew, state, tok, mask, oa, gamma, n_rollout_samples)[0]
+        )
         ra = torch.randint(0, len(names), (n_random, h), device=device)
-        r_ret = _rollout_returns(rssm, rew, state, tok, mask, ra, gamma)
+        r_ret = _rollout_returns(rssm, rew, state, tok, mask, ra, gamma, n_rollout_samples)
         pcts.append(float((r_ret < o_ret).float().mean()))
         o_rets.append(o_ret)
         r_rets.append(float(r_ret.mean()))
@@ -446,6 +458,9 @@ def main() -> None:
     p.add_argument("--mpc-horizon", type=int, default=5)
     p.add_argument("--mpc-samples", type=int, default=200)
     p.add_argument("--mpc-iters", type=int, default=3)
+    # exp 0046: K sampled rollouts per candidate, scored by mean return (K=1 = prior-mean, the
+    # exp-0044/0045 behaviour). >1 penalises reward-head OOD false positives via sample averaging.
+    p.add_argument("--mpc-rollout-samples", type=int, default=1)
     # exp 0044 localizing diagnostic (default off): does the reward head rank the TRUE gesture above
     # random ones? Forks the exp-0044 wall — MPC-search (oracle pct≈1) vs WM-fidelity (pct≈0.5).
     p.add_argument("--oracle-probe", action=argparse.BooleanOptionalAction, default=False)
@@ -608,6 +623,7 @@ def main() -> None:
                 n_iters=args.mpc_iters,
                 gamma=args.gamma,
                 seed=args.seed,
+                n_rollout_samples=args.mpc_rollout_samples,
             )
             rm = evaluate_rtfm(
                 mpc_agent, eval_seeds[: args.n_eval_seeds], cur_len, args.max_steps, args.one_shot
@@ -629,6 +645,7 @@ def main() -> None:
                 cur_len,
                 args.one_shot,
                 device,
+                n_rollout_samples=args.mpc_rollout_samples,
             )
             print(
                 f"  ORACLE pct={op['pct']:.2f} oracle_ret={op['oracle']:.3f} "
