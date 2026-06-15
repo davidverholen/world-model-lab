@@ -2,6 +2,20 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | exp 0042: length curriculum fails — the wall is multi-step EXECUTION, not reading
+
+exp0042 (length-1→2 curriculum, --curriculum-rounds 10 then length-2, commit 991ed32): the len-1
+warm-up ignites (2/4 seeds ground, swapped≪correct — replicates exp0036), but at the switch to
+length-2 `correct` collapses 0.35→0.05 and never recovers over 20 length-2 rounds. 2nd failed
+length-2 lever (after exp0041 cold-start). Converges with the parked swap_follow result (0037–0040)
+into ONE diagnosis: **the WM reads (length-1 grounds, inv_ratio>1), but the actor under-executes** —
+swap_follow ~0.25 even at length-1, and a 2-step gesture won't ignite cold OR warm-started. Bottleneck
+= multi-step/compositional EXECUTION of read content, not reading. This is on the ADR-0007 critical
+path (Crafter deep tree is all multi-step). exp0042 had aux OFF so no inv_ratio at length-2 → can't
+yet tell reading-compositionality vs execution apart. Next: exp0043 (length-2 curriculum + aux ON) to
+localize the wall (inv_ratio>1 + correct≈0 ⇒ pure execution failure). Then the fix targets execution
+= the milestone's later pillars (goal-conditioning, hierarchy) — bigger bets, maintainer's call.
+
 ## [2026-06-15] curation | public-ready pass: owned-GPU model names and LinkedIn URL removed
 
 Mechanical depersonalization pass (no research content changed). Owned GPU model names
