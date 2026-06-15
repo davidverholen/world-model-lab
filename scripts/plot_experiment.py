@@ -88,6 +88,8 @@ REF_LINES = {"inv_ratio": 1.0, "grounding": 0.0}
 # Bookkeeping keys that are monotonic or pure counts — not worth a panel (kept out of the
 # auto-bucket so they don't clutter). buffer = replay size (monotonic); *_n = sample counts.
 IGNORE = {"buffer", "n", "oracle_n"}
+# In a sweep comparison, also skip the schedule (len/shaping_coef are identical across arms).
+COMPARE_SKIP = IGNORE | {"len", "shaping_coef"}
 
 _KV = re.compile(r"([A-Za-z_]\w*)=([-+]?\d*\.?\d+)")
 _ROUND = re.compile(r"^round\s+(\d+):")
@@ -254,13 +256,71 @@ def load(path: Path, quiet: bool = False) -> tuple[dict[str, np.ndarray] | None,
     return aggregate(seeds), len(seeds), n_rounds
 
 
+def load_arms(base: Path) -> list[tuple[str, dict[str, np.ndarray]]]:
+    """Discover the arms of a split experiment: sibling run dirs sharing the base id, e.g.
+    base=runs/exp0047 → runs/exp0047c01, ...c30. Each arm is a normal run; its label is the dir
+    name with the shared prefix stripped (exp0047c10 → 'c10'). Returns [(label, data)]."""
+    arms = []
+    for d in sorted(base.parent.glob(f"{base.name}*")):
+        # Only real run dirs are arms — skips the sibling _preview/ output dir (no s*.log) and any
+        # other non-run match, so the glob can't pull in its own scratch output.
+        if d.is_dir() and any(d.glob("s*.log")):
+            data, _, _ = load(d, quiet=True)
+            if data is not None:
+                arms.append((d.name[len(base.name) :] or d.name, data))
+    return arms
+
+
+def render_compare(
+    arms: list[tuple[str, dict[str, np.ndarray]]], out_dir: Path, base: str, want: set[str] | None
+) -> list[tuple[str, str]]:
+    """One chart PER METRIC, overlaying every arm. Each seed is a thin line colored by arm (an arm's
+    seeds share a color), legend = arm labels — no mean/band, since with many arms the thin lines
+    ARE the comparison. Returns [(slug, metric)]."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    metrics = sorted(
+        {m for _, d in arms for m, v in d.items() if not np.all(np.isnan(v))} - COMPARE_SKIP
+    )
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+    written: list[tuple[str, str]] = []
+    for m in metrics:
+        slug = _slug(m)
+        if want is not None and slug not in want:
+            continue
+        fig, ax = plt.subplots(figsize=(7.5, 4.2))
+        for i, (label, d) in enumerate(arms):
+            if m not in d:
+                continue
+            color = colors[i % len(colors)]
+            for j, row in enumerate(d[m]):  # one thin line per seed; one legend entry per arm
+                if not np.all(np.isnan(row)):
+                    ax.plot(
+                        np.arange(len(row)),
+                        row,
+                        "-",
+                        lw=1.1,
+                        alpha=0.85,
+                        color=color,
+                        label=label if j == 0 else "_nolegend_",
+                    )
+        if m in REF_LINES:
+            ax.axhline(REF_LINES[m], color=_GRAY, ls="--", lw=0.7)
+        ax.set_title(f"{base} — {m} (per arm)", fontsize=11, fontweight="bold")
+        ax.set_xlabel("round")
+        ax.grid(alpha=0.3)
+        ax.legend(fontsize=8, framealpha=0.0, ncol=2)
+        fig.tight_layout()
+        fig.savefig(out_dir / f"{slug}.png", dpi=120, transparent=True)
+        plt.close(fig)
+        written.append((slug, m))
+    return written
+
+
 def write_preview_html(out_dir: Path, subtitle: str, slugs: list[str], interval: int, tick: int):
     """Write a self-refreshing, responsive dashboard. A CSS grid (auto-fit minmax) reflows the
     panels as the window resizes — wide → several columns, narrow → one big readable column. The
     page meta-refreshes every ``interval``s; the ``?t=tick`` cache-buster pulls the fresh PNGs."""
-    cells = "\n".join(
-        f'    <figure><img src="{s}.png?t={tick}" alt="{s}"></figure>' for s in slugs
-    )
+    cells = "\n".join(f'    <figure><img src="{s}.png?t={tick}" alt="{s}"></figure>' for s in slugs)
     (out_dir / "index.html").write_text(
         f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -269,15 +329,18 @@ def write_preview_html(out_dir: Path, subtitle: str, slugs: list[str], interval:
 <title>{subtitle} — live</title>
 <style>
   :root {{ color-scheme: dark light; }}
+  * {{ box-sizing: border-box; }}
   body {{ margin:0; padding:1rem; background:#1e1e1e; color:#cfcfcf;
-          font-family: system-ui, sans-serif; }}
+          font-family: system-ui, sans-serif; overflow-x: hidden; }}
   header {{ display:flex; gap:1rem; align-items:baseline; flex-wrap:wrap; margin:0 0 1rem; }}
   h1 {{ font-size:1.05rem; margin:0; }}
   .meta {{ color:#888; font-size:.85rem; }}
+  /* min(520px, 100%) so a narrow phone gets one full-width column instead of overflowing */
   .grid {{ display:grid; gap:1rem;
-           grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); }}
-  figure {{ margin:0; padding:.4rem; background:#111; border:1px solid #333; border-radius:8px; }}
-  img {{ width:100%; height:auto; display:block; }}
+           grid-template-columns: repeat(auto-fit, minmax(min(520px, 100%), 1fr)); }}
+  figure {{ margin:0; padding:.4rem; background:#111; border:1px solid #333; border-radius:8px;
+            min-width:0; }}
+  img {{ width:100%; max-width:100%; height:auto; display:block; }}
 </style></head>
 <body>
   <header><h1>{subtitle}</h1>
@@ -292,9 +355,7 @@ def write_preview_html(out_dir: Path, subtitle: str, slugs: list[str], interval:
 def _tailscale_ip() -> str | None:
     """Best-effort tailnet IPv4 (so the printed URL is phone-reachable). None if no tailscale."""
     with contextlib.suppress(Exception):
-        out = subprocess.run(
-            ["tailscale", "ip", "-4"], capture_output=True, text=True, timeout=2
-        )
+        out = subprocess.run(["tailscale", "ip", "-4"], capture_output=True, text=True, timeout=2)
         for line in out.stdout.splitlines():
             if line.strip():
                 return line.strip()
@@ -316,38 +377,51 @@ def serve_dir(directory: Path, host: str, port: int) -> int:
     raise SystemExit(f"no free port in {port}..{port + 9}")
 
 
-def watch(p: Path, exp: str, want: set[str] | None, interval: int, host: str, port: int) -> None:
-    """Serve the gitignored runs/<exp>/_preview/ over HTTP and re-render it on an interval. Renders
-    ALL panels full-width by default (the responsive grid IS the overview); --panels narrows it.
-    Never touches committed assets/ — interim figures stay out of git."""
-    preview = (p if p.is_dir() else p.parent) / "_preview"
+def watch(
+    p: Path, exp: str, want: set[str] | None, interval: int, host: str, port: int, compare: bool
+) -> None:
+    """Serve a gitignored _preview/ over HTTP and re-render it on an interval. Single-run mode: all
+    panels for one run (the responsive grid IS the overview). --compare mode: one chart per metric
+    overlaying every sweep arm. --panels narrows either. Never touches committed assets/."""
+    preview = (
+        (p.parent / f"{p.name}_preview")
+        if compare
+        else (p if p.is_dir() else p.parent) / "_preview"
+    )
     preview.mkdir(parents=True, exist_ok=True)
     index = preview / "index.html"
     if not index.exists():  # placeholder so the server has something before the first round lands
         index.write_text("<!doctype html><meta http-equiv=refresh content=2><body>waiting…</body>")
 
     bound = serve_dir(preview, host, port)
-    local = f"http://localhost:{bound}/"
     print(f"serving {preview}/ on {host}:{bound}")
-    print(f"  this machine:   {local}")
+    print(f"  this machine:   http://localhost:{bound}/")
     ts = _tailscale_ip()
     if ts:
         print(f"  on your tailnet: http://{ts}:{bound}/   (open this on your phone)")
     print(f"  reflows on resize, refreshes every {interval}s. Ctrl-C to stop.")
     with contextlib.suppress(Exception):
-        webbrowser.open(local)
+        webbrowser.open(f"http://localhost:{bound}/")
 
     tick = 0
     try:
         while True:
-            data, n_seeds, n_rounds = load(p, quiet=True)
-            if data is not None:
-                subtitle = f"exp{exp} ({n_seeds} seeds, {n_rounds} rounds)"
-                slugs = [_slug(t) for t, _ in select_panels(trim_incomplete(data))]
-                show = [s for s in slugs if want is None or s in want]
-                render_full(data, preview, subtitle, set(show))
-                write_preview_html(preview, subtitle, show, interval, tick)
-                tick += 1
+            if compare:
+                arms = load_arms(p)
+                if arms:
+                    subtitle = f"{p.name} sweep · {len(arms)} arms"
+                    show = [s for s, _ in render_compare(arms, preview, p.name, want)]
+                    write_preview_html(preview, subtitle, show, interval, tick)
+                    tick += 1
+            else:
+                data, n_seeds, n_rounds = load(p, quiet=True)
+                if data is not None:
+                    subtitle = f"exp{exp} ({n_seeds} seeds, {n_rounds} rounds)"
+                    slugs = [_slug(t) for t, _ in select_panels(trim_incomplete(data))]
+                    show = [s for s in slugs if want is None or s in want]
+                    render_full(data, preview, subtitle, set(show))
+                    write_preview_html(preview, subtitle, show, interval, tick)
+                    tick += 1
             time.sleep(interval)
     except KeyboardInterrupt:
         print("\nstopped.")
@@ -375,6 +449,12 @@ def main() -> None:
         help="watch-server bind address (default 0.0.0.0 = all interfaces, incl. tailnet).",
     )
     ap.add_argument("--port", type=int, default=8000, help="watch-server port (default 8000).")
+    ap.add_argument(
+        "--compare",
+        action="store_true",
+        help="split-experiment mode: treat PATH as a base id (e.g. runs/exp0047) and overlay every "
+        "sibling sweep arm (runs/exp0047*) — one chart per metric, a thin line per seed per arm.",
+    )
     args = ap.parse_args()
 
     p = Path(args.path)
@@ -383,7 +463,21 @@ def main() -> None:
     want = set(re.split(r"[,\s]+", args.panels.strip())) if args.panels else None
 
     if args.watch:
-        watch(p, exp, want, args.watch, args.host, args.port)
+        watch(p, exp, want, args.watch, args.host, args.port, args.compare)
+        return
+
+    if args.compare:
+        arms = load_arms(p)
+        if not arms:
+            raise SystemExit(f"no sweep arms found matching {p}*")
+        out_dir = Path("assets") / f"exp-{exp}"
+        written = render_compare(arms, out_dir, p.name, want)
+        print(
+            f"wrote {len(written)} comparison chart(s) to {out_dir}/ for arms: "
+            f"{', '.join(label for label, _ in arms)}"
+        )
+        for slug, metric in written:
+            print(f"  {slug:<28} {metric}")
         return
 
     data, n_seeds, n_rounds = load(p)
