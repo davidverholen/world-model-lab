@@ -2,6 +2,152 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] milestone | exp0047 NEGATIVE closes calibration thread → exp0048 validated-reading built + dispatched
+
+exp0047 (conservative reward head, CROP/CQL) concluded NEGATIVE: 6-coef sweep showed monotonic
+over-suppression (oracle_ret +0.13→−0.13 as α 0.1→3.0), no coef beats the 0.88 baseline — conservatism
+can't separate OOD junk from the sparse true gesture in our starved regime. This CLOSES the
+execution/calibration thread (0044–0047); the durable signal `swap_follow≈0` is the [[0040-rtfm-actor-conditioning]]
+objective/identifiability gap, not execution. Wall-relocation tripwire fired → redirect to the
+objective. Designed [[validated-reading-reward]] (intrinsic reward for the manual's marginal next-state
+predictive value, validated by the real transition — reality as judge, anti-baking + un-wireheadable;
+marginal framing dodges dark-room/noisy-TV). Lit gate (scout): VIME (IG formula), Marino-2020
+(act-to-verify, real-env judge — closest neighbour), ICM (foil), RND (anti-wirehead); novelty:
+relatively novel combination. Ingested VIME + Marino. Built exp0048 (`validated_reading_reward` +
+`--validated-reading-coef`, computed at collection vs `deter_noctx` baseline, detached/no_grad). 42
+tests pass, reviewer (opus) SHIP no-blockers. Dispatched a coef sweep overnight; swap_follow is the
+headline (does it finally lift off 0). Also queued Aleph/Kona (energy-based reasoning, LeCun/Freedman)
++ CQL/CROP papers from the prior thread.
+
+## [2026-06-15] ingest | VIME + Marino (hypothesis-verification) — exp0048 validated-reading lit anchors
+
+Ingested two papers at METHOD depth as the literature anchors for exp0048 (validated-reading intrinsic
+reward). Both sources were already verified in SOURCES.md and queued in the "Intrinsic-motivation /
+validated-reading" section of QUEUE.md; no re-verification performed.
+
+- **papers/vime-2016.md** (arxiv:1605.09674, Houthooft et al., NeurIPS 2016): VIME — information-gain
+  intrinsic reward via BNN dynamics model. Method depth on: the KL(posterior||prior) over BNN
+  parameter space as the intrinsic reward formula; mean-field variational inference approximation of
+  the posterior (diagonal Gaussian, SGVB updates); why this is an information-gain signal rather than
+  a prediction-error signal (the ICM inversion); dark-room and noisy-TV partial-fix properties.
+  Relevance section maps the connection to exp0048: VIME is the single-source IG ancestor; our
+  mechanism is VIME applied contrastively across the manual condition (marginal IG). Gaps documented:
+  no language/reading, single-source not contrastive, no marginal framing.
+
+- **papers/marino-hypothesis-2020.md** (arxiv:2006.15762, Marino et al., 2020): act-to-verify
+  hypothesis verification. Method depth on: the pre-condition/action-sequence/post-condition triplet
+  structure; two-phase policy (setup to reach pre-condition, then execute); resolving reward +-1 gated
+  on real-environment post-condition (not a model); anti-wireheading property (environment is the
+  incorruptible judge). Relevance section includes a structural comparison table (Marino vs exp0048
+  mechanism on 7 dimensions). Gaps documented: no language/reading step, no marginal-value framing,
+  no contrastive dual pass, resolving (+-1) vs confirming (clip>=0).
+
+Both pages cross-link [[icm-2017]] and [[rnd-2018]] as the foil (prediction ERROR = inverted sign)
+and anti-wirehead pattern (frozen external judge) respectively, using unresolved wiki-link notation
+since those pages do not yet exist. Cross-links to [[validated-reading-reward]], [[0048-rtfm-validated-reading]],
+[[vime-2016]], and [[marino-hypothesis-2020]] in the existing design/experiment pages now resolve.
+
+Pages changed: papers/vime-2016.md (created), papers/marino-hypothesis-2020.md (created),
+sources/QUEUE.md (two [x] marks in the Intrinsic-motivation section), INDEX.md (two lines added
+under Papers).
+
+## [2026-06-15] scout | intrinsic-motivation / validated-reading lit gate — 6 found, 6 queued (exp0048 design)
+
+Targeted search for the proposed "intrinsic reward = manual's marginal predictive value, confirmed by
+acting." Search covered: ICM/curiosity prediction-error, VIME/Plan2Explore information-gain,
+Oudeyer-Kaplan learning progress, empowerment (Klyubin / Mohamed-Rezende), Friston dark-room /
+active inference, and specifically: any prior art on intrinsic reward for instruction-following /
+manual-derived prediction confirmation. Full analysis in scout return message (2026-06-15).
+
+QUEUE.md: new section "Intrinsic-motivation / validated-reading (exp0048 design)" added with 4 HIGH
+and 2 MEDIUM items; 3 context items cross-referenced without duplication. SOURCES.md: 6 entries added
+(all ids verified 2026-06-15 via arXiv API or abstract fetch). No wiki pages edited.
+
+NOVELTY VERDICT: the specific mechanism (intrinsic reward = real-environment confirmation of a
+manual-derived dynamics prediction, with marginal-value framing) appears RELATIVELY NOVEL. The closest
+prior art is arXiv:2006.15762 (Marino et al. 2020 — hypothesis verification via acting), which shares
+the "act to test a claim about dynamics" structure but lacks the language-reading / manual-derived
+prediction component and the marginal-value framing. The full combination has not been found.
+
+Pages potentially affected: knowledge/experiments/0047-rtfm-conservative-reward.md (provides forward
+context for the next experiment design), any future exp0048 page.
+
+## [2026-06-15] ingest | CQL + CROP (conservative reward/value) — exp0047 lit anchor
+
+Ingested two papers at METHOD depth as the literature anchor for exp0047 (conservative reward head):
+
+- **papers/cql-2020.md** (arxiv:2006.04779, Kumar et al., NeurIPS 2020): conservative Q-learning;
+  method depth on the α·(E_{a~μ}[Q] − E_{a~π_β}[Q]) regularizer, logsumexp variant, the offline
+  distributional-shift problem, and portability of the regularizer to a reward head (substituting
+  R_hat for Q, one-sided relu for sparse rewards).
+- **papers/crop-2023.md** (arxiv:2310.17245, Li et al., 2023 preprint): CQL push-down applied
+  directly to the learned REWARD estimator in MBRL; L_CROP objective (MSE + α·E_{OOD}[R_hat]);
+  conservative Q lower-bound theory; D4RL dense-reward evaluation; open questions on sparse-reward
+  regime and push-down target (uniform-random vs replay-supported); exp0047 online variant documented
+  (detached belief, one-sided relu clamp, α=3.0, M=16).
+
+Both pages include a "Relevance to our work" section connecting to exp0025, exp0045, exp0046, and
+exp0047. The [[cql-2020]]/[[crop-2023]] links already present in 0047-rtfm-conservative-reward.md
+now resolve to the new pages.
+
+QUEUE.md: two items marked [x] (ingested). INDEX.md: two lines added under Papers. No concept stub
+created (see decision note below).
+
+Decision note — conservative/pessimistic value learning concept stub: NOT created this session.
+Rationale: the field concept is real and linkable (CQL, CROP, MOPO, COMBO, MOReL, CBOP, COPlanner
+all belong to it), but (a) several of those anchors are still queued (MOPO, COMBO, COPlanner), so
+a concept page written now would be partially sourced and would need immediate stub status; (b) the
+two paper pages carry enough cross-linking to serve exp0047 without a concept page; (c) the right
+time to write concepts/conservative-value-learning.md is after the remaining cluster (MOPO, COMBO,
+COPlanner) is ingested and exp0047 is harvested. Flagged for the next curation pass.
+
+## [2026-06-15] scout | reward-head OOD conservatism lit gate — 7 found, 5 newly queued (QUEUE + SOURCES updated)
+
+Targeted search triggered by exp0045/0046 failure: reward head overrates ~12% of OOD action sequences;
+sampled-rollout MPC only partially corrects (oracle pct 0.88→0.92, not 1.0). Root diagnosis: sparse
+positives (~5/60) + no training-time OOD penalty. Search question: what does the literature say about
+conservative/pessimistic reward/value heads that push down estimates on OOD action sequences?
+
+**Papers found and verified (all ids confirmed via arXiv API batch fetch or abstract fetch):**
+
+1. arxiv:2006.04779 CQL (Kumar et al., NeurIPS 2020) — foundational OOD conservatism: push-down Q on
+   random actions, push-up on data. Directly portable to a REWARD head.
+2. arxiv:2005.13239 MOPO (Yu et al., NeurIPS 2020) — already queued; verified id + formula:
+   r_tilde = r_hat - λ * max_i ||Σ_φ^i(s,a)||_F. Targets reward at step level via ensemble.
+3. arxiv:2005.05951 MOReL (Kidambi et al., NeurIPS 2020) — was queued without id; id now verified.
+   Pessimistic MDP that absorbs policy into penalty when leaving data support.
+4. arxiv:2102.08363 COMBO (Yu, Kumar et al., NeurIPS 2021) — CQL-style push-down on value function
+   for model-generated (OOD) rollouts; no ensemble uncertainty required.
+5. arxiv:2210.03802 CBOP (Jeong et al., ICLR 2023) — was queued without id; id now verified.
+   Bayesian posterior lower-bound on value expansion; weights model-free/model-based by uncertainty.
+6. arxiv:2310.17245 CROP (Li et al., 2023 preprint) — NEW. The direct "conservative REWARD head"
+   paper: trains reward estimator to simultaneously minimize prediction error AND predicted reward on
+   random actions (CQL-style push-down on reward head, not Q). The closest published instantiation
+   of our exp0047 target design.
+7. arxiv:2310.07220 COPlanner (Wang et al., 2023) — NEW. DreamerV3 + uncertainty-aware MPC:
+   dynamics uncertainty penalizes reward during imagined rollouts (conservative imagination) while
+   acting as exploration bonus in real env. Direct Dreamer-family analogue to our planning-time
+   pessimism lever.
+
+**SOURCES.md:** 8 rows added (CQL, MOReL, MOPO, COMBO, CBOP, CROP, COPlanner — all verified).
+**QUEUE.md:** MOReL entry updated with verified id (2005.05951); CBOP entry updated with verified id
+(2210.03802) + MOPO formula added; new section "Reward-head OOD conservatism" added with CQL (HIGH),
+CROP (HIGH), COPlanner (HIGH), COMBO (MEDIUM), triaged in priority order for exp0047 design.
+
+**Wiki pages that may now be stale or require updates:**
+- knowledge/design/hierarchical-imagination-agent.md §5 (calibration; CROP/CQL mechanisms directly
+  relevant to the conservative reward head design flagged there)
+- knowledge/experiments/0046-rtfm-robust-planning.md lesson "next" section (now has a concrete
+  lit anchor: CQL+CROP for the reward-head regularizer, COPlanner for the planning-time penalty)
+- Any concept page on "reward modeling" or "value calibration" (none currently exist; candidate
+  for creation once CQL/CROP are ingested)
+
+**Single most actionable mechanism:** CROP (arxiv:2310.17245) = CQL push-down applied directly to
+the reward head. Implement: add α * E_{a~uniform}[R_hat(z,a)] - E_{a~replay}[R_hat(z,a)] to the
+world-model reward-prediction loss. This requires zero architectural change (reward head already
+exists as a two-hot distributional head in our WM); OOD actions are sampled uniformly or from the
+MPC candidate set; α is the single tunable hyperparameter. Ingest CROP before coding exp0047.
+
 ## [2026-06-15] experiment | rung-4 exp0046 — sampled-rollout MPC: PARTIAL (lever real but under-powered)
 
 Ran the pre-registered robust-planning v1: K=10 sampled-rollout MPC (average) vs the reward head's

@@ -105,6 +105,29 @@ class RTFMAgent:
 
 
 @torch.no_grad()
+def validated_reading_reward(rssm, recon_head, state, action, tok, mask, real_next_embed) -> float:
+    """exp 0048: the manual's MARGINAL next-state predictive value, validated against the REAL
+    transition — an intrinsic 'I tested what I read and it held' reward.
+
+    Predict the real next embedding from (belief, action) WITH the manual vs WITHOUT it. The
+    no-manual baseline is ``deter_noctx`` (the anti-baking GRU base — identical recurrent step, the
+    manual only adds the cross-attention context), so the two predictions differ ONLY by the
+    manual's contribution. Reward = clip≥0(err_without − err_with): positive exactly when reading
+    the manual made the REAL outcome more predictable. The marginal framing makes
+    trivially-predictable (dark-room) and noisy states both score ~0 (the manual helps in neither),
+    and reality is the judge so it can't be wireheaded. See
+    knowledge/design/validated-reading-reward.md."""
+    h, z = state
+    h_with = rssm._deter_cond(h, z, action, tok, mask)
+    z_with = rssm._dist(rssm.prior_net(h_with)).mean
+    h_no = rssm.deter_noctx(state, action)
+    z_no = rssm._dist(rssm.prior_net(h_no)).mean
+    err_with = F.mse_loss(recon_head(rssm.belief((h_with, z_with))), real_next_embed)
+    err_no = F.mse_loss(recon_head(rssm.belief((h_no, z_no))), real_next_embed)
+    return float(torch.clamp(err_no - err_with, min=0.0))
+
+
+@torch.no_grad()
 def collect_rtfm(
     buffer,
     registry,
@@ -118,6 +141,8 @@ def collect_rtfm(
     max_steps,
     one_shot,
     shaping_coef=0.0,
+    recon_head=None,
+    validated_reading_coef=0.0,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
@@ -125,6 +150,8 @@ def collect_rtfm(
     reading-gated shaping (HO-0007) as the ignition gradient — annealed → 0 by the caller."""
     rng = np.random.default_rng(0)
     events = 0
+    vr_sum, vr_n = 0.0, 0
+    use_vr = validated_reading_coef > 0.0 and recon_head is not None
 
     def embed_of(obs):
         return agent.enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
@@ -154,6 +181,18 @@ def collect_rtfm(
             r_read = float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
+            # exp 0048: intrinsic validated-reading reward — pay the agent when reading the manual
+            # made THIS real transition more predictable (the manual's marginal predictive value,
+            # judged by reality). Only with a live WM belief (use_agent) + a present manual.
+            if use_vr and use_agent and agent._tok is not None:
+                a_t = torch.tensor([a], device=device)
+                r_read += validated_reading_coef * validated_reading_reward(
+                    agent.rssm, recon_head, agent._state, a_t, agent._tok, agent._mask, nemb
+                )
+                vr_sum += r_read - (
+                    float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
+                )
+                vr_n += 1
             buffer.add(
                 Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done), tag=mid
             )
@@ -164,7 +203,7 @@ def collect_rtfm(
             emb = nemb
             if done:
                 break
-    return events
+    return events, (vr_sum / vr_n if vr_n else 0.0)
 
 
 def wm_train_rtfm(
@@ -473,6 +512,9 @@ def main() -> None:
     # toward zero at WM-train time (coef=0 = off/unchanged). samples = M random actions per belief.
     p.add_argument("--reward-conservative-coef", type=float, default=0.0)
     p.add_argument("--reward-conservative-samples", type=int, default=16)
+    # exp 0048: intrinsic validated-reading reward — pay the agent (at collection) for the manual's
+    # marginal next-state predictive value, validated vs the real transition (0 = off/unchanged).
+    p.add_argument("--validated-reading-coef", type=float, default=0.0)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -564,7 +606,7 @@ def main() -> None:
             f"(len={cur_len} shaping_coef={shaping_coef:.3f}) ...",
             flush=True,
         )
-        ev = collect_rtfm(
+        ev, vr = collect_rtfm(
             buffer,
             registry,
             agent,
@@ -577,9 +619,14 @@ def main() -> None:
             args.max_steps,
             args.one_shot,
             shaping_coef,
+            recon_head=recon_head,
+            validated_reading_coef=args.validated_reading_coef,
         )
         buffer.compute_returns(args.gamma)
-        print(f"  -> {ev} tutorial events; {len(registry.manuals)} manuals; buffer {buffer.size}")
+        print(
+            f"  -> {ev} tutorial events; {len(registry.manuals)} manuals; buffer {buffer.size}"
+            f"; validated_reading={vr:.4f}"
+        )
         wm_out = wm_train_rtfm(
             buffer,
             registry,

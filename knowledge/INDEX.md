@@ -37,6 +37,7 @@ calls these elaborate).
 - [rung4-manual-conditioned-agent](design/rung4-manual-conditioned-agent.md) — the reading-to-learn-dynamics agent: condition the WORLD MODEL (not policy) on the manual; anti-baking as a layered env+eval+probe+arch strategy (draft)
 - [grounding-env-spec](design/grounding-env-spec.md) — the read-to-learn-dynamics benchmark spec (authored here → crafter-rtfm); the env side rung-4 consumes (current)
 - [hierarchical-imagination-agent](design/hierarchical-imagination-agent.md) — dual-process planning: System-1 reactive default / System-2 deliberate (recursive read-grounded decomposition + imagination/MPC) / compilation / confidence-gated arbitration; the next major capability for the multi-step-execution wall (draft)
+- [validated-reading-reward](design/validated-reading-reward.md) — intrinsic reward to TEST what you read: pay the agent for the manual's marginal next-state predictive value, validated against the real transition (reality as un-fakeable judge; marginal framing dodges dark-room/noisy-TV). Targets the [[0040]] objective/identifiability gap; motivates exp0048 (draft, proposal)
 
 ## Papers
 
@@ -51,6 +52,10 @@ calls these elaborate).
 - [qiao-model-primacy-2023](papers/qiao-model-primacy-2023.md) — MBRL primacy bias lives in the WORLD MODEL; world-model resets help only at high UTD; confirms our 0011 negative; redesigned exp 0012 (draft)
 - [lecun-2022-path](papers/lecun-2022-path.md) — the umbrella position paper; module↔our-layer mapping (draft, skim depth)
 - [director-2022](papers/director-2022.md) — Director: manager proposes VQ-VAE subgoals every K=8 steps, worker reaches them in imagination; NeurIPS 2022; direct answer to our multi-step execution wall (draft)
+- [cql-2020](papers/cql-2020.md) — Conservative Q-Learning: push-down Q on OOD actions, push-up on data; NeurIPS 2020; foundational offline-RL conservatism; portable to reward heads (draft)
+- [crop-2023](papers/crop-2023.md) — CROP: CQL-style push-down applied directly to the learned REWARD estimator in MBRL; conservative Q lower-bound; exp0047 lit anchor (draft)
+- [vime-2016](papers/vime-2016.md) — VIME: intrinsic reward = KL(posterior||prior) over BNN dynamics-model parameters (information gain); NeurIPS 2016; single-source IG ancestor of exp0048 marginal-IG validated-reading reward (draft)
+- [marino-hypothesis-2020](papers/marino-hypothesis-2020.md) — Empirically Verifying Hypotheses Using RL: agent acts to confirm/refute pre/action/post triplets against real environment; 2020; closest structural analog to exp0048 act-to-verify loop; missing: reading, marginal-value framing, contrastive dual pass (draft)
 
 ## Labs
 
@@ -110,6 +115,8 @@ calls these elaborate).
 - [0044-rtfm-mpc-execution](experiments/0044-rtfm-mpc-execution.md) — CEM-MPC ≈ reactive at length-2 (mean 0.09 vs 0.06, within noise; neither cracks it) → planning doesn't solve the wall; it relocates to WM multi-step rollout/reward FIDELITY (upstream of all planning/hierarchy). Next: oracle-gesture probe to localize (done)
 - [0045-rtfm-oracle-probe](experiments/0045-rtfm-oracle-probe.md) — oracle probe: WM reads+VALUES the gesture (pct≈0.88, ret 5–6× random) — NOT a fidelity wall. But ~12% of wrong sequences are overrated → reward-head OOD false positives the planner exploits = exp0017–0025 at the planning layer. Fix = reward calibration / robust planning (done)
 - [0046-rtfm-robust-planning](experiments/0046-rtfm-robust-planning.md) — v1 sampled-rollout MPC (K=10, average): PARTIAL. Oracle pct 0.88→0.92, MPC correct 0.05→~0.11 (~2× floor), swapped≈0 (anti-baking holds) — but pct plateaus ~0.91, not 1.0. Averaging shaves SOME prior-mean optimism; the bulk of the ~12% OOD false positives is a starved/miscalibrated reward head (collection-signal: ~5/60 length-2 positives). Next: compose pessimism / continue-gating / reward-OOD-reg (done)
+- [0047-rtfm-conservative-reward](experiments/0047-rtfm-conservative-reward.md) — CROP/CQL conservative reward head (push down predicted reward on OOD actions): NEGATIVE. 6-coef sweep → monotonic over-suppression (oracle_ret +0.13→−0.13 as α 0.1→3.0); no coef beats the 0.88 baseline. Conservatism can't separate OOD junk from the sparse true gesture. CLOSES the execution/calibration thread (0044–0047); swap_follow≈0 throughout = the [[0040]] objective gap → attack the objective (done)
+- [0048-rtfm-validated-reading](experiments/0048-rtfm-validated-reading.md) — intrinsic "validated-reading" reward: pay the agent for the manual's MARGINAL next-state predictive value, confirmed by the REAL transition (deter_noctx baseline; reality is the judge → anti-baking + un-wireheadable). Direct attack on the [[0040]] identifiability gap; headline = does swap_follow lift off 0. Design [[validated-reading-reward]]; lit [[vime-2016]]/[[marino-hypothesis-2020]] (pre-registered, running)
 
 ## Wanted pages (linked but not yet written)
 

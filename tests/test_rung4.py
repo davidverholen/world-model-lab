@@ -248,3 +248,34 @@ def test_conservative_reward_penalty_pushes_ood_reward_down():
         opt.step()
     after = ood_mean()
     assert after < before  # OOD predicted reward was pushed down
+
+
+def test_validated_reading_reward_marginal_sign():
+    """exp 0048: intrinsic validated-reading reward = clip≥0(err_without_manual − err_with_manual)
+    against the REAL next embedding. If reality matches the WITH-manual prediction, the manual
+    helped → reward > 0; if reality matches the no-manual (deter_noctx) prediction, the manual did
+    not help → reward clips to 0. Pins the sign + the marginal (deter_noctx) baseline."""
+    from world_model.train_rtfm import validated_reading_reward
+
+    torch.manual_seed(0)
+    ED, NA, TD = 64, 5, 384
+    rssm = ConditionedRSSM(embed_dim=ED, num_actions=NA, text_dim=TD, ctx_dim=64)
+    recon = torch.nn.Linear(rssm.state_dim, ED)
+    state = rssm.initial(1, "cpu")
+    action = torch.zeros(1, dtype=torch.long)
+    tok = torch.randn(1, 5, TD)
+    mask = torch.ones(1, 5, dtype=torch.bool)
+
+    # Rebuild the two predicted next embeddings exactly as the reward helper does.
+    h, z = state
+    h_with = rssm._deter_cond(h, z, action, tok, mask)
+    pred_with = recon(rssm.belief((h_with, rssm._dist(rssm.prior_net(h_with)).mean)))
+    h_no = rssm.deter_noctx(state, action)
+    pred_no = recon(rssm.belief((h_no, rssm._dist(rssm.prior_net(h_no)).mean)))
+    assert not torch.allclose(pred_with, pred_no)  # the manual actually changes the prediction
+
+    r_helps = validated_reading_reward(rssm, recon, state, action, tok, mask, pred_with.detach())
+    r_nohelp = validated_reading_reward(rssm, recon, state, action, tok, mask, pred_no.detach())
+    assert isinstance(r_helps, float) and isinstance(r_nohelp, float)
+    assert r_helps > 0.0  # reality = with-manual pred → err_with=0, err_no>0 → positive marginal
+    assert r_nohelp == 0.0  # reality = no-manual pred → err_no=0, err_with≥0 → clipped to 0

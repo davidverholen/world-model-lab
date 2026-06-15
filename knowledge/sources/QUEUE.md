@@ -204,6 +204,24 @@ releases; ingest specific outputs as they land.
       Latent Space "Moonlake" episode (latent.space/p/moonlake). Watch for first
       model release.
 
+## Energy-based reasoning (adjacent — LeCun/EBM lineage; raised in conversation 2026-06-15, existence web-verified)
+
+Not on the ladder (this is *reasoning*, not world-modeling) but squarely in the energy-based /
+JEPA paradigm we already track — park here, ingest only if a real paper/preprint lands.
+
+- [ ] **Logical Intelligence — "Kona" (energy-based reasoning model) + "Aleph" (formal-verification
+      agent)** — company founded by **Yann LeCun + Michael Freedman** (Fields Medalist), pitched as
+      the first energy-based-model commercialization shop. Kona: non-autoregressive, reasons in a
+      *continuous latent space*, optimises a whole reasoning trajectory against a learned **energy
+      function** (constraint satisfaction) instead of next-token prediction; gradient-guided local
+      edits to improve trace coherence. Aleph: orchestrates Kona + LLMs + **Lean 4** to emit
+      machine-checkable proofs. Full token-free EBM "LI-1.0" slated 2026. ⚠️ Benchmark/cost numbers
+      (Putnam 76%, "$4 vs $11k") are VENDOR claims — no peer-reviewed paper yet; verify before any
+      ingest. Relevance: energy-based output scoring rhymes with our anti-hallucination /
+      calibrated-imagination thread (reward-head overestimation as an energy-calibration problem) and
+      the LeCun line in concepts/jepa + labs/ami-labs. Sources: logicalintelligence.com/blog/energy-based-models-for-reasoning ;
+      digg.com/ai/7kti5l2f. Watch for the LI-1.0 / arXiv release.
+
 ## Value calibration / model exploitation (exp 0019–0021 thread; scouted 2026-06-13, ids from search results — verify at ingest)
 
 The published toolkit for the inflated-imagined-value failure mode (our 0019/0020
@@ -216,15 +234,68 @@ implemented (exp 0021) reusing DreamerV3's critic-on-replay rather than reinvent
       monotonic-improvement bound. HIGH priority — the canonical short-rollout result.
 - [ ] arxiv:2005.13239 MOPO: Model-based Offline Policy Optimization — penalize reward
       by model uncertainty (lower-bound the true return). Fork-b4 pessimism lever.
-- [ ] MOReL (Kidambi et al. 2020; id to verify) — pessimistic MDP, companion to MOPO.
-- [ ] CBOP: Conservative Bayesian Model-Based Value Expansion (ICLR 2023; ssanner.github.io
-      /papers/iclr23_cbop.pdf; arxiv id to verify) — adaptively weights model rollouts
-      by posterior uncertainty; the calibrated version of value expansion.
+      MOPO formula: r_tilde(s,a) = r_hat(s,a) - λ * max_i ||Σ_φ^i(s,a)||_F
+      (subtract λ × max ensemble std-dev from predicted reward at every step; verified
+      2026-06-15 via WebSearch extracting the formula from d3rlpy docs + NeurIPS source).
+- [ ] arxiv:2005.05951 MOReL: Model-Based Offline Reinforcement Learning (Kidambi,
+      Rajeswaran, Netrapalli & Joachims, NeurIPS 2020) — pessimistic MDP companion to
+      MOPO. Constructs a P-MDP that absorbs the policy into a penalty state when it
+      leaves the data-support region; theoretically minimax-optimal. arXiv id verified
+      2026-06-15 via arXiv API batch fetch.
+- [ ] arxiv:2210.03802 CBOP: Conservative Bayesian Model-Based Value Expansion for
+      Offline Policy Optimization (Jeong, Wang, Gimelfarb et al., ICLR 2023) — trades
+      off model-free vs model-based value estimates according to their epistemic
+      uncertainty (Bayesian posterior lower-bound); the calibrated value-expansion
+      approach. arXiv id verified 2026-06-15 via arXiv API.
 - [ ] (already queued) arxiv:2412.14312 "Stealing That Free Lunch" — Dyna-style limits;
       read alongside this thread (the skeptic's case for why imagination value misleads).
 - NOTE DreamerV3 (papers/dreamerv3-2023.md, INGESTED) is the primary source for b1
       (critic-on-replay β_repval 0.3) + b3 (percentile return-norm, two-hot critic) —
       page corrected 2026-06-13 to capture the replay-critic detail it had missed.
+
+## Reward-head OOD conservatism (exp 0045/0046 wall; scouted 2026-06-15 — reward-head calibration lit gate)
+
+The exp0045/0046 diagnosis: the WM reward head is CONFIDENTLY WRONG on OOD action sequences
+(~12% of random sequences score above the true gesture). The root fix is a training-time
+conservative/OOD-penalized reward head. This cluster maps the published toolkit, in order
+of direct portability to our setting. INGEST the top items before designing exp0047.
+
+### HIGHEST PRIORITY — read before exp0047
+
+- [x] arxiv:2006.04779 CQL: Conservative Q-Learning for Offline Reinforcement Learning
+      (Kumar, Zhou, Tucker & Levine, NeurIPS 2020) — INGESTED 2026-06-15 →
+      papers/cql-2020.md (method depth: conservative regularizer, logsumexp variant,
+      OOD distributional-shift problem, portability to reward heads, relevance to exp0047).
+
+- [x] arxiv:2310.17245 CROP: Conservative Reward for Model-based Offline Policy
+      Optimization (Li, Zhou, Li et al., 2023; preprint, revised April 2026) —
+      INGESTED 2026-06-15 → papers/crop-2023.md (method depth: CROP objective, push-down
+      on reward head not Q, conservative Q lower-bound theory, dense D4RL eval vs sparse
+      open question, push-down target analysis, exp0047 online variant documented).
+
+### HIGH — model-uncertainty pessimism applied to reward/value at planning time
+
+- [ ] arxiv:2310.07220 COPlanner: Plan to Roll Out Conservatively but to Explore
+      Optimistically for Model-Based RL (Wang, Zheng, Sun et al., 2023) — extends
+      DreamerV3-style imagination with uncertainty-aware MPC. Mechanism: uncertainty
+      from the dynamics model functions as a PENALTY during imagined rollouts (planning
+      is conservative: avoid high-uncertainty regions) while serving as a BONUS during
+      real-env exploration. This is MOPO's uncertainty-penalized reward applied at
+      PLANNING time, not training time, and integrated into the Dreamer imagination loop.
+      Closest published analogue to our exp0046 lever (but targeting dynamics uncertainty,
+      not reward-head uncertainty). id verified 2026-06-15 via arXiv API. DECISION
+      RELEVANCE: confirms the pessimistic-planning direction; may provide the specific
+      formula for uncertainty → reward penalty in our MPC loop.
+
+### MEDIUM — offline MBRL conservatism toolkit (context; read after top items)
+
+- [ ] arxiv:2102.08363 COMBO: Conservative Offline Model-Based Policy Optimization
+      (Yu, Kumar, Rafailov, Rajeswaran, Levine & Finn, NeurIPS 2021) — applies CQL-style
+      value regularization to data generated by model rollouts (no explicit uncertainty
+      needed). Regularizes Q DOWN on model-generated (OOD) state-action pairs and UP
+      on real-data pairs; this avoids needing an ensemble uncertainty estimate. More
+      directly portable to our setting than MOPO (we have a single-model WM, not an
+      ensemble). id verified 2026-06-15 via arXiv API.
 
 ## Background / lineage (no rush; see concepts/intellectual-lineage.md; ids unverified)
 
@@ -418,6 +489,76 @@ diagnosis. New sources to queue:
       exploration on Crafter; the "cheap external prior" lever for the deep tree.
 - (already queued) 2307.03486 Achievement Distillation — PROMOTE to ingest if the next fork is
   the actor-side capstone; 2305.00508 structured-exploration is its sibling.
+
+## Intrinsic-motivation / validated-reading (exp0048 design; scouted 2026-06-15)
+
+Targeted lit gate for the proposed mechanism: an intrinsic reward that fires when the agent ACTS to
+test a manual-derived prediction and the real environment CONFIRMS the prediction. Key design questions:
+(1) un-fakeability / wireheading prevention; (2) marginal predictive value (WITH manual vs WITHOUT);
+(3) dark-room / noisy-TV degeneracy. Items below are ordered HIGH → context; read in sequence.
+
+### HIGH PRIORITY — the backbone cluster (ingest before exp0048 is designed)
+
+- [ ] arxiv:1705.05363 **ICM: Curiosity-driven Exploration by Self-supervised Prediction**
+      (Pathak, Agrawal, Efros & Darrell, ICML 2017) — canonical prediction-error intrinsic reward.
+      Mechanism: inverse-dynamics network learns features that ignore action-independent noise (already
+      a partial noisy-TV fix); forward model predicts next state in that feature space; error = intrinsic
+      reward. KEY CONTRAST to our framing: reward is high when prediction FAILS (prediction error) —
+      exactly the wrong sign for "reward accurate manual-derived prediction." ICM is the foil for our
+      mechanism; ingesting it maps the inversion required. id verified 2026-06-15 (arXiv API + abstract).
+
+- [x] arxiv:1605.09674 **VIME: Variational Information Maximizing Exploration**
+      (Houthooft, Chen, Duan, Schulman, De Turck & Abbeel, NeurIPS 2016) — INGESTED 2026-06-15 →
+      papers/vime-2016.md (method depth: BNN posterior update via mean-field VI, KL(posterior||prior)
+      as information-gain intrinsic reward, why IG ≠ prediction-error, dark-room / noisy-TV properties,
+      what VIME is missing vs our contrastive marginal-IG mechanism).
+
+- [ ] arxiv:1810.12894 **RND: Exploration by Random Network Distillation**
+      (Burda, Edwards, Storkey & Klimov, ICLR 2019) — count-based exploration proxy via prediction
+      error of a learnable network against a frozen random target. Mechanism: the frozen target is
+      UN-FAKEABLE by the agent (it doesn't control the target), which is a clean anti-wireheading
+      property. KEY INSIGHT for us: the un-fakeability of our proposed reward follows the same logic —
+      the real environment's response is the "frozen random target" the agent cannot alter; reward
+      is gated on that external response. id verified 2026-06-15 (arXiv abstract fetch).
+
+- [x] arxiv:2006.15762 **Empirically Verifying Hypotheses Using Reinforcement Learning**
+      (Marino, Fergus, Szlam & Gupta, 2020) — INGESTED 2026-06-15 →
+      papers/marino-hypothesis-2020.md (method depth: pre/action/post hypothesis triplet structure,
+      two-phase setup+execution policy, resolving reward ±1 gated on real-env post-condition,
+      anti-wireheading property, what is missing vs our mechanism: no reading, no marginal-value
+      framing, no contrastive dual pass, resolving not confirming).
+
+### MEDIUM — dark-room / noisy-TV literature (design-around, read after HIGH)
+
+- [ ] arxiv:2102.04399 **How to Stay Curious while Avoiding Noisy TVs using Aleatoric Uncertainty
+      Estimation** (Mavor-Parker, Young, Barry & Griffin, ICML 2022) — separates ALEATORIC
+      (irreducible, environment-controlled) vs EPISTEMIC (reducible, learnable) uncertainty; intrinsic
+      reward is suppressed for high-aleatoric transitions. KEY DESIGN LESSON: our "reward only when
+      the real environment confirms the prediction" is structurally aleatoric-safe IF the manual
+      predicts a deterministic outcome — aleatoric stochasticity of the environment would naturally
+      degrade confirmation rate, suppressing reward in noisy states. id verified 2026-06-15 (arXiv).
+
+- [ ] arxiv:2211.10515 **Curiosity in Hindsight: Intrinsic Exploration in Stochastic Environments**
+      (Jarrett, Tallec, Altché, Mesnard, Munos & Valko, ICML 2023) — causal-model solution to
+      noisy-TV: learns representations that capture ONLY the predictable aspects of future states
+      (conditioned on the unpredictable/stochastic aspects via a hindsight variable); intrinsic reward
+      then reflects only reducible uncertainty. KEY DESIGN LESSON: our information-gain framing (WITH
+      manual vs WITHOUT) is only anti-noisy-TV if the manual predicts CONTROLLABLE dynamics, not
+      stochastic noise — same constraint, structural solution differs. id verified 2026-06-15 (arXiv).
+
+### CONTEXT — background papers already known (no re-queue)
+
+- Plan2Explore (arxiv:2005.05960) — already queued under "Self-generated hypotheses / directed
+  exploration"; ensemble-disagreement information gain; useful for comparing our marginal framing
+  against ensemble-disagreement. Do NOT duplicate entry.
+- Oudeyer & Kaplan 2007 (IEEE Trans. Evol. Comp. 11:265) — learning progress = expected REDUCTION
+  in prediction error; avoids both predictable (no progress) and unpredictable (no progress)
+  regimes; the direct ancestor of the "neither boring nor noisy" property we want. No arXiv id
+  (pre-arXiv journal); add to Background section only. NOT duplicated here.
+- Klyubin et al. 2005 / Mohamed & Rezende 2015 (arxiv:1509.08731) empowerment — already referenced
+  under Hierarchy / subgoal emergence queue below; variational empowerment = mutual information
+  between actions and reachable future states; different axis (control, not prediction accuracy).
+  Cross-reference when designing; no new queue entry needed.
 
 ## Hierarchy / subgoal emergence (credit-assignment brainstorm 2026-06-13; ids to verify)
 - [x] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
