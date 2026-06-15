@@ -11,8 +11,8 @@ unrecognised metric still gets plotted in its own panel, so non-RTFM logs work t
     uv run python scripts/plot_experiment.py runs/exp0046
     # 2. feature: also render full-width PNGs for the panels you'll embed
     uv run python scripts/plot_experiment.py runs/exp0046 --panels grounding-headline,eval-scores
-    # 3. live: watch the in-flight run in a responsive auto-refreshing dashboard window
-    uv run python scripts/plot_experiment.py runs/exp0046 --watch 30
+    # 3. live: serve a responsive auto-refreshing dashboard (reach it from your phone via tailscale)
+    uv run python scripts/plot_experiment.py runs/exp0046 --watch 30   # http://0.0.0.0:8000/
 
 Always writes assets/exp-<NNNN>/overview.png (the 3-column contact sheet of ALL metrics — goes at
 the bottom of the report as an at-a-glance overview). With --panels, ALSO writes one full-width
@@ -25,7 +25,11 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import functools
+import http.server
 import re
+import subprocess
+import threading
 import time
 import warnings
 import webbrowser
@@ -285,16 +289,54 @@ def write_preview_html(out_dir: Path, subtitle: str, slugs: list[str], interval:
     )
 
 
-def watch(p: Path, exp: str, want: set[str] | None, interval: int) -> None:
-    """Re-render into the gitignored runs/<exp>/_preview/ on an interval and open a live dashboard
-    window. Renders ALL panels full-width by default (the grid IS the overview); --panels narrows
-    it. Never touches committed assets/ — interim figures stay out of git."""
+def _tailscale_ip() -> str | None:
+    """Best-effort tailnet IPv4 (so the printed URL is phone-reachable). None if no tailscale."""
+    with contextlib.suppress(Exception):
+        out = subprocess.run(
+            ["tailscale", "ip", "-4"], capture_output=True, text=True, timeout=2
+        )
+        for line in out.stdout.splitlines():
+            if line.strip():
+                return line.strip()
+    return None
+
+
+def serve_dir(directory: Path, host: str, port: int) -> int:
+    """Start a background HTTP server rooted at ``directory`` (binds ``host`` — use 0.0.0.0 so the
+    dashboard is reachable from another device on the tailnet). Returns the bound port; tries a few
+    if the first is taken. The thread is a daemon, so Ctrl-C in the render loop ends everything."""
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(directory))
+    for cand in range(port, port + 10):
+        try:
+            httpd = http.server.ThreadingHTTPServer((host, cand), handler)
+        except OSError:
+            continue
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        return cand
+    raise SystemExit(f"no free port in {port}..{port + 9}")
+
+
+def watch(p: Path, exp: str, want: set[str] | None, interval: int, host: str, port: int) -> None:
+    """Serve the gitignored runs/<exp>/_preview/ over HTTP and re-render it on an interval. Renders
+    ALL panels full-width by default (the responsive grid IS the overview); --panels narrows it.
+    Never touches committed assets/ — interim figures stay out of git."""
     preview = (p if p.is_dir() else p.parent) / "_preview"
     preview.mkdir(parents=True, exist_ok=True)
     index = preview / "index.html"
-    print(f"live preview: {index}")
-    print(f"  opening a window; reflows on resize, refreshes every {interval}s. Ctrl-C to stop.")
-    opened = False
+    if not index.exists():  # placeholder so the server has something before the first round lands
+        index.write_text("<!doctype html><meta http-equiv=refresh content=2><body>waiting…</body>")
+
+    bound = serve_dir(preview, host, port)
+    local = f"http://localhost:{bound}/"
+    print(f"serving {preview}/ on {host}:{bound}")
+    print(f"  this machine:   {local}")
+    ts = _tailscale_ip()
+    if ts:
+        print(f"  on your tailnet: http://{ts}:{bound}/   (open this on your phone)")
+    print(f"  reflows on resize, refreshes every {interval}s. Ctrl-C to stop.")
+    with contextlib.suppress(Exception):
+        webbrowser.open(local)
+
     tick = 0
     try:
         while True:
@@ -305,11 +347,6 @@ def watch(p: Path, exp: str, want: set[str] | None, interval: int) -> None:
                 show = [s for s in slugs if want is None or s in want]
                 render_full(data, preview, subtitle, set(show))
                 write_preview_html(preview, subtitle, show, interval, tick)
-                if not opened:
-                    # headless / no browser — the printed path still works
-                    with contextlib.suppress(Exception):
-                        webbrowser.open(index.resolve().as_uri())
-                    opened = True
                 tick += 1
             time.sleep(interval)
     except KeyboardInterrupt:
@@ -329,9 +366,15 @@ def main() -> None:
         "--watch",
         type=int,
         metavar="SECONDS",
-        help="live-preview mode: open a responsive dashboard window and re-render every SECONDS "
-        "into the gitignored runs/<exp>/_preview/ (for the in-flight run; never writes assets/).",
+        help="live-preview mode: serve a responsive HTTP dashboard, re-rendering every SECONDS "
+        "into gitignored runs/<exp>/_preview/ (in-flight run; never writes assets/).",
     )
+    ap.add_argument(
+        "--host",
+        default="0.0.0.0",  # noqa: S104 — intentional: reachable from another device on the tailnet
+        help="watch-server bind address (default 0.0.0.0 = all interfaces, incl. tailnet).",
+    )
+    ap.add_argument("--port", type=int, default=8000, help="watch-server port (default 8000).")
     args = ap.parse_args()
 
     p = Path(args.path)
@@ -340,7 +383,7 @@ def main() -> None:
     want = set(re.split(r"[,\s]+", args.panels.strip())) if args.panels else None
 
     if args.watch:
-        watch(p, exp, want, args.watch)
+        watch(p, exp, want, args.watch, args.host, args.port)
         return
 
     data, n_seeds, n_rounds = load(p)
