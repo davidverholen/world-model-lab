@@ -28,6 +28,24 @@ Final round (coef=0):
 Tutorial events stay at **3–6/round** (vs length-1's 12–27 with the same shaping), and correct never
 lifts off ~0. The recipe that ignited length-1 **does not ignite length-2**.
 
+## Trajectory
+
+### eval scores (no ignition)
+
+![exp0041 eval-scores](../../assets/exp-0041/eval-scores-0-1.png)
+
+_`correct` never lifts off ~0 across all rounds and seeds — the flat trajectory *is* the result.
+The same shaping recipe that ignited length-1 produces no learning signal at length-2._
+
+### collection signal (the cause)
+
+![exp0041 collection-signal](../../assets/exp-0041/collection-signal.png)
+
+_Tutorial events stay pinned at ~3–6/round (vs length-1's 12–27 under identical shaping). A
+single-attempt two-action gesture (~17² space) is too sparse for the one_shot achievement to fire
+from scratch, so there is nothing for `correct` to learn from — the ignition failure is an
+exploration/sparsity wall, not a reading wall._
+
 ## Lesson
 
 **Length-1 is the current ceiling of the rung-4 recipe.** Length-2 is combinatorially much harder:
@@ -57,3 +75,7 @@ length-1 as the demonstrated rung-4 result and consolidate before scaling.
 ## Links
 
 [[0036-rtfm-shaping-ignition]] · [[0040-rtfm-actor-conditioning]] · [[rung4-manual-conditioned-agent]] · [[no-hardcoded-env]]
+
+## All-metrics overview
+
+![exp0041 overview](../../assets/exp-0041/overview.png)

@@ -38,6 +38,21 @@ Final round (29, length-2, coef=0):
   vs length-1's ~0.4. Planning does **not** solve the execution wall.
 - The WM **reads** length-2 throughout (inv_ratio 1.10–1.23), so reading is not the limiter.
 
+## Trajectory
+
+### reactive eval vs MPC eval (the A/B)
+
+![exp0044 eval-scores](../../assets/exp-0044/eval-scores-0-1.png)
+
+![exp0044 mpc-eval](../../assets/exp-0044/mpc-eval-0-1.png)
+
+_Read these two panels together: reactive `correct` sits at ~0.06 and MPC `correct` at ~0.09 over
+the length-2 phase — MPC is consistently but marginally ahead (within eval noise), and **neither
+lifts off the ~0.05–0.10 floor** vs length-1's ~0.4. Swapping a search planner for the reactive
+policy barely moves the needle, so the binding constraint is not the policy's credit assignment but
+the world model's multi-step rollout/reward fidelity (which planning inherits as a ceiling). The
+`reading diagnostic` panel confirms inv_ratio>1 throughout — reading is not the limiter._
+
 ## Lesson — the wall relocates from policy to WORLD-MODEL imagination fidelity
 
 This is the second pre-registered branch: swapping a *search* planner for the reactive policy barely
@@ -78,3 +93,7 @@ investing further — this is a meatier fork than another rtfm lever.
 ## Links
 
 [[0043-rtfm-execution-wall]] · [[hierarchical-imagination-agent]] · [[director-2022]] · [[imagination-training]] · [[0007-crafter-mastery-milestone]]
+
+## All-metrics overview
+
+![exp0044 overview](../../assets/exp-0044/overview.png)

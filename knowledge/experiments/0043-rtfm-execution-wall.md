@@ -27,6 +27,23 @@ The WM's manual-specificity (`inv_ratio`) at length-2 is **indistinguishable fro
 seed — the belief encodes the 2-step gesture just as well as the 1-step one. Yet `correct` collapses
 from ~0.35 to ~0.05. **The world model reads the multi-step recipe; the actor cannot execute it.**
 
+## Trajectory
+
+### reading diagnostic (WM reads it — across the length jump)
+
+![exp0043 reading-diagnostic](../../assets/exp-0043/reading-diagnostic.png)
+
+_`inv_ratio` holds ~1.1–1.27 throughout, **indistinguishable** between the length-1 and length-2
+phases — the belief encodes the 2-step gesture just as well as the 1-step one._
+
+### eval scores (but the actor can't execute it)
+
+![exp0043 eval-scores](../../assets/exp-0043/eval-scores-0-1.png)
+
+_Yet `correct` collapses from ~0.35 to ~0.05 at the length-2 switch. Reading intact + execution
+collapsed, in the same run with no confounder — this is the decisive localization: the world model
+reads the multi-step recipe, the actor cannot execute it._
+
 ## Lesson — the wall is multi-step EXECUTION, and it's the same wall as the rung-3 plateau
 
 This is the decisive, confounder-free localization. Combined with exps 0037–0042 it closes the
@@ -63,3 +80,7 @@ ratification (this is its later-pillar work). Park rtfm length-scaling here; rea
 ## Links
 
 [[0042-rtfm-length-curriculum]] · [[0040-rtfm-actor-conditioning]] · [[hierarchy-and-credit]] · [[temporal-abstraction]] · [[0007-crafter-mastery-milestone]] · [[dreamer4-2025]]
+
+## All-metrics overview
+
+![exp0043 overview](../../assets/exp-0043/overview.png)

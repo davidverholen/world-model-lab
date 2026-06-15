@@ -44,6 +44,24 @@ Final round (round 19, coef=0, aux on):
 - **swap_follow did NOT break its ceiling** (~0.25–0.35, ≈ exp0036). Strengthening the WM's reading
   (which the aux demonstrably did, per inv_ratio) does not move the execution metric.
 
+## Trajectory
+
+### reading diagnostic (the aux works)
+
+![exp0038 reading-diagnostic](../../assets/exp-0038/reading-diagnostic.png)
+
+_`inv_ratio` climbs above the dashed 1.0 line to ~1.1–1.4 — feeding a shuffled manual measurably
+worsens the auxiliary reconstruction, so the belief is manual-specific (genuine reading, not the
+copy-through failure that would pin it at 1.0). The aux did its job on the WM._
+
+### grounding headline (but execution doesn't move)
+
+![exp0038 grounding-headline](../../assets/exp-0038/grounding-headline-0-1.png)
+
+_Despite the rising `inv_ratio`, `swap_follow` stays flat at ~0.25 — strengthening the WM's reading
+does not move the execution metric. Side-by-side, these two panels are the whole result: reading ↑,
+execution flat ⇒ the bottleneck is the actor, not the world model._
+
 ## Lesson
 
 **The swap_follow bottleneck is the ACTOR's execution, not the WM's reading.** Two independent
@@ -83,3 +101,7 @@ research-direction call (park with this writeup).
 ## Links
 
 [[0036-rtfm-shaping-ignition]] · [[dynalang-2023]] · [[rung4-manual-conditioned-agent]] · [[hierarchy-and-credit]] · [[no-hardcoded-env]]
+
+## All-metrics overview
+
+![exp0038 overview](../../assets/exp-0038/overview.png)

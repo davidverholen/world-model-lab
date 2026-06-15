@@ -3,7 +3,7 @@ status: draft
 owner: world-model
 scope: local
 verified: true
-last_reviewed: 2026-06-14
+last_reviewed: 2026-06-15
 ---
 
 # 0036: reading-shaping IGNITES genuine (partial) reading-to-learn-dynamics
@@ -46,6 +46,26 @@ Final round (round 19, **coef=0.000** — shaping fully removed, the honest regi
   gesture (swap_follow well below the scripted reader's 1.0). And **s0 failed entirely**
   (none=correct=swapped, grounding 0) — one seed never grounded.
 
+## Trajectory
+
+### eval scores by manual mode
+
+![exp0036 eval-scores](../../assets/exp-0036/eval-scores-0-1.png)
+
+_`correct` rises well above `none` and `swapped` over training and the `swapped` band stays low —
+the content-sensitivity signal (a wrong manual misleads the agent). The wide min–max band is the
+3/4-vs-1/4 seed split: three seeds ignite genuine reading while s0 never grounds, so its
+`correct≈none≈swapped` pins the band's low edge._
+
+### grounding headline
+
+![exp0036 grounding-headline](../../assets/exp-0036/grounding-headline-0-1.png)
+
+_`grounding` (correct−none) lifts off zero, but `swap_follow` only reaches ~0.15–0.40 — partial
+execution: the agent is *disrupted* by a wrong manual yet does not reliably *execute* the displayed
+gesture (well below a scripted reader's 1.0). This is the "reads but under-executes" frontier the
+Lesson names._
+
 ## Lesson
 
 **First genuine reading-to-learn-dynamics result on this stack: ignited from scratch, content-
@@ -82,3 +102,7 @@ design §6.2 open question — but re-check baking via swapped≪correct on held
 ## Links
 
 [[0034-rtfm-oneshot-ignition]] · [[0033-rtfm-length1-grounding]] · [[rung4-manual-conditioned-agent]] · [[dynalang-2023]] · [[language-grounding]] · [[no-hardcoded-env]]
+
+## All-metrics overview
+
+![exp0036 overview](../../assets/exp-0036/overview.png)

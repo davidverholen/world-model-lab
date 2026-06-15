@@ -1606,3 +1606,19 @@ metric caught a confound correct-none missed (methodology win, validates the ant
 Two-domain finding: crafter-rtfm's reading-necessity gate (text-only stub grounds, swap_follow=1.0)
 does NOT hold for a vision+text learner -> handoff to crafter-rtfm (need a recipe-not-visually-inferable
 mode). Next: that handoff, then re-test (consider direct actor-conditioning). Run stopped, GPU free.
+
+## [2026-06-15] tooling | per-panel trajectory plots for experiment reports
+
+Added `scripts/plot_experiment.py`: parses the rung-3/rung-4 training logs generically (every
+`key=value` per `round N:` block; multi-seed `s*.log` aggregated to mean ± min–max band).
+Theme-agnostic (transparent background + neutral-gray chrome + saturated palette → readable on light
+or dark); unknown metrics auto-bucket into their own panel, so non-RTFM logs degrade gracefully.
+**Always** renders the 3-column `overview.png` (all metrics — goes at the bottom of the report for
+at-a-glance reference) and renders full-width `<panel>.png` ONLY for the slugs passed via `--panels`,
+so committed assets are exactly the figures the report uses (overview + featured panels), nothing
+else. Wired into the `/run-experiment` skill (Record step) and the experiment-page template
+(**Trajectory** = featured panels + readings; **All-metrics overview** = the contact sheet at the
+bottom). Backfilled exp0036/0038/0040/0041/0042/0043/0044/0045. exp0046 left un-plotted — its 4-seed
+run is still training (round 12/30); regenerate at write-up. Note: the 4-seed aggregate corrected a
+single-seed misread of exp0046 (grounding ignites ~0.3 at length-1 then collapses at the length-2
+switch, not pinned-near-zero) — read the aggregate, not one seed.

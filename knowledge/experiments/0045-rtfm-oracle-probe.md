@@ -34,6 +34,19 @@ Stable/rising across the length-2 phase (s0: 0.83 → 0.90). **The WM genuinely 
 true gesture** — it ranks it well above random (≈88th percentile, 5–6× the random return). This is
 **not** a fundamental WM-fidelity wall (that would be pct≈0.5).
 
+## Trajectory
+
+### oracle-gesture probe
+
+![exp0045 oracle-probe](../../assets/exp-0045/oracle-probe.png)
+
+_`oracle_pct` sits stably at ~0.88 across the whole length-2 phase — well above the 0.5
+WM-fidelity-wall floor — and `oracle_ret` runs ~5–6× `oracle_rand_ret`. So the WM reads **and
+values** the true gesture: this is not a fidelity wall. But pct is ~0.88, **not 1.0** — ~12% of
+random sequences still outscore the only rewarding one. Those are reward-head false positives on
+OOD action sequences, exactly what naive MPC is pulled toward. The wall is reward-head OOD
+calibration at the planning layer, not WM rollout fidelity._
+
 ## Lesson — the wall is reward-head OOD calibration; exp 0017–0025 at the planning layer
 
 The decisive detail is that pct ≈ 0.88, **not 1.0**: the gesture is ranked *high but not highest* —
@@ -68,3 +81,7 @@ calibrated-uncertainty / confidence-gating the design flagged as load-bearing
 ## Links
 
 [[0044-rtfm-mpc-execution]] · [[hierarchical-imagination-agent]] · [[imagination-training]] · [[0021-critic-on-replay]] · [[0007-crafter-mastery-milestone]]
+
+## All-metrics overview
+
+![exp0045 overview](../../assets/exp-0045/overview.png)

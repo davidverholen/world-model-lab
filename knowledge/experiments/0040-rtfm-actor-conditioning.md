@@ -36,6 +36,18 @@ Final round (coef=0, held-out eval):
 - **No baking:** swapped never exceeds correct on any seed; the held-out guard held. Actor-
   conditioning didn't cheat — it just didn't help, and destabilized training.
 
+## Trajectory
+
+### grounding headline (null + high variance)
+
+![exp0040 grounding-headline](../../assets/exp-0040/grounding-headline-0-1.png)
+
+_`swap_follow` shows no systematic lift (mean ~0.18, *below* shaping-only) and the min–max band is
+very wide — the high edge is s3 (the best single run in the rung-4 series, swap_follow 0.40) and the
+low edge is s1/s2's collapse to 0.05. Capacity exists but the outcome is seed/basin-dependent, not a
+reliable gain: visual confirmation that actor-conditioning is null-to-negative and that swap_follow
+is bounded by the training objective, not the architecture._
+
 ## Lesson — swap_follow is bounded by the training OBJECTIVE, not the architecture
 
 Three levers have now failed to lift swap_follow off ~0.25, each ruling out an architectural cause:
@@ -86,3 +98,7 @@ research-direction decision (they touch the anti-baking design and what swap_fol
 ## Links
 
 [[0038-rtfm-aux-grounds-wm]] · [[0036-rtfm-shaping-ignition]] · [[rung4-manual-conditioned-agent]] · [[hierarchy-and-credit]] · [[no-hardcoded-env]]
+
+## All-metrics overview
+
+![exp0040 overview](../../assets/exp-0040/overview.png)

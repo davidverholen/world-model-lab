@@ -33,6 +33,24 @@ switch to length-2, `correct` drops 0.35 → 0.05 and **stays there for all 20 l
 warm-started reading skill does NOT transfer to 2-step gestures; the curriculum is no better than the
 exp-0041 cold-start.
 
+## Trajectory
+
+### schedule (the curriculum switch)
+
+![exp0042 schedule](../../assets/exp-0042/schedule-curriculum-anneal.png)
+
+_`len` steps 1→2 at round 10 (the `--curriculum-rounds 10` warm-up boundary); read the eval panels
+against this jump._
+
+### grounding headline (ignites, then collapses at the switch)
+
+![exp0042 grounding-headline](../../assets/exp-0042/grounding-headline-0-1.png)
+
+_During the length-1 warm-up `grounding` ignites (2/4 seeds, band's upper half reaching ~0.35,
+replicating exp0036). At the round-10 switch to length-2 it collapses to ~0.05 and **stays flat for
+all 20 length-2 rounds** — the warm-started reading skill does not transfer to 2-step gestures. The
+curriculum is no better than the exp-0041 cold-start._
+
 ## Lesson — reading is solved; the wall is multi-step EXECUTION
 
 This is the **second failed lever on length-2** (cold-start 0041, curriculum 0042), and it converges
@@ -67,3 +85,7 @@ bets to weigh (and echo Dreamer-4's per-subtask conditioning for the deep tree).
 ## Links
 
 [[0041-rtfm-length2-generalization]] · [[0040-rtfm-actor-conditioning]] · [[0036-rtfm-shaping-ignition]] · [[hierarchy-and-credit]] · [[0007-crafter-mastery-milestone]] · [[dreamer4-2025]]
+
+## All-metrics overview
+
+![exp0042 overview](../../assets/exp-0042/overview.png)

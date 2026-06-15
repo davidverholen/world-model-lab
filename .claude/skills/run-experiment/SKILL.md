@@ -20,7 +20,13 @@ Experiments are only real if they end as a page in `knowledge/experiments/`.
    (gitignored); the page links them.
 3. **Record**: results into the page exactly as observed — numbers first, no
    interpretation in the Result section. Results are facts: never retro-edit a
-   Result section; follow-up experiments supersede.
+   Result section; follow-up experiments supersede. Then plot the trajectory:
+   `uv run python scripts/plot_experiment.py runs/expNNNN` renders the all-metrics overview
+   and lists the panel slugs; re-run with `--panels <slug,slug>` to render full-width ONLY
+   the panels you'll feature (so committed assets = overview + featured panels, nothing else).
+   In the **Trajectory** section embed each featured panel above its own one-paragraph reading;
+   put the `overview.png` in the **All-metrics overview** section at the bottom. Read the
+   multi-seed aggregate, not one seed. Figure = fact; paragraph = interpretation.
 4. **Route learnings** (PROCESS.md table): update affected concept pages; propose an
    ADR if an architectural choice fell out; new recurring concept → page candidate.
 5. **Bookkeep**: INDEX.md line, LOG.md entry, tick ROADMAP.md if it closes an item.
