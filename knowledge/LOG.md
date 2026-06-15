@@ -33,7 +33,14 @@ Dynalang ingest), 0b72bcd (aux infra), 209e19b (exp0037/0038), 43a77c5 (actor-co
 milestone; commons 93385fb/2edaa76 (HO-0006/0007 accepted). New infra (aux, actor-cond) is flag-gated
 OFF — exp0036 recipe is the default. Also: lit-gate (RTFM/Messenger/Dynalang/LRS-brittleness queued;
 Dynalang ingested method-depth). Cross-domain subagent autonomous-mode idea recorded to memory.
-**Nothing running at handoff; GPU idle.** Next decision is the maintainer's (objective fork above).
+**Update — length-2 ladder step also tested (exp0041):** the validated length-1 recipe does NOT
+generalize to length-2 (events 3–6/round vs 12–27, correct ~0, no grounding). Length-1 is the
+current ceiling. This is the lit-backed curriculum case (RTFM/Messenger both needed complexity
+staging) — a length-1→length-2 curriculum is the principled next step but a new design direction for
+the maintainer to sign off, not another autonomous lever. **Stopping here: clean wall reached.**
+Three items now wait on the maintainer: (a) swap_follow objective fork; (b) length curriculum for
+length-2; (c) stale-remote-docs cleanup (touches accepted ADR-0004 → propose, don't rewrite).
+**Nothing running; GPU idle; all work committed.**
 
 ## [2026-06-15] curation | exp 0038: masked-manual aux grounds the WM, but swap_follow is ACTOR-bound
 

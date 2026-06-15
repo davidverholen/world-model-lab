@@ -102,6 +102,7 @@ calls these elaborate).
 - [0036-rtfm-shaping-ignition](experiments/0036-rtfm-shaping-ignition.md) — FIRST genuine reading-to-learn-dynamics: HO-0007 reading-shaping (anneal→0) IGNITES reading; 3/4 seeds correct≫none AND swapped≪correct (content-sensitive, no LRS shortcut); grounding partial (swap_follow 0.15–0.40, s0 failed) → strengthen next (done)
 - [0038-rtfm-aux-grounds-wm](experiments/0038-rtfm-aux-grounds-wm.md) — 2× training NULL (0037); Dynalang masked-manual aux GROUNDS the WM (inv_ratio 0.87→1.1–1.4, all seeds ground, s0 fixed) but swap_follow stays ~0.25 → bottleneck is ACTOR execution, not WM reading (correct-mode identifiability) (done)
 - [0040-rtfm-actor-conditioning](experiments/0040-rtfm-actor-conditioning.md) — actor-conditioning (§6.2 fallback) does NOT lift swap_follow (mean ~0.18, high variance, s3 best-ever 0.40); 3rd failed lever → swap_follow is OBJECTIVE-bound not architecture-bound → PARK thread, maintainer call on the objective (partial-anneal / mixed-mode train / accept ~0.3) (done)
+- [0041-rtfm-length2-generalization](experiments/0041-rtfm-length2-generalization.md) — the length-1 ignition recipe does NOT generalize to length-2 (events 3–6/round, correct ~0); length-1 is the current ceiling → lit-backed length curriculum (RTFM/Messenger) is the next step, maintainer sign-off (done)
 
 ## Wanted pages (linked but not yet written)
 
