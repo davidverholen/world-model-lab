@@ -2,6 +2,21 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-15] curation | exp 0043: DECISIVE — length-2 is a PURE EXECUTION wall (WM reads it, actor can't do it)
+
+exp0043 (length-2 curriculum + aux ON to read inv_ratio): at length-2, inv_ratio = 1.13–1.25 on
+every seed — INDISTINGUISHABLE from the length-1 phase (1.13–1.27) — so the WM reads the 2-step
+gesture just as well; but correct collapses ~0.35→0.05. Confounder-free localization: **the WM reads
+the multi-step recipe, the actor cannot execute it.** Closes the diagnosis with 4 converging results
+(swap_follow ~0.25 / len-2 cold fail / len-2 curriculum fail / len-2 reads-but-can't-execute):
+**reading is SOLVED; multi-step/compositional EXECUTION is THE wall.** Unification: this is the SAME
+bottleneck as the rung-3 Crafter depth plateau (exps 0026–0031: actor/discovery-bound, not
+perception) — plain Crafter stalls on the deep tech tree, rtfm stalls on the 2-step gesture; both are
+multi-step-execution / credit-assignment / HIERARCHY. The next major capability (hierarchy / temporal
+abstraction / goal-conditioned credit assignment) pays off on BOTH fronts at once; echoes Dreamer-4's
+per-subtask staging. PARK rtfm length-scaling (reading demonstrated). Next = maintainer strategic call
+on the execution/hierarchy bet + ADR-0007 ratification (this is its later-pillar work).
+
 ## [2026-06-15] curation | exp 0042: length curriculum fails — the wall is multi-step EXECUTION, not reading
 
 exp0042 (length-1→2 curriculum, --curriculum-rounds 10 then length-2, commit 991ed32): the len-1
