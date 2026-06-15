@@ -11,6 +11,8 @@ unrecognised metric still gets plotted in its own panel, so non-RTFM logs work t
     uv run python scripts/plot_experiment.py runs/exp0046
     # 2. feature: also render full-width PNGs for the panels you'll embed
     uv run python scripts/plot_experiment.py runs/exp0046 --panels grounding-headline,eval-scores
+    # 3. live: watch the in-flight run in a responsive auto-refreshing dashboard window
+    uv run python scripts/plot_experiment.py runs/exp0046 --watch 30
 
 Always writes assets/exp-<NNNN>/overview.png (the 3-column contact sheet of ALL metrics — goes at
 the bottom of the report as an at-a-glance overview). With --panels, ALSO writes one full-width
@@ -22,8 +24,11 @@ author picks which panels carry the story; interpretation text stays hand-writte
 from __future__ import annotations
 
 import argparse
+import contextlib
 import re
+import time
 import warnings
+import webbrowser
 from collections import defaultdict
 from pathlib import Path
 
@@ -226,6 +231,91 @@ def render_full(
     return written
 
 
+def load(path: Path, quiet: bool = False) -> tuple[dict[str, np.ndarray] | None, int, int]:
+    """Parse + aggregate every s*.log under path (or a single file). Returns (data, n_seeds,
+    n_rounds); data is None if nothing parseable (so watch can wait for the first round)."""
+    logs = sorted(path.glob("s*.log")) if path.is_dir() else [path]
+    if not logs:
+        raise SystemExit(f"no s*.log under {path}")
+    seeds = []
+    for f in logs:
+        parsed = parse_log(f)
+        if parsed:
+            seeds.append(parsed)
+        elif not quiet:
+            print(f"skipped {f}: no round metrics")  # don't silently shrink the seed count
+    if not seeds:
+        return None, 0, 0
+    n_rounds = max(len(v) for s in seeds for v in s.values())
+    return aggregate(seeds), len(seeds), n_rounds
+
+
+def write_preview_html(out_dir: Path, subtitle: str, slugs: list[str], interval: int, tick: int):
+    """Write a self-refreshing, responsive dashboard. A CSS grid (auto-fit minmax) reflows the
+    panels as the window resizes — wide → several columns, narrow → one big readable column. The
+    page meta-refreshes every ``interval``s; the ``?t=tick`` cache-buster pulls the fresh PNGs."""
+    cells = "\n".join(
+        f'    <figure><img src="{s}.png?t={tick}" alt="{s}"></figure>' for s in slugs
+    )
+    (out_dir / "index.html").write_text(
+        f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="{interval}">
+<title>{subtitle} — live</title>
+<style>
+  :root {{ color-scheme: dark light; }}
+  body {{ margin:0; padding:1rem; background:#1e1e1e; color:#cfcfcf;
+          font-family: system-ui, sans-serif; }}
+  header {{ display:flex; gap:1rem; align-items:baseline; flex-wrap:wrap; margin:0 0 1rem; }}
+  h1 {{ font-size:1.05rem; margin:0; }}
+  .meta {{ color:#888; font-size:.85rem; }}
+  .grid {{ display:grid; gap:1rem;
+           grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); }}
+  figure {{ margin:0; padding:.4rem; background:#111; border:1px solid #333; border-radius:8px; }}
+  img {{ width:100%; height:auto; display:block; }}
+</style></head>
+<body>
+  <header><h1>{subtitle}</h1>
+  <span class="meta">live · auto-refresh {interval}s · resize to reflow</span></header>
+  <div class="grid">
+{cells}
+  </div>
+</body></html>"""
+    )
+
+
+def watch(p: Path, exp: str, want: set[str] | None, interval: int) -> None:
+    """Re-render into the gitignored runs/<exp>/_preview/ on an interval and open a live dashboard
+    window. Renders ALL panels full-width by default (the grid IS the overview); --panels narrows
+    it. Never touches committed assets/ — interim figures stay out of git."""
+    preview = (p if p.is_dir() else p.parent) / "_preview"
+    preview.mkdir(parents=True, exist_ok=True)
+    index = preview / "index.html"
+    print(f"live preview: {index}")
+    print(f"  opening a window; reflows on resize, refreshes every {interval}s. Ctrl-C to stop.")
+    opened = False
+    tick = 0
+    try:
+        while True:
+            data, n_seeds, n_rounds = load(p, quiet=True)
+            if data is not None:
+                subtitle = f"exp{exp} ({n_seeds} seeds, {n_rounds} rounds)"
+                slugs = [_slug(t) for t, _ in select_panels(trim_incomplete(data))]
+                show = [s for s in slugs if want is None or s in want]
+                render_full(data, preview, subtitle, set(show))
+                write_preview_html(preview, subtitle, show, interval, tick)
+                if not opened:
+                    # headless / no browser — the printed path still works
+                    with contextlib.suppress(Exception):
+                        webbrowser.open(index.resolve().as_uri())
+                    opened = True
+                tick += 1
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        print("\nstopped.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("path", help="runs/<exp> dir or a single .log file")
@@ -235,34 +325,34 @@ def main() -> None:
         help="comma/space-separated panel slugs to render FULL-WIDTH (the ones embedded in the "
         "report). Omit to render only the overview + list available slugs.",
     )
+    ap.add_argument(
+        "--watch",
+        type=int,
+        metavar="SECONDS",
+        help="live-preview mode: open a responsive dashboard window and re-render every SECONDS "
+        "into the gitignored runs/<exp>/_preview/ (for the in-flight run; never writes assets/).",
+    )
     args = ap.parse_args()
 
     p = Path(args.path)
-    logs = sorted(p.glob("s*.log")) if p.is_dir() else [p]
-    if not logs:
-        raise SystemExit(f"no s*.log under {p}")
-    seeds = []
-    for f in logs:
-        parsed = parse_log(f)
-        if parsed:
-            seeds.append(parsed)
-        else:
-            print(f"skipped {f}: no round metrics")  # don't silently shrink the seed count
-    if not seeds:
-        raise SystemExit(f"no parseable round metrics in {logs}")
-
     # Slug from the run DIR name (exp0045), not a single log's stem (s0 -> "0"). --exp overrides.
     exp = args.exp or re.sub(r"\D", "", p.name if p.is_dir() else p.parent.name)
-    n_rounds = max(len(v) for s in seeds for v in s.values())
-    subtitle = f"exp{exp} ({len(seeds)} seeds, {n_rounds} rounds)"
+    want = set(re.split(r"[,\s]+", args.panels.strip())) if args.panels else None
+
+    if args.watch:
+        watch(p, exp, want, args.watch)
+        return
+
+    data, n_seeds, n_rounds = load(p)
+    if data is None:
+        raise SystemExit(f"no parseable round metrics under {p}")
+    subtitle = f"exp{exp} ({n_seeds} seeds, {n_rounds} rounds)"
     out_dir = Path("assets") / f"exp-{exp}"
-    data = aggregate(seeds)
 
     # The 3-column overview is ALWAYS rendered (the bottom-of-page "all metrics" figure). Full-width
     # panels render ONLY for slugs the author selects via --panels, so committed assets are exactly
     # the figures the report uses (overview + featured panels) and nothing else.
     render_overview(data, out_dir, subtitle)
-    want = set(re.split(r"[,\s]+", args.panels.strip())) if args.panels else None
     written = render_full(data, out_dir, subtitle, want)
     rel = lambda name: (Path("..") / ".." / out_dir / name).as_posix()  # noqa: E731
 

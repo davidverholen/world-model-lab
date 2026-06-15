@@ -17,7 +17,9 @@ Experiments are only real if they end as a page in `knowledge/experiments/`.
    no rung-skipping).
 2. **Run**: `uv run python -m <module>` with explicit seeds. Record command line,
    seeds, and `git rev-parse --short HEAD` in the page. Artifacts go to `runs/`
-   (gitignored); the page links them.
+   (gitignored); the page links them. Monitor an in-flight run live with
+   `uv run python scripts/plot_experiment.py runs/expNNNN --watch 30` — a responsive
+   auto-refreshing dashboard window rendered into the gitignored `runs/<exp>/_preview/`.
 3. **Record**: results into the page exactly as observed — numbers first, no
    interpretation in the Result section. Results are facts: never retro-edit a
    Result section; follow-up experiments supersede. Then plot the trajectory:
