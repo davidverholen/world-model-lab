@@ -185,17 +185,30 @@ def wm_train_rtfm(
     manual_aux_head=None,
     manual_aux_coef=0.0,
     manual_aux_mask_frac=0.4,
+    reward_conservative_coef=0.0,
+    reward_conservative_samples=16,
 ):
     """Train the WM (recon/kl/reward/continue). When manual_aux_coef>0, ADD the dense
     masked-manual-reconstruction reading gradient ([[dynalang-2023]] option A, see
     world_model.models.manual_aux): at each step, reconstruct masked manual token embeddings from
     the anti-baking belief (cross-attention blocked) so the belief must internalise the manual. The
     aux term fires at every window step a manual is present — the dense signal Dynalang relies on.
-    coef=0.0 leaves all existing behaviour byte-for-byte unchanged (head not even invoked)."""
+    coef=0.0 leaves all existing behaviour byte-for-byte unchanged (head not even invoked).
+
+    When reward_conservative_coef>0, ADD a CROP/CQL-style conservative-reward penalty (exp 0047,
+    [[crop-2023]] / [[cql-2020]]): per step, sample ``reward_conservative_samples`` random (OOD)
+    actions from the **detached** belief and penalise their predicted reward toward zero (one-sided
+    relu — only positive overestimates are pushed down, suited to our sparse reward). This stops the
+    reward head from over-rating OOD action sequences (exp 0045: ~12% ranked above the true gesture;
+    exp 0046 showed planning-time averaging only partly fixes it → fix the head at train time). The
+    belief is detached so the penalty shapes ONLY the reward head, not the representation. coef=0.0
+    is byte-for-byte unchanged (the random-action forward is never run)."""
     recon = kl = torch.zeros(())
-    aux_last = 0.0
+    aux_last = cons_last = 0.0
     w = window
     use_aux = manual_aux_coef > 0.0 and manual_aux_head is not None
+    use_cons = reward_conservative_coef > 0.0
+    n_act_rew = rew.action_embed.num_embeddings
     for _step in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
@@ -206,7 +219,7 @@ def wm_train_rtfm(
         b, w = actions.shape
         state = rssm.initial(b, device)
         prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
-        recon = kl = r_l = c_l = aux = torch.zeros((), device=device)
+        recon = kl = r_l = c_l = aux = cons = torch.zeros((), device=device)
         for k in range(w):
             if use_aux:
                 # Aux belief uses the PRE-step state + prev_a → deter_noctx (anti-baking). Compute
@@ -221,16 +234,28 @@ def wm_train_rtfm(
             recon = recon + F.mse_loss(recon_head(belief), embed[:, k].detach())
             r_l = r_l + rew.twohot_loss(belief, actions[:, k], rewards[:, k])
             c_l = c_l + F.binary_cross_entropy_with_logits(cont(belief), 1.0 - dones[:, k])
+            if use_cons:
+                # CROP/CQL push-down: penalise predicted reward on M random OOD actions from the
+                # DETACHED belief (shapes the reward head only). One-sided relu → only positive
+                # overestimates are penalised; genuinely-rewarding actions seen in data are anchored
+                # by twohot_loss and pushed back up. See knowledge/experiments/0047.
+                bel_d = belief.detach()
+                rand_a = torch.randint(
+                    0, n_act_rew, (b, reward_conservative_samples), device=device
+                )
+                bel_exp = bel_d.unsqueeze(1).expand(b, reward_conservative_samples, bel_d.shape[-1])
+                cons = cons + rew(bel_exp, rand_a).clamp_min(0.0).mean()
             prev_a = actions[:, k]
-        loss = (recon + kl + r_l + c_l + manual_aux_coef * aux) / w
+        loss = (
+            recon + kl + r_l + c_l + manual_aux_coef * aux + reward_conservative_coef * cons
+        ) / w
         opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_([p for g in opt.param_groups for p in g["params"]], 100.0)
         opt.step()
         aux_last = float(aux.item() / w)
-    if use_aux:
-        return float(recon.item() / w), float(kl.item() / w), aux_last
-    return float(recon.item() / w), float(kl.item() / w)
+        cons_last = float(cons.item() / w)
+    return float(recon.item() / w), float(kl.item() / w), aux_last, cons_last
 
 
 def imagine_ac_rtfm(
@@ -444,6 +469,10 @@ def main() -> None:
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
     p.add_argument("--manual-aux-mask-frac", type=float, default=0.4)
+    # exp 0047: CROP/CQL conservative-reward penalty — push predicted reward on random OOD actions
+    # toward zero at WM-train time (coef=0 = off/unchanged). samples = M random actions per belief.
+    p.add_argument("--reward-conservative-coef", type=float, default=0.0)
+    p.add_argument("--reward-conservative-samples", type=int, default=16)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -567,9 +596,10 @@ def main() -> None:
             manual_aux_head=manual_aux_head,
             manual_aux_coef=args.manual_aux_coef,
             manual_aux_mask_frac=args.manual_aux_mask_frac,
+            reward_conservative_coef=args.reward_conservative_coef,
+            reward_conservative_samples=args.reward_conservative_samples,
         )
-        aux_l = wm_out[2] if len(wm_out) == 3 else 0.0
-        recon, kl = wm_out[0], wm_out[1]
+        recon, kl, aux_l, cons_l = wm_out
         al, cl, ir = imagine_ac_rtfm(
             buffer,
             registry,
@@ -598,7 +628,7 @@ def main() -> None:
         )
         print(
             f"  recon={recon:.3f} kl={kl:.3f} actor_loss={al:.3f} critic_loss={cl:.3f} "
-            f"imagined_return={ir:.3f}",
+            f"imagined_return={ir:.3f} reward_cons={cons_l:.4f}",
             flush=True,
         )
         print(

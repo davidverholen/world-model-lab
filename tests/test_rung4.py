@@ -11,6 +11,7 @@ from world_model.models.manual_aux import (
     random_span_mask,
 )
 from world_model.models.manual_conditioning import ConditionedRSSM, ManualConditioner
+from world_model.models.twohot import TwoHotRewardHead
 
 
 def test_manual_conditioner_shapes_and_mask():
@@ -204,3 +205,46 @@ def test_manual_invariance_diagnostic_runs():
     # untrained head: both losses finite; ratio is a finite number (not asserting direction yet —
     # that's the thing TRAINING is supposed to produce; here we just exercise the wiring).
     assert all(v == v for v in diag.values())  # no NaN
+
+
+def test_conservative_reward_penalty_pushes_ood_reward_down():
+    """exp 0047 (CROP/CQL): optimizing ONLY the conservative penalty must drive the reward head's
+    predicted reward on random (OOD) actions down. Validates sign + gradient flow of the term used
+    in train_rtfm.wm_train_rtfm. The penalty is one-sided (relu) so it only suppresses positive
+    overestimates."""
+    torch.manual_seed(0)
+    B, SD, NA, M = 8, 96, 17, 16
+    rew = TwoHotRewardHead(state_dim=SD, num_actions=NA)
+    belief = torch.randn(B, SD)  # detached fixed beliefs (the train loop detaches the belief)
+
+    @torch.no_grad()
+    def ood_mean():
+        rand_a = torch.randint(0, NA, (B, M))
+        bel_exp = belief.unsqueeze(1).expand(B, M, SD)
+        return float(rew(bel_exp, rand_a).mean())
+
+    # Induce a CONTROLLED (non-saturating) overestimate: regress predicted reward on random actions
+    # toward +1.5 via the head's own twohot loss, so there is a positive OOD value to push down.
+    warm = torch.optim.Adam(rew.parameters(), lr=5e-3)
+    for _ in range(60):
+        rand_a = torch.randint(0, NA, (B, M))
+        bel_exp = belief.unsqueeze(1).expand(B, M, SD)
+        tgt = torch.full((B, M), 1.5)
+        loss = rew.twohot_loss(bel_exp, rand_a, tgt)
+        warm.zero_grad()
+        loss.backward()
+        warm.step()
+    before = ood_mean()
+    assert before > 0.5  # the head now overrates OOD actions
+
+    # Apply the conservative penalty (the exact term from wm_train_rtfm) and confirm it pushes down.
+    opt = torch.optim.Adam(rew.parameters(), lr=5e-3)
+    for _ in range(120):
+        rand_a = torch.randint(0, NA, (B, M))
+        bel_exp = belief.unsqueeze(1).expand(B, M, SD)
+        cons = rew(bel_exp, rand_a).clamp_min(0.0).mean()
+        opt.zero_grad()
+        cons.backward()
+        opt.step()
+    after = ood_mean()
+    assert after < before  # OOD predicted reward was pushed down
