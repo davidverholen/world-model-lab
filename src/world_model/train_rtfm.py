@@ -149,12 +149,20 @@ class HierarchyAgent:
 
 
 @torch.no_grad()
-def collect_beliefs_for_codebook(buffer, registry, rssm, seq_batch, window, device, n_batches=4):
+def collect_beliefs_for_codebook(
+    buffer, registry, rssm, seq_batch, window, device, n_batches=4, success_frac=0.0
+):
     """Burn beliefs over sampled replay windows to fit the goal codebook (exp 0050). Returns
-    (N, state_dim) beliefs from the CURRENT world model (so codes track the live belief space)."""
+    (N, state_dim) beliefs from the CURRENT world model (so codes track the live belief space).
+
+    exp0050b diagnosis: the worker reaches codebook goals fine and the manager uses diverse codes,
+    but correct stays 0 — the codebook (K-means over mostly-FAILURE beliefs) contains no
+    gesture-COMPLETION goal for the manager to propose. ``success_frac`` > 0 oversamples windows
+    that END in a reward transition (Director codebook-coverage fix; exp0048/49 showed the success
+    state IS reachable), so the completion belief enters the codebook as a selectable subgoal."""
     bels = []
     for _ in range(n_batches):
-        batch = buffer.sample_sequences(seq_batch, window)
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         tok, mask = registry.tokens(batch["tag"])
@@ -773,6 +781,9 @@ def main() -> None:
     # trains in imagination over that WM — isolates "is the hierarchy a good executor" from the
     # Phase-A-v1 collection-poisoning confound (a degenerate hierarchy filled the buffer with junk).
     p.add_argument("--hier-flat-collect", action=argparse.BooleanOptionalAction, default=False)
+    # exp0050b: oversample reward-earning beliefs when fitting the codebook, so the gesture-
+    # completion state becomes a selectable manager subgoal (the diagnosed Phase-A gap).
+    p.add_argument("--hier-codebook-success", type=float, default=0.0)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -894,7 +905,8 @@ def main() -> None:
         if hier_on:
             codebook.fit(
                 collect_beliefs_for_codebook(
-                    buffer, registry, rssm, args.seq_batch, args.window, device
+                    buffer, registry, rssm, args.seq_batch, args.window, device,
+                    success_frac=args.hier_codebook_success,
                 )
             )
             if not args.hier_flat_collect:  # else: keep the flat VR-actor collecting (v2)
