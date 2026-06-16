@@ -27,7 +27,6 @@ import textwrap
 from pathlib import Path
 
 import crafter_rtfm as C
-import imageio.v2 as imageio
 import numpy as np
 import torch
 from crafter_rtfm import ManualMode
@@ -108,12 +107,17 @@ def compose_frame(game_rgb: np.ndarray, panel_lines: list[str]) -> np.ndarray:
     return np.asarray(canvas, dtype=np.uint8)
 
 
-def write_gif(frames: list[np.ndarray], path: str | Path, fps: int) -> None:
-    """Write a list of RGB uint8 frames to a looping GIF at ``fps`` frames/sec."""
+def write_gif(frames: list[np.ndarray], path: str | Path, fps: float) -> None:
+    """Write RGB uint8 frames to a looping GIF at ``fps`` frames/sec.
+
+    Uses PIL directly (not imageio.mimsave, whose ``duration`` kwarg silently failed to write the
+    per-frame delay — GIFs then defaulted to ~10 fps regardless of ``fps``). PIL ``duration`` is
+    milliseconds per frame; sub-1 fps (slow, readable) is supported."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    duration = 1.0 / max(fps, 1)
-    imageio.mimsave(path, frames, format="GIF", duration=duration, loop=0)
+    imgs = [Image.fromarray(np.ascontiguousarray(f)) for f in frames]
+    ms = max(20, int(round(1000.0 / fps)))  # per-frame delay; floor avoids a 0 ms "fastest" delay
+    imgs[0].save(path, save_all=True, append_images=imgs[1:], duration=ms, loop=0, disposal=2)
 
 
 def _wrap(text: str, width: int = 46) -> list[str]:

@@ -43,6 +43,27 @@ from crafter_rtfm import ManualMode
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+# House plot style — mirror scripts/plot_experiment.py so these diagnostic figures match the other
+# experiment-report assets: transparent background + neutral-gray chrome (reads on light or dark),
+# saturated palette legible against either. Saved with transparent=True so the page theme shows.
+_GRAY = "#888888"
+plt.rcParams.update(
+    {
+        "text.color": _GRAY,
+        "axes.labelcolor": _GRAY,
+        "axes.titlecolor": _GRAY,
+        "axes.edgecolor": _GRAY,
+        "xtick.color": _GRAY,
+        "ytick.color": _GRAY,
+        "grid.color": _GRAY,
+        "figure.facecolor": "none",
+        "axes.facecolor": "none",
+        "savefig.facecolor": "none",
+    }
+)
+# Shared palette with plot_experiment.py (blue, red, green, amber, purple, cyan).
+_BLUE, _RED, _GREEN, _AMBER = "#3b82f6", "#ef4444", "#22c55e", "#f59e0b"
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from PIL import Image, ImageDraw  # noqa: E402
 from visualize_rtfm import _FONT, ACTION_NAMES, GAME_PX, write_gif  # noqa: E402
@@ -318,32 +339,32 @@ def main() -> None:
 
     fig, ax = plt.subplots(1, 3, figsize=(15, 4))
     # full belief (h+z) — what the policy/heads actually consume
-    ax[0].plot(steps, l2_mean, "-o", color="#cc4444", label="imagined vs real")
+    ax[0].plot(steps, l2_mean, "-o", color=_RED, label="imagined vs real")
     ax[0].fill_between(
         steps,
         np.nanpercentile(l2m, 25, 0),
         np.nanpercentile(l2m, 75, 0),
         alpha=0.2,
-        color="#cc4444",
+        color=_RED,
     )
-    ax[0].plot(steps, noise_mean, "--s", color="#888888", label="real vs real (sampling floor)")
+    ax[0].plot(steps, noise_mean, "--s", color=_GRAY, label="real vs real (sampling floor)")
     ax[0].legend(fontsize=8)
     ax[0].set(title="belief (h+z) divergence L2", xlabel="imagined step", ylabel="L2")
     # deterministic h only — clean recurrent-dynamics fidelity (un-inflated by z sampling)
-    ax[1].plot(steps, h_mean, "-o", color="#cc7722", label="imagined vs real")
+    ax[1].plot(steps, h_mean, "-o", color=_AMBER, label="imagined vs real")
     ax[1].fill_between(
-        steps, np.nanpercentile(hm, 25, 0), np.nanpercentile(hm, 75, 0), alpha=0.2, color="#cc7722"
+        steps, np.nanpercentile(hm, 25, 0), np.nanpercentile(hm, 75, 0), alpha=0.2, color=_AMBER
     )
-    ax[1].plot(steps, h_noise_mean, "--s", color="#888888", label="real vs real (floor)")
+    ax[1].plot(steps, h_noise_mean, "--s", color=_GRAY, label="real vs real (floor)")
     ax[1].legend(fontsize=8)
     ax[1].set(title="deterministic h divergence L2", xlabel="imagined step", ylabel="L2")
-    ax[2].plot(steps, cos_mean, "-o", color="#4466cc")
+    ax[2].plot(steps, cos_mean, "-o", color=_BLUE)
     ax[2].fill_between(
         steps,
         np.nanpercentile(cosm, 25, 0),
         np.nanpercentile(cosm, 75, 0),
         alpha=0.2,
-        color="#4466cc",
+        color=_BLUE,
     )
     ax[2].set(
         title="belief cosine: imagined vs real",
@@ -354,7 +375,7 @@ def main() -> None:
     fig.suptitle(f"{ckpt.name}  mode={args.mode}  {args.seeds} seeds  H={args.horizon}")
     fig.tight_layout()
     plot_path = out_dir / "fidelity.png"
-    fig.savefig(plot_path, dpi=110)
+    fig.savefig(plot_path, dpi=110, transparent=True)
     print(f"wrote {plot_path}")
 
     print("\n=== imagination fidelity summary (imagined-vs-real | sampling floor) ===")
