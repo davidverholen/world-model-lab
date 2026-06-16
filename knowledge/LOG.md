@@ -2064,3 +2064,13 @@ with step-1 ~flat. So the depth-2 composition wall is at least partly COMBINATOR
 (distinct from exp0051's 2×-compute-same-distribution, which was flat). Single seed → needs multi-seed
 confirm + higher-coverage probe; combines with the path-reward levers. Then dispatched exp0058
 escalation sweep (factor 3/5/10, decay 0.5) into the freed GPU; exp0057 floor sweep still running.
+
+## 2026-06-17 — exp0057 floor sweep DONE: moderate path reward (0.5) moves conditional step-2
+
+Floor sweep (reading-shaping-floor 0.5/1.0, 1 seed): floor 0.5 lifts conditional P(step-2|step-1) to
+0.38 (from ~0.17) and exact swap_follow to 0.140 — the FIRST path reward to move the conditional, not
+just step-1. Floor 1.0 over-shapes (cond back to 0.18) → there's a magnitude SWEET SPOT (0.2 too weak,
+0.5 right, 1.0 too strong). CONVERGES with exp0056 coverage n1600 (both land conditional ~0.38-0.40 /
+exact ~0.11-0.14) — two independent levers agree the depth-2 wall IS movable. Single seed each → needs
+multi-seed confirm. exp0058 escalation (factor 3/5/10 @ decay 0.5) still running to test back-loading
+vs uniform.

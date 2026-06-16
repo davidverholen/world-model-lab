@@ -3,7 +3,7 @@ status: draft
 owner: world-model
 scope: local
 verified: false
-last_reviewed: 2026-06-16
+last_reviewed: 2026-06-17
 ---
 
 # 0057: reward the PATH — keep the per-step gesture reward instead of annealing it away
@@ -35,16 +35,27 @@ raises how often the agent is on the path (step-1, lots of exposure) but not ste
 reliability — plausibly because step-2 is only ever practiced AFTER step-1 (a rare state), so it stays
 exposure-starved even when rewarded.
 
-## Hypothesis / sweep
+## Result — a MODERATE path reward moves conditional step-2 (sweet spot at 0.5)
 
-Push the path reward harder — `--reading-shaping-floor ∈ {0.5, 1.0}` (1.0 = no anneal, full path
-reward throughout), baseline else (folded VR 0.3, n-train 400, length 2). Watch swap_follow_s1, exact,
-and the **conditional P(step-2|step-1)**.
+`--reading-shaping-floor ∈ {0.5, 1.0}` (1 seed each), last-5 length-2, vs the exp0049 floor-0/0.2 refs:
 
-- If conditional step-2 rises with a stronger/kept path reward → reward-magnitude was the limiter.
-- If step-1 keeps rising but conditional step-2 stays ~0.17 → step-2 is **exposure-starved**, not
-  reward-starved → next lever targets step-2 *practice* directly (weight later gesture steps higher,
-  or imagine/reset from step-1-done states — a backward curriculum), rather than more uniform reward.
+| floor | step-1 (s1) | exact | **P(step-2\|step-1)** |
+|---|---|---|---|
+| 0 (baseline) | 0.28 | 0.05 | 0.17 |
+| 0.2 (exp0049) | 0.42 | 0.07 | 0.17 |
+| **0.5** | 0.36 | **0.140** | **0.38** |
+| 1.0 | 0.38 | 0.068 | 0.18 |
+
+**Floor 0.5 lifts conditional step-2 to 0.38** (from ~0.17) and exact to 0.14 — the first time a path
+reward moved the *conditional*, not just step-1. **Floor 1.0 over-shapes and kills it** (back to 0.18):
+there is a magnitude SWEET SPOT. So step-2 was partly reward-magnitude-starved after all — but only in a
+band (0.2 too weak, 0.5 right, 1.0 too strong). **Converges with [[0056-rtfm-coverage-sweep]]**: coverage
+(n1600) and path-floor 0.5 BOTH land conditional step-2 ≈0.38–0.40 / exact ≈0.11–0.14 — two independent
+levers agreeing that the depth-2 wall is movable. Single seed each → needs multi-seed confirm.
+
+Open question carried to [[0058-rtfm-escalating-path-reward]]: does *back-loading* the reward
+(escalation) beat a uniform floor-0.5, and is the exposure component still limiting beyond the sweet
+spot?
 
 ## Standing bar — diagnostic (tag: `EXTRA-RIGOR`)
 
