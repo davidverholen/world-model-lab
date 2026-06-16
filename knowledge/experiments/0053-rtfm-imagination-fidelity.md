@@ -53,6 +53,25 @@ Deterministic-h divergence at step 8 (imagined-vs-real ÷ sampling floor; 1× = 
    manual-*insensitive*, mirroring the manual-blind policy collapse. The exp0052 VR-head collapse muted
    the WM's manual-conditioning, not only the policy.
 
+### Figures
+
+![baseline (~0.10) fidelity: belief / deterministic-h / cosine, with sampling floor](../../assets/exp-0053/fidelity-baseline.png)
+
+_Baseline, CORRECT. Solid = imagined-vs-real, grey dashed = real-vs-real sampling floor. The
+deterministic-h panel (middle) is the clean read: imagined drift sits only modestly above the floor →
+faithful open-loop dynamics._
+
+![collapsed exp0052 fidelity (same axes)](../../assets/exp-0053/fidelity-collapsed.png)
+
+_Collapsed exp0052 model, CORRECT — same close-to-floor fidelity, confirming the collapse is NOT a
+world-model breakdown but a downstream (policy/readout) one._
+
+![imagined vs real, side by side (baseline, SWAPPED)](../../assets/exp-0053/imagined-vs-real-baseline-swapped.gif)
+
+_Side-by-side rollout (baseline, SWAPPED): left = imagined path (imagined belief → nearest real frame
+by retrieval), right = reality under the SAME action plan. The two tracks drift apart as the dream
+follows the (wrong) displayed manual — the visual form of the CORRECT-vs-SWAPPED asymmetry above._
+
 ## Caveats
 
 Single checkpoint (s0) per model, 16 eval seeds, horizon 8, divergence in the RSSM latent (DINO-derived)
