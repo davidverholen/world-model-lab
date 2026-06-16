@@ -2,7 +2,7 @@
 status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-16
 ---
 
@@ -100,9 +100,38 @@ Baselines: exp0045 oracle_pct 0.88; length-2 `swap_follow` ≈ 0.00 (flat across
   0.25) and events 3 → 7–10 across rounds 10–29 — the floor *rising*, not a length-1 carryover fading.
 
 **Caveat (load-bearing): 1 seed per arm.** The cross-arm *dose–response* cannot be seed-luck (shared
-seed 0), but a single training trajectory has its own randomness, so seed 0 could be a favourable draw
-for the mechanism. A **4-seed control at α=0.3 is running** (`runs/exp0048ctl`) to settle it; phase-1
-results are CANDIDATES until it lands.
+seed 0), but a single training trajectory has its own randomness, so seed 0 could be a favourable draw.
+A 4-seed control at α=0.3 settled it (below).
+
+## Multi-seed control (α=0.3, 4 seeds) — WEAK CONFIRM; phase-1 was inflated
+
+`runs/exp0048ctl`, final 5 length-2 rounds (25–29). Honest correction: **phase-1's single-seed numbers
+were optimistic** — partly 1-seed variance, partly GPU non-determinism (even re-running *seed 0* gave
+swap_follow ≈ 0.09, not 0.18). The robust, multi-seed picture:
+
+| metric | 4-seed mean | range | phase-1 (1 seed) | α=0 control |
+|---|---|---|---|---|
+| **swap_follow L2** | **0.105** | 0.05–0.13 | 0.18 | **0.00** |
+| swapped | 0.005 | 0.00–0.02 | 0.00 | 0.00 |
+| correct | 0.073 | 0.05–0.09 | 0.10 | 0.05 |
+| events L2 | 5.8 | 4.0–7.4 | 7.4 | 2.8 |
+| oracle_pct | 0.884 | 0.82–0.93 | 0.92 | 0.86 |
+
+**What survives multi-seed (real):** length-2 `swap_follow` is lifted off zero on **all 4 seeds**
+(0.05–0.13, mean 0.105) where the α=0 control is a flat 0.00 — the first confirmed move of this metric
+in the whole rung — with `swapped` ≈ 0 (anti-baking clean across every seed), and events ~2× the
+control (the flywheel turning). This clears the pre-registered bar ("swap_follow clearly >0 across
+most/all seeds, mean ≳ 0.10–0.15"), at its lower edge.
+
+**What does NOT survive (phase-1 oversold):** the **oracle_pct elevation washes out to baseline**
+(0.88, not 0.92 — that was a lucky tail), so the "beat the calibration thread on oracle_pct" claim is
+retracted. And the magnitude is **~half** what phase-1 advertised (0.105 vs 0.18). The effect is real
+but **modest / underpowered** — a chip in the wall, not yet a crack.
+
+![exp0048ctl swap_follow + grounding (4-seed band)](../../assets/exp-0048ctl/grounding-headline-0-1.png)
+
+_4 seeds at α=0.3: swap_follow holds a 0.05–0.13 band through length-2 (vs the α=0 control's flat 0.00),
+swapped pinned near 0 — real and anti-baking-clean, but small._
 
 ## Trajectory
 
@@ -143,8 +172,12 @@ says the VR reward is *carrying* obedience but not yet *strongly* enough alone. 
 (probe the 0.2–0.6 ridge and/or don't fully anneal shaping so VR fully replaces the scaffold). And the
 whole result is the first brick of the [[mentored-learning-loop]] north star.
 
-**Status: phase-1 positive, pending the 4-seed control.** Update this section with the multi-seed
-verdict when `runs/exp0048ctl` harvests.
+**Status: CONFIRMED (weakly).** The 4-seed control validates the *direction* — length-2 swap_follow
+off zero, all seeds, anti-baking clean, events ~2× control — at modest magnitude (0.105), with the
+phase-1 oracle/magnitude inflation corrected. The mechanism is **real but underpowered**: the question
+is no longer "does validated-reading work" (it does, a little) but "can it be made strong." →
+[[0049-rtfm-sustained-vr]]: VR must *replace* the annealing shaping scaffold (shaping-floor) and/or sit
+higher on the ridge, multi-seed from the start. First confirmed brick of the [[mentored-learning-loop]].
 
 ## Links
 

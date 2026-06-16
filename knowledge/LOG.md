@@ -2,6 +2,21 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-16] experiment | exp0048 4-seed control — WEAK CONFIRM (phase-1 was inflated)
+
+The 4-seed control (α=0.3) at the comparable final window (rounds 25–29): length-2 swap_follow mean
+**0.105** (range 0.05–0.13), ALL 4 seeds >0 vs the α=0 control's flat 0.00, swapped≈0 (anti-baking
+clean every seed), events 5.8 (~2× control). This CLEARS the pre-registered bar (>0 across seeds, mean
+≳0.10–0.15) at its lower edge → the validated-reading reward is the FIRST confirmed lever to move
+length-2 swap_follow off zero in the whole rung-4 thread. HONEST CORRECTION: phase-1's single-seed
+numbers were inflated — partly 1-seed variance, partly GPU non-determinism (re-running *seed 0* gave
+0.09 not 0.18). Magnitude is ~half what phase-1 advertised, and the oracle_pct elevation (0.92) WASHES
+OUT to baseline (0.88) across seeds → that claim retracted. Verdict: effect REAL but UNDERPOWERED (a
+chip, not yet a crack). 0048 finalized (verified). Methodology lesson reinforced: never trust 1-seed +
+GPU runs; the multi-seed control did exactly its job tonight (caught a 3× inflation). Next:
+[[0049-rtfm-sustained-vr]] — can it be made strong (shaping-floor so VR replaces the annealing scaffold
++ ridge), multi-seed from the start. (Also running: exp0048ctl01 = α=0.1 × 2 seeds, a comparison point.)
+
 ## [2026-06-16] experiment | exp0048 validated-reading PHASE-1 POSITIVE — first lever to move length-2 swap_follow off zero
 
 The validated-reading intrinsic reward WORKS at 1 seed. Phase-1 coef sweep (5×1, fixed seed): the

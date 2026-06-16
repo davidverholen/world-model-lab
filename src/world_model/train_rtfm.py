@@ -504,6 +504,9 @@ def main() -> None:
     # HO-0007: initial reading-shaping coefficient (dense reading-gated ignition gradient);
     # linearly annealed to 0 over the run. 0 disables shaping (the exp-0035 honest-but-sparse run).
     p.add_argument("--reading-shaping-coef", type=float, default=1.0)
+    # exp 0049: anneal reading-shaping to this FLOOR instead of 0 (default 0 = unchanged), so the
+    # obedience scaffold persists for the validated-reading reward to replace. Eval still runs at 0.
+    p.add_argument("--reading-shaping-floor", type=float, default=0.0)
     # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
@@ -594,10 +597,13 @@ def main() -> None:
         for m in wm_mods + [actor, critic]:
             m.train()
         use_agent = rnd > 0
-        # HO-0007 reading-shaping: dense reading-gated ignition gradient, linearly annealed to 0 so
-        # the agent ends up standing on the sparse honest reward alone (eval always runs at coef=0).
+        # HO-0007 reading-shaping: dense reading-gated ignition gradient, linearly annealed toward
+        # the FLOOR (exp 0049; default floor 0 → standing on the sparse honest reward, unchanged).
+        # A floor > 0 keeps the obedience scaffold alive so validated-reading can REPLACE it rather
+        # than just cushion its removal. Eval always runs at coef=0, so this stays honest.
         denom = max(1, args.rounds - 1)
-        shaping_coef = args.reading_shaping_coef * max(0.0, 1.0 - rnd / denom)
+        _floor = args.reading_shaping_floor
+        shaping_coef = _floor + (args.reading_shaping_coef - _floor) * max(0.0, 1.0 - rnd / denom)
         # Length curriculum: length-1 warm-up for the first --curriculum-rounds, then the --length
         # target. cur_len drives BOTH collection and eval, so the round line shows the regime.
         cur_len = 1 if rnd < args.curriculum_rounds else args.length
