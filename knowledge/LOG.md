@@ -1935,3 +1935,13 @@ SHIP (decoupling correct, detach preserves WM, two-hot represents small VR, back
 train/eval leakage). CPU-smoked end-to-end (vr_loss trains, raw VR stored, actor picks it up). GPU
 dispatch pending — waiting for exp0051 coef-0.5 to free the 8 GB GPU. New page
 [[0052-rtfm-decoupled-vr-head]] (pre-registration), INDEX updated.
+
+## 2026-06-16 — hardware correction: local machine is a 16 GB desktop GPU
+
+Maintainer corrected the hardware assumptions: local compute is a **16 GB desktop GPU**, not the
+old 8 GB laptop (4070). CLAUDE.md hardware section updated — 16 GB, desktop, multi-hour local
+training now viable (no laptop power-cap/thermal throttle), ~1.2 GB/seed so many parallel seeds fit.
+compute-strategy.md: added a 2026-06-16 status note + relabelled the option table; the laptop
+thermal/power-cap/benchmark measurements are now marked HISTORICAL (retired laptop), kept as
+reference data. Kept tracked files depersonalized (no GPU model name). Confirmed in practice: 4
+concurrent training runs (exp0051c05 ×2 + exp0052 ×2) sat at ~3.4 GB used / ~12.4 GB free.

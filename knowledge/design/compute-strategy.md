@@ -9,13 +9,20 @@ last_reviewed: 2026-06-12
 
 # Compute Strategy
 
-> **Status note (2026-06-15): the desktop-remote path is retired.** The Windows
-> desktop GPU is no longer available and its dispatch machinery was removed (ADR 0004
-> superseded). Compute is now **local laptop GPU** + **on-demand rented cloud GPU**
-> (vast.ai, maintainer-triggered). The `desktop GPU` rows below are kept as *measured
-> reference data* (real benchmarks that still inform the latency-bound vs throughput-
-> bound reasoning and rental sizing) — read them as "a ~16 GB / ~44 TFLOPS card," which
-> now means a rented box, not a standing machine.
+> **Status note (2026-06-16): local compute is now a 16 GB desktop GPU.** Development
+> and experiments (including multi-hour runs) now run on a **local desktop GPU with
+> 16 GB VRAM** — not the laptop the measurements below were taken on. It is not power-
+> capped or thermally throttled under sustained load, so the laptop-era "don't schedule
+> multi-hour training locally" constraint no longer binds; the rung-4 ConditionedRSSM
+> run uses ~1.2 GB/seed, so many parallel seeds fit easily. **All "laptop GPU" rows and
+> the thermal/power-cap measurements below are HISTORICAL** (the retired laptop 4070-class
+> card) — kept as real benchmark data for the latency-bound vs throughput-bound reasoning,
+> not the current machine. On-demand rented cloud GPU (vast.ai, maintainer-triggered)
+> remains the path for genuinely large scale only.
+>
+> **Earlier note (2026-06-15): the desktop-remote SSH path is retired.** The old Windows
+> desktop GPU and its dispatch machinery were removed (ADR 0004 superseded). (Distinct
+> from the current *local* desktop above.)
 
 ## What it is
 
@@ -25,8 +32,9 @@ environment-ladder rung. Prices checked 2026-06-12 (vast.ai: 4090 ~$0.31–0.44/
 
 | Option | VRAM / bandwidth / FP32 | Best for |
 |---|---|---|
-| laptop GPU (local) | 8 GB / 256 GB/s / ~15–20 TFLOPS | rungs 1–2: iteration speed, env-loop-bound work; short (<~1 h) runs |
-| ~16 GB card (rented, e.g. 4090) | 16–24 GB / ~900 GB/s / ~44 TFLOPS | rung 3: multi-hour GPU-bound training (~2.5–3× laptop; measured on the retired desktop) |
+| **desktop GPU (local, current)** | **16 GB** | rungs 1–4: iteration speed AND multi-hour local training; many parallel seeds (~1.2 GB/seed) |
+| laptop GPU (retired; rows below are its measurements) | 8 GB / 256 GB/s / ~15–20 TFLOPS | *historical* — was rungs 1–2, short (<~1 h) runs |
+| ~16 GB card (rented, e.g. 4090) | 16–24 GB / ~900 GB/s / ~44 TFLOPS | cloud burst when local binds: multi-hour GPU-bound training |
 | vast.ai burst (4090/5090) | 24–32 GB, ~$0.35–0.55/hr | rung 3–4: parallel sweeps (N seeds × arms), baselines |
 | H100+ class | 80 GB, $1–2+/hr | rung 4+: ≥100M-param transformer world models only |
 

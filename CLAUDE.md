@@ -18,17 +18,18 @@ uv-managed (Python 3.12, PyTorch).
 
 ## Hardware
 
-- **Local (this machine, Linux):** an 8 GB laptop GPU — default for development
-  and short (<~1 h) experiments. Keep models small; prefer batch-size/precision
-  tweaks over architecture growth when memory binds. Note: power-capped at ~45 W and
-  thermally throttles within minutes of sustained load (measured — see
-  knowledge/design/compute-strategy.md); don't schedule multi-hour training here.
+- **Local (this machine, Linux):** a 16 GB desktop GPU — the default for development
+  and experiments, including multi-hour runs (unlike the retired laptop, it is not
+  power-capped or thermally throttled under sustained load). Memory rarely binds at
+  our scale (the rung-4 ConditionedRSSM run uses ~1.2 GB/seed, so many parallel seeds
+  fit easily); prefer batch-size/precision tweaks over architecture growth only if it
+  ever does. (knowledge/design/compute-strategy.md still carries the older laptop
+  thermal/power measurements — historical, superseded by this desktop.)
 - **Bigger runs (when local binds):** rent a cloud GPU on demand (e.g. vast.ai —
-  see knowledge/design/compute-strategy.md). There is no standing remote machine;
-  the earlier Windows-desktop SSH dispatch was retired (ADR 0004 superseded). Cloud
-  spend stays the maintainer's explicit call — flag the cost, don't spend
-  autonomously. Local parallel seeds run as concurrent processes on the one GPU (it
-  idles on our latency-bound step), which covers most multi-seed work.
+  see knowledge/design/compute-strategy.md). Cloud spend stays the maintainer's
+  explicit call — flag the cost, don't spend autonomously. Local parallel seeds run
+  as concurrent processes on the one GPU (it idles on our latency-bound step), which
+  covers most multi-seed work.
 
 ## Layout
 
