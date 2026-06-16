@@ -254,24 +254,37 @@ def collect_rtfm(
     recon_head=None,
     validated_reading_coef=0.0,
     store_vr=False,
+    path_reward_coef=0.0,
+    path_reward_factor=1.0,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
     only path to the achievement (the honest grounding signal). shaping_coef>0 adds the env's dense
-    reading-gated shaping (HO-0007) as the ignition gradient — annealed → 0 by the caller."""
+    reading-gated shaping (HO-0007) as the ignition gradient — annealed → 0 by the caller.
+
+    path_reward_coef>0 (exp 0058): an ESCALATING per-step path reward computed on our side — reward
+    the agent ``coef * factor**k`` for performing the k-th (0-indexed, in-order) action of the
+    DISPLAYED gesture (pointer resets on a wrong action, mirroring the env's reading_shaping). With
+    factor>1, later steps are worth more, rebalancing the objective toward the under-weighted tail
+    of the chain (exp0057: step-2 contributes ~6x less than step-1 to a uniform path reward, so the
+    actor satisfices on step-1). When active the env's flat reading_shaping is DISABLED (coef 0) to
+    avoid double-counting; honesty still rests on the SWAPPED/held-out eval (path reward is
+    collection-only). Reading-gated and CORRECT-mode-honest (displayed == true recipe)."""
     rng = np.random.default_rng(0)
     events = 0
     vr_sum, vr_n = 0.0, 0
     # Compute VR when EITHER the old folded path (coef>0, added into r_read) OR the new decoupled
     # path (store_vr, kept in its own channel for a dedicated VR head — exp 0052) is active.
     use_vr = (validated_reading_coef > 0.0 or store_vr) and recon_head is not None
+    use_path = path_reward_coef > 0.0  # exp 0058 escalating path reward (replaces env shaping)
+    env_shaping = 0.0 if use_path else shaping_coef
 
     def embed_of(obs):
         return agent.enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
 
     for ep in range(n_episodes):
         env = C.make_recipe_env(
-            mode, length=length, one_shot=one_shot, reading_shaping_coef=shaping_coef
+            mode, length=length, one_shot=one_shot, reading_shaping_coef=env_shaping
         )
         seed = int(seeds[ep % len(seeds)])
         obs, info = env.reset(seed=seed)
@@ -279,6 +292,12 @@ def collect_rtfm(
         if use_agent:
             agent.reset(obs, info)
         emb = embed_of(obs)
+        # exp 0058: per-episode in-order pointer over the displayed gesture, for the escalating
+        # path reward. Mirrors harness/env gesture extraction; gesture is fixed for the episode.
+        gesture, gptr = [], 0
+        if use_path:
+            disp = info.get("displayed_facts", {}).get("rituals", {})
+            gesture = list(next(iter(disp.values()))["gesture"]) if disp else []
         for t in range(max_steps):
             a = agent.act(obs, info) if use_agent else int(rng.integers(env.action_space.n))
             obs, r, term, trunc, info = env.step(a)
@@ -292,6 +311,15 @@ def collect_rtfm(
             # shaping is the dense ignition gradient and is annealed → 0, so the final agent stands
             # on the sparse honest reward alone (and eval always runs at shaping_coef=0).
             r_read = float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
+            # exp 0058: escalating per-step path reward — coef*factor**k for the k-th in-order
+            # action of the displayed gesture (pointer resets on a miss). Worth more for later steps
+            # so the actor stops satisficing on step-1. env reading_shaping is 0 (no double count).
+            if use_path and gesture:
+                if env.action_names[a] == gesture[gptr]:
+                    r_read += path_reward_coef * (path_reward_factor**gptr)
+                    gptr = (gptr + 1) % len(gesture)
+                else:
+                    gptr = 0
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
             # exp 0048/0052: intrinsic validated-reading reward — the manual's marginal predictive
@@ -874,6 +902,11 @@ def main() -> None:
     # exp 0049: anneal reading-shaping to this FLOOR instead of 0 (default 0 = unchanged), so the
     # obedience scaffold persists for the validated-reading reward to replace. Eval still runs at 0.
     p.add_argument("--reading-shaping-floor", type=float, default=0.0)
+    # exp 0058: ESCALATING per-step path reward (computed on our side, replaces env shaping). coef =
+    # base reward for step-0 of the gesture; factor>1 makes step-k worth coef*factor**k, rebalancing
+    # the objective toward the under-weighted tail of the chain. 0 = off/unchanged.
+    p.add_argument("--path-reward-coef", type=float, default=0.0)
+    p.add_argument("--path-reward-factor", type=float, default=1.0)
     # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
@@ -1099,9 +1132,15 @@ def main() -> None:
                     epsilon=args.epsilon,
                     seed=args.seed,
                 )
+        # exp 0058: when the escalating path reward is on, env shaping is disabled — report the
+        # path reward, not a misleading annealed shaping_coef.
+        if args.path_reward_coef > 0.0:
+            reward_desc = f"path_reward={args.path_reward_coef:.2f}*{args.path_reward_factor:g}**k"
+        else:
+            reward_desc = f"shaping_coef={shaping_coef:.3f}"
         print(
             f"round {rnd}: collecting {args.episodes_per_round} episodes "
-            f"(len={cur_len} shaping_coef={shaping_coef:.3f}) ...",
+            f"(len={cur_len} {reward_desc}) ...",
             flush=True,
         )
         ev, vr = collect_rtfm(
@@ -1120,6 +1159,8 @@ def main() -> None:
             recon_head=recon_head,
             validated_reading_coef=args.validated_reading_coef,
             store_vr=args.vr_head_coef > 0.0,
+            path_reward_coef=args.path_reward_coef,
+            path_reward_factor=args.path_reward_factor,
         )
         buffer.compute_returns(args.gamma)
         print(
