@@ -31,11 +31,23 @@ from [[0057-rtfm-path-reward]] (which raises both steps equally and keeps the st
 - Honest: collection-only, CORRECT-mode (displayed == true recipe); eval stays swapped/held-out.
 - Reviewer (opus): SHIP (faithful escalating analog, no double-count, no eval leak, backward-compat).
 
+## Reward design (maintainer-refined)
+
+Two reward channels, cleanly separated:
+- **Tutorial-execution (path reward, intrinsic, repeatable):** `coef · factor**k · decay**n` for the
+  k-th in-order gesture step on its n-th in-episode payout. `factor>1` = later steps worth more
+  (escalation, the core lever); `decay<1` = repeated in-episode executions worth progressively less
+  (diminishing return — the skill stays rewarded every time but re-runs can't farm unbounded reward).
+  `decay 1.0` = reward every time; `0.0` = once per episode. Rewarded EVERY correct execution.
+- **Achievement (`tutorial_newly`, extrinsic):** one-time, only on actual game progress. (Base Crafter
+  reward is discarded.)
+
 ## Pre-registered sweep
 
-`--path-reward-coef 0.2 --path-reward-factor ∈ {3, 5, 10}` (step-2 worth 0.6 / 1.0 / 2.0; factor≈6
-equalises the per-step contribution), baseline else (folded VR 0.3, n-train 400, length 2). Watch
-**conditional P(step-2|step-1)** and exact swap_follow.
+`--path-reward-coef 0.2 --path-reward-factor ∈ {3, 5, 10} --path-reward-decay 0.5` (step-2 worth 0.6 /
+1.0 / 2.0 on first execution; factor≈6 equalises the per-step contribution; decay 0.5 = each repeat
+worth half), baseline else (folded VR 0.3, n-train 400, length 2). Watch **conditional
+P(step-2|step-1)** and exact swap_follow.
 
 - Conditional step-2 **rises** with factor → satisficing was the limiter; the chain's tail just needed
   to be worth optimizing.
