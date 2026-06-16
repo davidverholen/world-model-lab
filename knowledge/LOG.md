@@ -1988,3 +1988,12 @@ imagination-viewer. Built by an opus impl subagent, reviewed in the main loop. G
   save format → then reward-gap probe to decide reward-readout-overoptimism vs pure credit-assignment.
 - Scout queued the Eric Xing cluster paper (SimuRA, arxiv:2507.23773, inferred from OpenReview id
   6fDZYJYYgu which would not resolve) — verified:false, low priority; LLM-as-world-model, tangential.
+
+## 2026-06-16 — exp0054 pre-registered (reward-gap probe)
+
+Added the missing definition page for exp0054 (was running on the dashboard without a page). exp0054
+re-runs the working ~0.10 baseline (folded VR 0.3) WITH the new save format (rew head persisted) so
+the imagined-vs-real REWARD-gap can be measured — decides the downstream fork from
+[[0053-rtfm-imagination-fidelity]]: reward-head over-optimism (→ conservatism) vs pure
+credit-assignment (→ planning/horizon). Note: exp0053 is a DIAGNOSTIC over existing checkpoints (no
+runs/exp0053 train dir); exp0054 is the fresh training run.
