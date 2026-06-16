@@ -8,10 +8,11 @@ last_reviewed: 2026-06-17
 
 # 0057: reward the PATH — keep the per-step gesture reward instead of annealing it away
 
-**Status: IN FLIGHT.** Follows the [[0055-rtfm-ensemble-pessimism]] reframe (wall = 2-step
-composition, not reading/reward) and the maintainer's framing: *the path isn't rewarded — but
-path-following is exactly what we want to train.* Objective↔reward alignment — we MEASURE
-path-following (swap_follow), so we should REWARD it.
+**Status: DONE (1 seed/arm) — POSITIVE: floor 0.5 moves conditional step-2 (sweet spot).** Follows the
+[[0055-rtfm-ensemble-pessimism]] reframe (wall = 2-step composition, not reading/reward) and the
+maintainer's framing: *the path isn't rewarded — but path-following is exactly what we want to train.*
+Objective↔reward alignment — we MEASURE path-following (swap_follow), so we should REWARD it. Result
+below.
 
 ## Key realization: the path reward already exists, and we turn it off
 
