@@ -2,6 +2,38 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-16] decision | exp0050 pre-registered — manual-directed hierarchy (Director x manual) to break the ~0.10 ceiling
+
+Maintainer chose the full hierarchy build (over a minimal manual-directed-MPC tweak) — "we wanted to
+build this anyway" ([[hierarchical-imagination-agent]] is its home). Lit gate (scout): Director (anchor,
+ingested), FuN (manager/worker origin, continuous-vs-discrete goal trade-off), HAC (co-training
+instability + hindsight-relabel fix — the top risk), THICK (ICLR2024, hierarchy-in-WM; Director more
+portable for us). Novelty: the manual-DIRECTED manager (subgoals soft-conditioned on read text) is
+relatively novel; the Director-hierarchy-in-WM and Dynalang-style language-WM binding are not. Key
+design call (scout): TEST HIERARCHY WITHOUT THE MANUAL FIRST (Phase A) to isolate credit-assignment vs
+grounding, THEN add manual conditioning (Phase B). Minimal first cut: goal-conditioned worker
+(similarity reward, K=8 imagination) + manager MLP over a K-means RSSM-state codebook (no full VQ yet),
+pre-seeded from the VR-trained checkpoints (which reach the gesture endpoint ~10%). Stability designed in
+(hindsight relabel, separate buffers, Dreamer alternation). exp0050 pre-registered with phased
+implementation plan + named counter-outcomes. NEXT SESSION = the careful build (reviewer-gated). Nothing
+running; tree clean.
+
+## [2026-06-16] scout | hierarchy / manual-directed subgoals lit gate (exp0050 design) — 4 found, 4 queued
+
+Focused failure-specific literature gate for the manual-directed Director build. Four clusters
+searched: (1) language-conditioned manager subgoals, (2) subgoal representation trade-offs,
+(3) co-training instability, (4) hierarchy over learned WM post-Director. Verified via arXiv API
+batch + abstract fetch. Findings: FuN (1703.01161) and HAC (1712.00948) are the mandatory
+background for subgoal space and co-training stability respectively; THICK (openreview:TjCDNssXKU,
+ICLR 2024) and Hieros (2310.05167) are the post-Director hierarchy-in-WM papers. Novelty verdict:
+the exact combination of manual/language-DIRECTED manager subgoal proposals inside a learned WM
+appears unpublished — the two axes (language→subgoal and hierarchy-in-WM) exist separately but not
+combined with anti-baking conditioning. QUEUE.md: new section "Hierarchy / manual-directed subgoals
+(exp0050 design; scouted 2026-06-16)" added above the existing "Hierarchy / subgoal emergence"
+section. SOURCES.md: 4 entries added (FuN, HAC, Hieros, THICK). Pages potentially affected:
+papers/director-2022.md (open questions now partially addressable from FuN/HAC/THICK reads),
+knowledge/INDEX.md (new SOURCES entries — no INDEX change needed, scout doesn't create pages).
+
 ## [2026-06-16] experiment | exp0049 NULL — VR cracked the objective gap; ~0.10 is the EXECUTION ceiling → design fork
 
 Shaping-floor A/B (α=0.3, floor 0.2 vs the floor=0 control, 4 seeds): NO lift — swap_follow 0.094 vs

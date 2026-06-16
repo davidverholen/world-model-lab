@@ -560,6 +560,73 @@ test a manual-derived prediction and the real environment CONFIRMS the predictio
   between actions and reachable future states; different axis (control, not prediction accuracy).
   Cross-reference when designing; no new queue entry needed.
 
+## Hierarchy / manual-directed subgoals (exp0050 design; scouted 2026-06-16)
+
+Targeted lit gate for the proposed manual-directed Director build: manager reads the text manual and
+proposes subgoals in imagination; worker executes each subgoal in the RSSM. Four questions mapped
+below: (1) language-conditioned manager subgoals, (2) subgoal representation trade-offs,
+(3) co-training instability fixes, (4) hierarchy over a learned WM post-Director. Read in order.
+
+### HIGHEST PRIORITY — read before designing exp0050
+
+- [ ] arxiv:1703.01161 **FeUdal Networks for Hierarchical Reinforcement Learning** (Vezhnevets,
+      Osindero, Schaul, Heess et al., ICML 2017) — canonical deep-RL manager-worker architecture.
+      Manager operates at 1/c temporal resolution and proposes a CONTINUOUS DIRECTION VECTOR in a
+      latent state space; worker follows that vector using cosine-similarity reward (same mechanism
+      as Director's feature-space similarity reward). KEY TRADE-OFF vs Director: continuous goal
+      space (FuN) vs discrete VQ-VAE codebook (Director) — FuN's continuous space is harder to
+      search but avoids codebook-coverage gaps; Director's discrete codes are tractable but require
+      the codebook to include the manual-specified goal state. INGEST for: exact goal-space
+      dimensionality, how the manager is trained on sparse reward, and the transition/reward
+      non-stationarity analysis. id verified 2026-06-16 via arXiv API batch fetch.
+
+- [ ] arxiv:1712.00948 **HAC: Learning Multi-Level Hierarchies with Hindsight** (Levy, Konidaris,
+      Platt & Saenko, ICLR 2019) — the definitive treatment of co-training instability in
+      hierarchical RL. Core diagnosis: changing a lower-level policy makes the upper level's
+      subgoal→outcome mapping non-stationary → RL cannot estimate action values reliably.
+      Core fix: train each level AS IF lower levels are already optimal, using hindsight
+      relabeling (substitute commanded subgoal with the state the lower level actually reached).
+      First to demonstrate stable parallel 3-level training. KEY CAUTION for us: HAC-style
+      hindsight relabeling is compatible with the PAST low-level policy, not the current one —
+      this residual non-stationarity is the known failure mode in co-training. Our setting
+      (worker trains in imagination on similarity reward, manager trains on task reward) partially
+      sidesteps this because imagination holds the WM fixed while updating actor; but the WM
+      itself changes, which reintroduces non-stationarity. INGEST for: exact relabeling rule,
+      failure-mode analysis table, and how the hindsight fix interacts with off-policy replay
+      (our flywheel uses replay). id verified 2026-06-16 via arXiv API batch fetch.
+
+### HIGH — hierarchy over a learned world model (post-Director, 2023-2024)
+
+- [ ] openreview:TjCDNssXKU **THICK: Learning Hierarchical World Models with Adaptive Temporal
+      Abstractions from Discrete Latent Dynamics** (Gumbsch, Sajid, Martius & Butz, ICLR 2024)
+      — the closest post-Director hierarchical WM paper. Mechanism: THICK learns a TWO-LEVEL
+      world model (not two-level actor) — the lower WM predicts states densely; the upper WM
+      predicts sparse "context-change" events. Hierarchical policy trains in imagination of this
+      two-level WM. KEY DIFFERENCE FROM DIRECTOR: THICK builds hierarchy INTO the world model
+      architecture (two-level WM), whereas Director builds hierarchy OVER a single flat WM
+      (VQ-VAE on top of RSSM). For our build Director's approach is more portable (we have a
+      fixed RSSM; we don't need to redesign the WM). INGEST for: whether the two-level WM
+      eliminates co-training instability that single-WM Director has, and benchmark comparison
+      vs Director on long-horizon sparse tasks. No arXiv id; OpenReview only. CONFIDENCE: HIGH
+      (title + authors verified via ICLR 2024 proceedings + GitHub CognitiveModeling/THICK).
+
+- [ ] arxiv:2310.05167 **Hieros: Hierarchical Imagination on Structured State Space Sequence
+      World Models** (Mattes, Schlosser & Herbrich, 2024) — hierarchical RL in imagination
+      of an S5 (structured state space) world model. Like Director but uses SSM not RSSM;
+      trains at multiple time scales in parallel during imagination. Primary relevance: confirms
+      that Director-style hierarchy in imagination generalizes beyond RSSM; provides an
+      alternative world model substrate. Lower priority than THICK for us (we already have RSSM
+      and Director is our anchor). CONTEXT read only. id verified 2026-06-16 via arXiv API.
+
+### CONTEXT — subgoal representation comparison (one-page reads; no full ingest)
+
+NOTE: the novelty assessment (below) concludes that language-DIRECTED manager subgoal proposals
+over a WM are relatively unpublished in our exact form. FuN and HAC are mandatory background;
+THICK is the nearest post-Director WM hierarchy paper. None of the three conditions the manager
+on a text manual — that is the novel axis of our build.
+
+---
+
 ## Hierarchy / subgoal emergence (credit-assignment brainstorm 2026-06-13; ids to verify)
 - [x] Hafner et al. 2022, Director: Deep Hierarchical Planning from Pixels (already
       noted under temporal-abstraction) — INGESTED 2026-06-15 → papers/director-2022.md
