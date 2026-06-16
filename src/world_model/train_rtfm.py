@@ -578,10 +578,16 @@ def imagine_hierarchy_rtfm(
                 nextv = v_m[t + 1] if t + 1 < n_macro else v_mH
                 g = m_rew[t] + gamma_macro * m_cont[t] * ((1 - lam) * nextv + lam * g)
                 m_returns[t] = g
+        # exp0050 v2 fix: NORMALIZE advantages (Phase-A-v1 diverged — worker_loss → ±80 — with raw
+        # advantages; the two-hot value's symexp output can blow up the PG term). Standardizing the
+        # advantage per batch caps the policy-gradient scale and is the standard stabilizer.
+        def _norm(adv):
+            return (adv - adv.mean()) / (adv.std() + 1e-8)
+
         # ---- worker actor-critic (recompute logits/values WITH grad on detached beliefs) ----
         wb_f = w_bel.reshape(-1, sd)
         wg_f = w_goal.reshape(-1, sd)
-        w_adv = (w_returns - v_w).reshape(-1).detach()
+        w_adv = _norm((w_returns - v_w).reshape(-1).detach())
         dist_w = Categorical(logits=worker(wb_f, wg_f))
         worker_loss = -(dist_w.log_prob(w_act.reshape(-1)) * w_adv).mean()
         worker_loss = worker_loss - ent_coef * dist_w.entropy().mean()
@@ -590,7 +596,7 @@ def imagine_hierarchy_rtfm(
         )
         # ---- manager actor-critic ----
         mb_f = m_bel.reshape(-1, sd)
-        m_adv = (m_returns - v_m).reshape(-1).detach()
+        m_adv = _norm((m_returns - v_m).reshape(-1).detach())
         dist_m = Categorical(logits=manager(mb_f))
         manager_loss = (
             -(dist_m.log_prob(m_code.reshape(-1)) * m_adv).mean()
@@ -599,6 +605,9 @@ def imagine_hierarchy_rtfm(
         manager_v_loss = manager_critic.twohot_loss(mb_f, m_returns.reshape(-1).detach())
         opt.zero_grad()
         (worker_loss + worker_v_loss + manager_loss + manager_v_loss).backward()
+        torch.nn.utils.clip_grad_norm_(  # belt-and-suspenders vs the v1 divergence
+            [p for grp in opt.param_groups for p in grp["params"]], 100.0
+        )
         opt.step()
         with torch.no_grad():
             for tgt, src in ((worker_tgt, worker_critic), (manager_tgt, manager_critic)):
@@ -753,6 +762,10 @@ def main() -> None:
     p.add_argument("--hindsight-frac", type=float, default=0.5)
     # rounds before fitting the codebook + training the hierarchy
     p.add_argument("--hier-warmup", type=int, default=3)
+    # exp0050 v2: keep COLLECTION on the flat VR-actor (which reaches ~0.10) while the hierarchy
+    # trains in imagination over that WM — isolates "is the hierarchy a good executor" from the
+    # Phase-A-v1 collection-poisoning confound (a degenerate hierarchy filled the buffer with junk).
+    p.add_argument("--hier-flat-collect", action=argparse.BooleanOptionalAction, default=False)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -877,10 +890,11 @@ def main() -> None:
                     buffer, registry, rssm, args.seq_batch, args.window, device
                 )
             )
-            collect_agent = HierarchyAgent(
-                enc, text_enc, rssm, worker, manager, codebook, n_act, device,
-                args.hier_k, epsilon=args.epsilon, seed=args.seed,
-            )
+            if not args.hier_flat_collect:  # else: keep the flat VR-actor collecting (v2)
+                collect_agent = HierarchyAgent(
+                    enc, text_enc, rssm, worker, manager, codebook, n_act, device,
+                    args.hier_k, epsilon=args.epsilon, seed=args.seed,
+                )
         print(
             f"round {rnd}: collecting {args.episodes_per_round} episodes "
             f"(len={cur_len} shaping_coef={shaping_coef:.3f}) ...",
@@ -935,6 +949,14 @@ def main() -> None:
                 args.burn_in, args.horizon, args.hier_k, args.gamma, args.lam, args.ent_coef,
                 device, hindsight_frac=args.hindsight_frac,
             )[:3]
+            if args.hier_flat_collect:
+                # also keep the flat VR-actor trained so it COLLECTS competent data (v2): the
+                # hierarchy trains in imagination over a good WM instead of poisoning the buffer.
+                imagine_ac_rtfm(
+                    buffer, registry, rssm, rew, cont, actor, critic, target_critic, opt_ac,
+                    args.ac_updates_per_round, args.seq_batch, args.window, args.burn_in,
+                    args.horizon, args.gamma, args.lam, args.ent_coef, device,
+                )
         elif hier is not None:
             al, cl, ir = 0.0, 0.0, 0.0  # hierarchy warmup: WM-only, policies not yet trained
         else:
