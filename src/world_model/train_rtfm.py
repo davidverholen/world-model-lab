@@ -294,7 +294,10 @@ def collect_rtfm(
         emb = embed_of(obs)
         # exp 0058: per-episode in-order pointer over the displayed gesture, for the escalating
         # path reward. Mirrors harness/env gesture extraction; gesture is fixed for the episode.
-        gesture, gptr = [], 0
+        # rewarded_pos caps each gesture POSITION to one reward per episode (not per action, so a
+        # repeated-action gesture still pays each position) — kills the step-1 re-farm loophole; the
+        # gesture is done once under one_shot, so this never under-rewards a legitimate pass.
+        gesture, gptr, rewarded_pos = [], 0, set()
         if use_path:
             disp = info.get("displayed_facts", {}).get("rituals", {})
             gesture = list(next(iter(disp.values()))["gesture"]) if disp else []
@@ -316,8 +319,10 @@ def collect_rtfm(
             # so the actor stops satisficing on step-1. env reading_shaping is 0 (no double count).
             if use_path and gesture:
                 if env.action_names[a] == gesture[gptr]:
-                    r_read += path_reward_coef * (path_reward_factor**gptr)
-                    gptr = (gptr + 1) % len(gesture)
+                    if gptr not in rewarded_pos:  # once per position per episode (no re-farming)
+                        r_read += path_reward_coef * (path_reward_factor**gptr)
+                        rewarded_pos.add(gptr)
+                    gptr = (gptr + 1) % len(gesture)  # advance regardless, to track the sequence
                 else:
                     gptr = 0
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
