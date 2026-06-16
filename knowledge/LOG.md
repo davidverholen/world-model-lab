@@ -2042,3 +2042,15 @@ over-optimistic). BUT the new swap_follow_s1 backfill REFRAMED the whole rung: s
 (0045–0055) was not the binding constraint. Pivot to composition. exp0056 dispatched: coverage sweep
 (--n-train-seeds 100/400/1600) to separate combinatorial-coverage from architectural-composition,
 watching swap_follow_s1 vs exact. Overnight autonomous exploration of composition levers underway.
+
+## 2026-06-16 — exp0057 path-reward (the env's reading_shaping IS a per-step path reward we anneal off)
+
+Discovered the env's reading_shaping (HO-0007) already rewards advancing through the displayed gesture
+step-by-step (+coef per correct next action, pointer resets on error) — i.e. the per-step PATH reward
+the maintainer asked for — but we anneal coef 1.0→0 over the run, killing it during the length-2 phase
+(rounds 10–30). Honesty is guaranteed by the SWAPPED/held-out eval (coef 0), not by withholding the
+path reward. Re-analysed exp0049f02 (floor 0.2, 4 seeds) via swap_follow_s1: keeping the path reward
+lifted step-1 (0.28→0.42) but NOT conditional step-2 (~0.17) — uniform path reward helps getting onto
+the path, not step-2's conditional reliability (likely exposure-starved: step-2 only practiced after
+step-1). exp0057 sweeps shaping-floor {0.5,1.0} (flag-only) to test reward-magnitude vs exposure;
+running concurrently with the exp0056 coverage sweep. New page [[0057-rtfm-path-reward]].
