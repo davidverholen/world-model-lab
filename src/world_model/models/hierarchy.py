@@ -23,6 +23,81 @@ from world_model.models.actor import Actor
 from world_model.models.twohot import TwoHotValueHead
 
 
+class GoalVQVAE(nn.Module):
+    """Director's goal autoencoder (§2): a VQ-VAE over RSSM beliefs that learns a SEPARABLE discrete
+    goal space. The minimal K-means-in-raw-belief cut failed (exp0050b/c: raw-belief cosine is
+    ~uninformative — worker_sim flat ~0.6 = ambient, so goals are meaningless and the manager
+    collapses). The VQ-VAE fixes this: the encoder learns a latent that RECONSTRUCTS the belief, so
+    distinct states get distinct latents — a goal space where reaching a goal is meaningful.
+
+    - The manager's action space = the codebook (``n_codes`` discrete codes).
+    - A code → a goal vector ``goal_of(idx)`` (the code embedding) in the encoder latent space.
+    - The worker's similarity reward lives in that latent: ``cosine(encode(next_belief), goal)``.
+    - ``recon_error`` (per-state) feeds the optional manager exploration bonus (Director §5: novel =
+      high autoencoder error).
+    """
+
+    def __init__(
+        self,
+        belief_dim: int,
+        code_dim: int = 32,
+        n_codes: int = 64,
+        beta: float = 0.25,
+        hidden: int = 256,
+    ):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(belief_dim, hidden), nn.SiLU(), nn.Linear(hidden, code_dim)
+        )
+        self.codebook = nn.Embedding(n_codes, code_dim)
+        self.codebook.weight.data.uniform_(-1.0 / n_codes, 1.0 / n_codes)
+        self.decoder = nn.Sequential(
+            nn.Linear(code_dim, hidden), nn.SiLU(), nn.Linear(hidden, belief_dim)
+        )
+        self.n_codes, self.code_dim, self.beta = n_codes, code_dim, beta
+        self.goal_dim = code_dim  # worker goal-space dimension (the encoder latent)
+
+    def encode(self, belief: torch.Tensor) -> torch.Tensor:
+        """(..., belief_dim) → (..., code_dim) latent (the worker's goal-reward space)."""
+        return self.encoder(belief)
+
+    def quantize(self, z_e: torch.Tensor):
+        """Nearest-codebook quantization. (B, code_dim) → (z_q, idx)."""
+        d = (
+            z_e.pow(2).sum(-1, keepdim=True)
+            - 2 * z_e @ self.codebook.weight.t()
+            + self.codebook.weight.pow(2).sum(-1)
+        )
+        idx = d.argmin(-1)
+        return self.codebook(idx), idx
+
+    def goal_of(self, idx: torch.Tensor) -> torch.Tensor:
+        """Manager code index (...) → (..., code_dim) goal vector (the code embedding)."""
+        return self.codebook(idx)
+
+    def forward(self, belief: torch.Tensor):
+        """VQ-VAE pass → (recon_loss, vq_loss, idx). Straight-through estimator so the encoder
+        gets gradients through the quantizer."""
+        z_e = self.encode(belief)
+        z_q, idx = self.quantize(z_e)
+        z_st = z_e + (z_q - z_e).detach()  # straight-through
+        recon = self.decoder(z_st)
+        recon_loss = F.mse_loss(recon, belief)
+        vq_loss = F.mse_loss(z_q, z_e.detach()) + self.beta * F.mse_loss(z_e, z_q.detach())
+        return recon_loss, vq_loss, idx
+
+    @torch.no_grad()
+    def recon_error(self, belief: torch.Tensor) -> torch.Tensor:
+        """Per-state reconstruction error (B,) — the Director §5 novelty/exploration signal."""
+        z_q, _ = self.quantize(self.encode(belief))
+        return (self.decoder(z_q) - belief).pow(2).mean(-1)
+
+    # Uniform goal-module interface (shared with GoalCodebook) so the hierarchy loop is goal-kind-
+    # agnostic: ``project`` maps a belief into the goal space the worker reward lives in.
+    def project(self, belief: torch.Tensor) -> torch.Tensor:
+        return self.encode(belief)
+
+
 class GoalCodebook(nn.Module):
     """A fixed-size set of goal vectors (centroids) in belief space, fit by K-means over visited
     beliefs. The manager's discrete action space (Director §2, minus the VQ-VAE — centroids stand in
@@ -33,6 +108,7 @@ class GoalCodebook(nn.Module):
         super().__init__()
         self.n_codes = n_codes
         self.dim = dim
+        self.goal_dim = dim  # K-means goal space == belief space
         # registered (not a parameter — set by K-means, not gradient); starts at small noise so an
         # unfit codebook still yields distinct, finite goals in smoke tests.
         self.register_buffer("centroids", torch.randn(n_codes, dim) * 0.01)
@@ -62,6 +138,14 @@ class GoalCodebook(nn.Module):
     def vecs(self, idx: torch.Tensor) -> torch.Tensor:
         """idx (...) long → (..., dim) goal vectors."""
         return self.centroids[idx]
+
+    # Uniform goal-module interface (shared with GoalVQVAE): the K-means goal space IS belief space,
+    # so project is the identity and goal_of aliases vecs.
+    def goal_of(self, idx: torch.Tensor) -> torch.Tensor:
+        return self.centroids[idx]
+
+    def project(self, belief: torch.Tensor) -> torch.Tensor:
+        return belief
 
     @torch.no_grad()
     def nearest(self, belief: torch.Tensor) -> torch.Tensor:
@@ -108,14 +192,28 @@ class Manager(nn.Module):
         return self.net(x)
 
 
-def make_hierarchy(state_dim: int, n_actions: int, n_codes: int, manager_ctx_dim: int = 0):
-    """Build worker + manager + their two-hot value heads. Goal space = belief space (goal_dim =
-    state_dim) for the first cut. Returns (worker, worker_critic, manager, manager_critic,
-    codebook).
-    Worker value is goal-conditioned (state+goal); manager value is over the belief only."""
-    worker = GoalWorker(state_dim, state_dim, n_actions)
-    worker_critic = TwoHotValueHead(state_dim=state_dim + state_dim)
+def make_hierarchy(
+    state_dim: int,
+    n_actions: int,
+    n_codes: int,
+    manager_ctx_dim: int = 0,
+    goal_kind: str = "vq",
+    code_dim: int = 32,
+):
+    """Build worker + manager + their two-hot value heads + the goal module. Returns
+    (worker, worker_critic, manager, manager_critic, goal_module).
+
+    ``goal_kind='vq'`` (exp0050 chosen path): a learned VQ-VAE goal autoencoder — goal space = its
+    ``code_dim`` latent; the worker reaches a code embedding, reward = cosine in the encoder latent.
+    ``goal_kind='kmeans'`` (the failed minimal cut, kept for reference): raw-belief centroids. The
+    worker value is goal-conditioned (belief + goal); the manager value is over the belief only."""
+    goal_dim = code_dim if goal_kind == "vq" else state_dim
+    worker = GoalWorker(state_dim, goal_dim, n_actions)
+    worker_critic = TwoHotValueHead(state_dim=state_dim + goal_dim)
     manager = Manager(state_dim, n_codes, ctx_dim=manager_ctx_dim)
     manager_critic = TwoHotValueHead(state_dim=state_dim)
-    codebook = GoalCodebook(n_codes, state_dim)
-    return worker, worker_critic, manager, manager_critic, codebook
+    if goal_kind == "vq":
+        goal_module = GoalVQVAE(state_dim, code_dim=code_dim, n_codes=n_codes)
+    else:
+        goal_module = GoalCodebook(n_codes, state_dim)
+    return worker, worker_critic, manager, manager_critic, goal_module

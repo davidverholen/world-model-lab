@@ -111,11 +111,21 @@ class HierarchyAgent:
     conditioned) chooses the action toward it. Greedy at eval. Phase A: state-only manager."""
 
     def __init__(
-        self, enc, text_enc, rssm, worker, manager, codebook, n_act, device, hier_k, epsilon=0.0,
+        self,
+        enc,
+        text_enc,
+        rssm,
+        worker,
+        manager,
+        goal_module,
+        n_act,
+        device,
+        hier_k,
+        epsilon=0.0,
         seed=0,
     ):
         self.enc, self.text_enc, self.rssm = enc, text_enc, rssm
-        self.worker, self.manager, self.codebook = worker, manager, codebook
+        self.worker, self.manager, self.goal_module = worker, manager, goal_module
         self.n_act, self.device, self.hier_k, self.epsilon = n_act, device, hier_k, epsilon
         self.rng = np.random.default_rng(seed)
         self._tok = self._mask = self._state = self._prev_a = self._goal = None
@@ -138,7 +148,7 @@ class HierarchyAgent:
         bel = self.rssm.belief(self._state)
         if self._t % self.hier_k == 0:  # manager re-picks a subgoal at the macro clock
             code = self.manager(bel).argmax(-1)
-            self._goal = self.codebook.vecs(code)
+            self._goal = self.goal_module.goal_of(code)
         if self.epsilon > 0 and self.rng.random() < self.epsilon:
             a = int(self.rng.integers(self.n_act))
         else:
@@ -174,6 +184,34 @@ def collect_beliefs_for_codebook(
             bels.append(rssm.belief(state))
             prev_a = actions[:, k]
     return torch.cat(bels)
+
+
+def train_goal_vqvae(
+    buffer, registry, rssm, vqvae, opt_vq, steps, seq_batch, window, device, success_frac=0.0
+):
+    """Gradient-train the VQ-VAE goal autoencoder (exp0050: Director's learned, separable goal
+    space) on current-WM beliefs — recon + VQ-commitment loss. Beliefs are detached (autoencode the
+    space, not backprop into the WM). Returns (recon_loss, vq_loss, codes_used)."""
+    rl = vl = 0.0
+    used: set[int] = set()
+    for _ in range(steps):
+        bels = collect_beliefs_for_codebook(
+            buffer,
+            registry,
+            rssm,
+            seq_batch,
+            window,
+            device,
+            n_batches=1,
+            success_frac=success_frac,
+        )
+        recon_loss, vq_loss, idx = vqvae(bels)
+        opt_vq.zero_grad()
+        (recon_loss + vq_loss).backward()
+        opt_vq.step()
+        rl, vl = recon_loss.item(), vq_loss.item()
+        used |= set(idx.unique().tolist())
+    return rl, vl, len(used)
 
 
 @torch.no_grad()
@@ -471,7 +509,7 @@ def imagine_hierarchy_rtfm(
     manager,
     manager_critic,
     manager_tgt,
-    codebook,
+    goal_module,
     opt,
     updates,
     seq_batch,
@@ -502,6 +540,7 @@ def imagine_hierarchy_rtfm(
     assert horizon % K == 0 and horizon >= K, "horizon must be a positive multiple of hier_k"
     n_macro = horizon // K
     sd = rssm.state_dim
+    gd = goal_module.goal_dim  # goal-space dim: code_dim (VQ) or state_dim (k-means)
     gamma_macro = gamma**K
     stats = (0.0, 0.0, 0.0, 0.0)
     for _ in range(updates):
@@ -522,7 +561,7 @@ def imagine_hierarchy_rtfm(
             for _mi in range(n_macro):
                 bel_m = rssm.belief(s)
                 code = Categorical(logits=manager(bel_m)).sample()  # (b,)
-                goal = codebook.vecs(code)  # (b, sd) detached (codebook is a buffer)
+                goal = goal_module.goal_of(code)  # (b, gd) detached (no_grad block)
                 m_bel.append(bel_m)
                 m_code.append(code)
                 m_goal.append(goal)
@@ -556,11 +595,14 @@ def imagine_hierarchy_rtfm(
             m_cont = torch.stack(m_cont)
             m_goal = torch.stack(m_goal)
             m_achieved = torch.stack(m_achieved)
-            # HAC hindsight: per (macro,row), relabel the segment goal with the achieved belief.
+            # HAC hindsight: per (macro,row), relabel the segment goal with the achieved belief —
+            # PROJECTED into the goal space (= encoder latent for VQ; identity for k-means).
+            m_ach_goal = goal_module.project(m_achieved)  # (n_macro, b, gd)
             hs = (torch.rand(n_macro, b, device=device) < hindsight_frac).unsqueeze(-1)
-            seg_goal = torch.where(hs, m_achieved, m_goal)  # (n_macro, b, sd)
-            w_goal = seg_goal.unsqueeze(1).expand(n_macro, K, b, sd).reshape(n_macro * K, b, sd)
-            w_rew = goal_similarity(w_beln, w_goal)  # (T, b) cosine to (possibly relabeled) goal
+            seg_goal = torch.where(hs, m_ach_goal, m_goal)  # (n_macro, b, gd)
+            w_goal = seg_goal.unsqueeze(1).expand(n_macro, K, b, gd).reshape(n_macro * K, b, gd)
+            # worker reward = cosine of the NEXT belief (projected into goal space) to the goal
+            w_rew = goal_similarity(goal_module.project(w_beln), w_goal)  # (T, b)
             # worker λ-returns PER SEGMENT (each K-step rollout = a fixed-goal episode; bootstrap
             # at the achieved belief under that goal — avoids mixing goals across macro boundaries).
             wr = w_rew.reshape(n_macro, K, b)
@@ -586,6 +628,7 @@ def imagine_hierarchy_rtfm(
                 nextv = v_m[t + 1] if t + 1 < n_macro else v_mH
                 g = m_rew[t] + gamma_macro * m_cont[t] * ((1 - lam) * nextv + lam * g)
                 m_returns[t] = g
+
         # exp0050 v2 fix: NORMALIZE advantages (Phase-A-v1 diverged — worker_loss → ±80 — with raw
         # advantages; the two-hot value's symexp output can blow up the PG term). Standardizing the
         # advantage per batch caps the policy-gradient scale and is the standard stabilizer.
@@ -594,7 +637,7 @@ def imagine_hierarchy_rtfm(
 
         # ---- worker actor-critic (recompute logits/values WITH grad on detached beliefs) ----
         wb_f = w_bel.reshape(-1, sd)
-        wg_f = w_goal.reshape(-1, sd)
+        wg_f = w_goal.reshape(-1, gd)
         w_adv = _norm((w_returns - v_w).reshape(-1).detach())
         dist_w = Categorical(logits=worker(wb_f, wg_f))
         worker_loss = -(dist_w.log_prob(w_act.reshape(-1)) * w_adv).mean()
@@ -784,6 +827,10 @@ def main() -> None:
     # exp0050b: oversample reward-earning beliefs when fitting the codebook, so the gesture-
     # completion state becomes a selectable manager subgoal (the diagnosed Phase-A gap).
     p.add_argument("--hier-codebook-success", type=float, default=0.0)
+    # exp0050 (chosen): 'vq' = learned VQ-VAE goal autoencoder (separable goal space — Director's
+    # load-bearing piece); 'kmeans' = the failed raw-belief-centroid cut (kept for reference).
+    p.add_argument("--hier-goal-kind", type=str, default="vq", choices=["vq", "kmeans"])
+    p.add_argument("--hier-code-dim", type=int, default=32)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -855,8 +902,10 @@ def main() -> None:
     if args.hierarchy:
         from world_model.models.hierarchy import make_hierarchy
 
-        worker, w_crit, manager, m_crit, codebook = make_hierarchy(sd, n_act, args.hier_codes)
-        for mod in (worker, w_crit, manager, m_crit, codebook):
+        worker, w_crit, manager, m_crit, goal_module = make_hierarchy(
+            sd, n_act, args.hier_codes, goal_kind=args.hier_goal_kind, code_dim=args.hier_code_dim
+        )
+        for mod in (worker, w_crit, manager, m_crit, goal_module):
             mod.to(device)
         w_tgt, m_tgt = copy.deepcopy(w_crit), copy.deepcopy(m_crit)
         opt_hier = torch.optim.Adam(
@@ -868,7 +917,13 @@ def main() -> None:
             ],
             lr=3e-4,
         )
-        hier = (worker, w_crit, w_tgt, manager, m_crit, m_tgt, codebook, opt_hier)
+        # VQ goal autoencoder trains on its own recon+commitment loss (k-means has no params).
+        opt_vq = (
+            torch.optim.Adam(goal_module.parameters(), lr=3e-4)
+            if args.hier_goal_kind == "vq"
+            else None
+        )
+        hier = (worker, w_crit, w_tgt, manager, m_crit, m_tgt, goal_module, opt_hier, opt_vq)
 
     registry = ManualRegistry(text_enc)
     cap = args.rounds * args.episodes_per_round * args.max_steps + 1000
@@ -884,8 +939,8 @@ def main() -> None:
             m.train()
         hier_on = hier is not None and rnd >= args.hier_warmup  # hierarchy after warmup
         if hier is not None:
-            worker, w_crit, w_tgt, manager, m_crit, m_tgt, codebook, opt_hier = hier
-            for m in (worker, w_crit, manager, m_crit):
+            worker, w_crit, w_tgt, manager, m_crit, m_tgt, goal_module, opt_hier, opt_vq = hier
+            for m in (worker, w_crit, manager, m_crit, goal_module):
                 m.train()
         use_agent = rnd > 0
         # HO-0007 reading-shaping: dense reading-gated ignition gradient, linearly annealed toward
@@ -903,16 +958,47 @@ def main() -> None:
         # warmup, the flat agent seeds the buffer + WM.
         collect_agent = agent
         if hier_on:
-            codebook.fit(
-                collect_beliefs_for_codebook(
-                    buffer, registry, rssm, args.seq_batch, args.window, device,
+            # Fit/train the goal module on current-WM beliefs: VQ-VAE gradient-trains (learned,
+            # separable space); k-means just refits centroids. Then the hierarchy DRIVES collection
+            # (unless --hier-flat-collect). Before warmup, the flat agent seeds the buffer + WM.
+            if args.hier_goal_kind == "vq":
+                vq_rl, vq_vl, vq_used = train_goal_vqvae(
+                    buffer,
+                    registry,
+                    rssm,
+                    goal_module,
+                    opt_vq,
+                    args.updates_per_round // 2,
+                    args.seq_batch,
+                    args.window,
+                    device,
                     success_frac=args.hier_codebook_success,
                 )
-            )
+            else:
+                goal_module.fit(
+                    collect_beliefs_for_codebook(
+                        buffer,
+                        registry,
+                        rssm,
+                        args.seq_batch,
+                        args.window,
+                        device,
+                        success_frac=args.hier_codebook_success,
+                    )
+                )
             if not args.hier_flat_collect:  # else: keep the flat VR-actor collecting (v2)
                 collect_agent = HierarchyAgent(
-                    enc, text_enc, rssm, worker, manager, codebook, n_act, device,
-                    args.hier_k, epsilon=args.epsilon, seed=args.seed,
+                    enc,
+                    text_enc,
+                    rssm,
+                    worker,
+                    manager,
+                    goal_module,
+                    n_act,
+                    device,
+                    args.hier_k,
+                    epsilon=args.epsilon,
+                    seed=args.seed,
                 )
         print(
             f"round {rnd}: collecting {args.episodes_per_round} episodes "
@@ -963,15 +1049,40 @@ def main() -> None:
         if hier_on:
             # two-level imagination AC; print slots reused as (worker_loss, manager_loss, macro_r).
             hstats = imagine_hierarchy_rtfm(
-                buffer, registry, rssm, rew, cont, worker, w_crit, w_tgt, manager, m_crit, m_tgt,
-                codebook, opt_hier, args.ac_updates_per_round, args.seq_batch, args.window,
-                args.burn_in, args.horizon, args.hier_k, args.gamma, args.lam, args.ent_coef,
-                device, hindsight_frac=args.hindsight_frac,
+                buffer,
+                registry,
+                rssm,
+                rew,
+                cont,
+                worker,
+                w_crit,
+                w_tgt,
+                manager,
+                m_crit,
+                m_tgt,
+                goal_module,
+                opt_hier,
+                args.ac_updates_per_round,
+                args.seq_batch,
+                args.window,
+                args.burn_in,
+                args.horizon,
+                args.hier_k,
+                args.gamma,
+                args.lam,
+                args.ent_coef,
+                device,
+                hindsight_frac=args.hindsight_frac,
             )
             al, cl, ir = hstats[:3]
+            vqs = (
+                f" vq_recon={vq_rl:.3f} vq_used={vq_used}/{args.hier_codes}"
+                if args.hier_goal_kind == "vq"
+                else ""
+            )
             print(
                 f"  HIER worker_sim={hstats[3]:.3f} code_entropy={hstats[4]:.3f} "
-                f"codes_used={hstats[5]}/{args.hier_codes} (sim↑=worker reaches goals; "
+                f"codes_used={hstats[5]}/{args.hier_codes}{vqs} (sim↑=worker reaches goals; "
                 f"ent→0=manager collapse)",
                 flush=True,
             )
@@ -979,9 +1090,24 @@ def main() -> None:
                 # also keep the flat VR-actor trained so it COLLECTS competent data (v2): the
                 # hierarchy trains in imagination over a good WM instead of poisoning the buffer.
                 imagine_ac_rtfm(
-                    buffer, registry, rssm, rew, cont, actor, critic, target_critic, opt_ac,
-                    args.ac_updates_per_round, args.seq_batch, args.window, args.burn_in,
-                    args.horizon, args.gamma, args.lam, args.ent_coef, device,
+                    buffer,
+                    registry,
+                    rssm,
+                    rew,
+                    cont,
+                    actor,
+                    critic,
+                    target_critic,
+                    opt_ac,
+                    args.ac_updates_per_round,
+                    args.seq_batch,
+                    args.window,
+                    args.burn_in,
+                    args.horizon,
+                    args.gamma,
+                    args.lam,
+                    args.ent_coef,
+                    device,
                 )
         elif hier is not None:
             al, cl, ir = 0.0, 0.0, 0.0  # hierarchy warmup: WM-only, policies not yet trained
@@ -1010,7 +1136,7 @@ def main() -> None:
             for m in (rssm, worker, manager):
                 m.eval()
             eval_agent = HierarchyAgent(
-                enc, text_enc, rssm, worker, manager, codebook, n_act, device, args.hier_k
+                enc, text_enc, rssm, worker, manager, goal_module, n_act, device, args.hier_k
             )
         else:
             for m in [rssm, actor]:

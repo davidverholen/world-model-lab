@@ -5,11 +5,40 @@ import torch
 
 from world_model.models.hierarchy import (
     GoalCodebook,
+    GoalVQVAE,
     GoalWorker,
     Manager,
     goal_similarity,
     make_hierarchy,
 )
+
+
+def test_goal_vqvae_roundtrip_and_interface():
+    """exp0050: the VQ-VAE goal autoencoder learns a separable goal space. Pin the forward (recon +
+    vq loss + grad through the straight-through estimator), the goal_of/project/recon_error
+    interface, and that training reduces recon loss (the encoder learns to reconstruct beliefs)."""
+    torch.manual_seed(0)
+    bd, cd, K = 96, 16, 32
+    vq = GoalVQVAE(bd, code_dim=cd, n_codes=K)
+    assert vq.goal_dim == cd
+    belief = torch.randn(64, bd)
+    recon_loss, vq_loss, idx = vq(belief)
+    assert recon_loss.ndim == 0 and vq_loss.ndim == 0 and idx.shape == (64,)
+    assert vq.goal_of(idx).shape == (64, cd)  # code embedding
+    assert vq.project(belief).shape == (64, cd)  # encoder latent (worker reward space)
+    assert vq.recon_error(belief).shape == (64,)
+    # gradient flows through the straight-through estimator to the encoder
+    (recon_loss + vq_loss).backward()
+    assert any(p.grad is not None and p.grad.abs().sum() > 0 for p in vq.encoder.parameters())
+    # a few opt steps reduce recon loss (it learns to autoencode a fixed belief set)
+    opt = torch.optim.Adam(vq.parameters(), lr=3e-3)
+    r0 = vq(belief)[0].item()
+    for _ in range(50):
+        rl, vl, _ = vq(belief)
+        opt.zero_grad()
+        (rl + vl).backward()
+        opt.step()
+    assert vq(belief)[0].item() < r0  # recon improved
 
 
 def test_codebook_fit_and_nearest():
@@ -66,13 +95,17 @@ def test_manager_forward_state_only_and_with_ctx():
 
 
 def test_make_hierarchy_shapes():
-    sd, na, K = 48, 17, 32
-    worker, wc, manager, mc, cb = make_hierarchy(sd, na, K)
+    sd, na, K, cd = 48, 17, 32, 16
+    # default = VQ goal autoencoder: worker critic consumes belief + code_dim goal
+    worker, wc, manager, mc, gm = make_hierarchy(sd, na, K, goal_kind="vq", code_dim=cd)
     assert isinstance(worker, GoalWorker) and isinstance(manager, Manager)
-    assert isinstance(cb, GoalCodebook) and cb.centroids.shape == (K, sd)
-    # worker critic consumes concat(belief, goal); manager critic consumes belief
-    assert wc(torch.randn(2, sd + sd)).shape == (2,)
+    assert isinstance(gm, GoalVQVAE) and gm.goal_dim == cd
+    assert wc(torch.randn(2, sd + cd)).shape == (2,)
     assert mc(torch.randn(2, sd)).shape == (2,)
+    # kmeans option: goal space == belief space
+    _, wc2, _, _, gm2 = make_hierarchy(sd, na, K, goal_kind="kmeans")
+    assert isinstance(gm2, GoalCodebook) and gm2.goal_dim == sd
+    assert wc2(torch.randn(2, sd + sd)).shape == (2,)
 
 
 # ---- integration: the two-level imagination loop runs end-to-end ----
@@ -120,8 +153,8 @@ def test_imagine_hierarchy_runs_end_to_end():
     rssm = ConditionedRSSM(embed_dim=ED, num_actions=NA, text_dim=TD, ctx_dim=32)
     rew = TwoHotRewardHead(state_dim=rssm.state_dim, num_actions=NA)
     cont = ContinueHead(rssm.state_dim)
+    # default VQ goal module (no .fit — it gradient-trains; untrained is fine for the loop smoke)
     worker, wcrit, manager, mcrit, cb = make_hierarchy(rssm.state_dim, NA, n_codes=16)
-    cb.fit(torch.randn(64, rssm.state_dim))
     wtgt, mtgt = copy.deepcopy(wcrit), copy.deepcopy(mcrit)
     opt = torch.optim.Adam(
         [
