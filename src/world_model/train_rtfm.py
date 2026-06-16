@@ -387,6 +387,165 @@ def imagine_ac_rtfm(
     return stats
 
 
+def imagine_hierarchy_rtfm(
+    buffer,
+    registry,
+    rssm,
+    rew,
+    cont,
+    worker,
+    worker_critic,
+    worker_tgt,
+    manager,
+    manager_critic,
+    manager_tgt,
+    codebook,
+    opt,
+    updates,
+    seq_batch,
+    window,
+    burn_in,
+    horizon,
+    hier_k,
+    gamma,
+    lam,
+    ent_coef,
+    device,
+    hindsight_frac=0.5,
+    success_frac=0.5,
+):
+    """Director-style two-level imagination AC (exp 0050). Mirrors ``imagine_ac_rtfm`` but with a
+    MANAGER that picks a codebook subgoal every ``hier_k`` steps (trained on the K-step-accumulated
+    TASK reward at the macro clock, discount γ^K) and a WORKER that reaches it (trained on a
+    goal-SIMILARITY reward, per-segment λ-returns bootstrapped at the achieved belief). The
+    imagination rollout runs under ``no_grad`` (beliefs/actions collected, like the flat loop); the
+    policy/value losses recompute on those detached beliefs. HAC hindsight: a fraction of segments
+    relabel the worker's goal with the belief actually reached, giving a guaranteed-reachable signal
+    (the co-training-stability fix). See knowledge/experiments/0050-rtfm-hierarchy.md."""
+    from torch.distributions import Categorical
+
+    from world_model.models.hierarchy import goal_similarity
+
+    K = hier_k
+    n_macro = horizon // K
+    assert n_macro >= 1, "horizon must be >= hier_k"
+    sd = rssm.state_dim
+    gamma_macro = gamma**K
+    stats = (0.0, 0.0, 0.0, 0.0)
+    for _ in range(updates):
+        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
+        embed = torch.as_tensor(batch["obs"], device=device)
+        actions = torch.as_tensor(batch["action"], device=device)
+        tok, mask = registry.tokens(batch["tag"])
+        b = actions.shape[0]
+        with torch.no_grad():
+            state = rssm.initial(b, device)
+            prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+            for k in range(burn_in):
+                state, _, _ = rssm.obs_step(state, prev_a, embed[:, k], tok, mask)
+                prev_a = actions[:, k]
+            s = state
+            w_bel, w_beln, w_act, w_cont = [], [], [], []
+            m_bel, m_code, m_rew, m_cont, m_goal, m_achieved = [], [], [], [], [], []
+            for _mi in range(n_macro):
+                bel_m = rssm.belief(s)
+                code = Categorical(logits=manager(bel_m)).sample()  # (b,)
+                goal = codebook.vecs(code)  # (b, sd) detached (codebook is a buffer)
+                m_bel.append(bel_m)
+                m_code.append(code)
+                m_goal.append(goal)
+                macro_r = torch.zeros(b, device=device)
+                disc = torch.ones(b, device=device)
+                for _kk in range(K):
+                    bel = rssm.belief(s)
+                    a = Categorical(logits=worker(bel, goal)).sample()
+                    macro_r = macro_r + disc * rew(bel, a)  # accumulate discounted task reward
+                    disc = disc * gamma * torch.sigmoid(cont(bel))
+                    w_cont.append(torch.sigmoid(cont(bel)))
+                    s, _ = rssm.img_step(s, a, tok, mask)
+                    w_bel.append(bel)
+                    w_beln.append(rssm.belief(s))  # NEXT belief → goal-similarity reward
+                    w_act.append(a)
+                m_rew.append(macro_r)
+                achieved = rssm.belief(s)
+                m_achieved.append(achieved)
+                m_cont.append(torch.sigmoid(cont(achieved)))
+            # (T=n_macro*K, b, ...) micro tensors; (n_macro, b, ...) macro tensors
+            w_bel = torch.stack(w_bel)
+            w_beln = torch.stack(w_beln)
+            w_act = torch.stack(w_act)
+            w_cont = torch.stack(w_cont)
+            m_bel = torch.stack(m_bel)
+            m_code = torch.stack(m_code)
+            m_rew = torch.stack(m_rew)
+            m_cont = torch.stack(m_cont)
+            m_goal = torch.stack(m_goal)
+            m_achieved = torch.stack(m_achieved)
+            # HAC hindsight: per (macro,row), relabel the segment goal with the achieved belief.
+            hs = (torch.rand(n_macro, b, device=device) < hindsight_frac).unsqueeze(-1)
+            seg_goal = torch.where(hs, m_achieved, m_goal)  # (n_macro, b, sd)
+            w_goal = seg_goal.unsqueeze(1).expand(n_macro, K, b, sd).reshape(n_macro * K, b, sd)
+            w_rew = goal_similarity(w_beln, w_goal)  # (T, b) cosine to (possibly relabeled) goal
+            # worker λ-returns PER SEGMENT (each K-step rollout = a fixed-goal episode; bootstrap
+            # at the achieved belief under that goal — avoids mixing goals across macro boundaries).
+            wr = w_rew.reshape(n_macro, K, b)
+            wc = w_cont.reshape(n_macro, K, b)
+            w_inp = torch.cat([w_bel, w_goal], dim=-1)  # (T, b, 2sd)
+            v_w = worker_tgt(w_inp.flatten(0, 1)).reshape(n_macro, K, b)
+            v_boot = worker_tgt(torch.cat([m_achieved, seg_goal], dim=-1).flatten(0, 1)).reshape(
+                n_macro, b
+            )
+            w_returns = torch.empty(n_macro, K, b, device=device)
+            for mi in range(n_macro):
+                g = v_boot[mi]
+                for t in reversed(range(K)):
+                    nextv = v_w[mi, t + 1] if t + 1 < K else v_boot[mi]
+                    g = wr[mi, t] + gamma * wc[mi, t] * ((1 - lam) * nextv + lam * g)
+                    w_returns[mi, t] = g
+            # manager λ-returns at the macro clock (discount γ^K), bootstrap at the final belief.
+            v_m = manager_tgt(m_bel.flatten(0, 1)).reshape(n_macro, b)
+            v_mH = manager_tgt(m_achieved[-1])
+            m_returns = torch.empty(n_macro, b, device=device)
+            g = v_mH
+            for t in reversed(range(n_macro)):
+                nextv = v_m[t + 1] if t + 1 < n_macro else v_mH
+                g = m_rew[t] + gamma_macro * m_cont[t] * ((1 - lam) * nextv + lam * g)
+                m_returns[t] = g
+        # ---- worker actor-critic (recompute logits/values WITH grad on detached beliefs) ----
+        wb_f = w_bel.reshape(-1, sd)
+        wg_f = w_goal.reshape(-1, sd)
+        w_adv = (w_returns - v_w).reshape(-1).detach()
+        dist_w = Categorical(logits=worker(wb_f, wg_f))
+        worker_loss = -(dist_w.log_prob(w_act.reshape(-1)) * w_adv).mean()
+        worker_loss = worker_loss - ent_coef * dist_w.entropy().mean()
+        worker_v_loss = worker_critic.twohot_loss(
+            torch.cat([wb_f, wg_f], dim=-1), w_returns.reshape(-1).detach()
+        )
+        # ---- manager actor-critic ----
+        mb_f = m_bel.reshape(-1, sd)
+        m_adv = (m_returns - v_m).reshape(-1).detach()
+        dist_m = Categorical(logits=manager(mb_f))
+        manager_loss = (
+            -(dist_m.log_prob(m_code.reshape(-1)) * m_adv).mean()
+            - ent_coef * dist_m.entropy().mean()
+        )
+        manager_v_loss = manager_critic.twohot_loss(mb_f, m_returns.reshape(-1).detach())
+        opt.zero_grad()
+        (worker_loss + worker_v_loss + manager_loss + manager_v_loss).backward()
+        opt.step()
+        with torch.no_grad():
+            for tgt, src in ((worker_tgt, worker_critic), (manager_tgt, manager_critic)):
+                for pt, pc in zip(tgt.parameters(), src.parameters(), strict=True):
+                    pt.mul_(0.98).add_(pc, alpha=0.02)
+        stats = (
+            worker_loss.item(),
+            manager_loss.item(),
+            m_rew.mean().item(),
+            w_rew.mean().item(),
+        )
+    return stats
+
+
 def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
     """Score in each of the four modes + swap-follow rate. Grounding = correct − none."""
     out = {}

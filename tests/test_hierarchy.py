@@ -73,3 +73,91 @@ def test_make_hierarchy_shapes():
     # worker critic consumes concat(belief, goal); manager critic consumes belief
     assert wc(torch.randn(2, sd + sd)).shape == (2,)
     assert mc(torch.randn(2, sd)).shape == (2,)
+
+
+# ---- integration: the two-level imagination loop runs end-to-end ----
+
+
+class _FakeBuf:
+    def __init__(self, ed, na):
+        self.ed, self.na = ed, na
+
+    def sample_sequences(self, b, length, success_frac=0.0):
+        import numpy as np
+
+        return {
+            "obs": np.random.randn(b, length, self.ed).astype("float32"),
+            "action": np.random.randint(0, self.na, (b, length)),
+            "reward": np.random.rand(b, length).astype("float32"),
+            "return": np.random.rand(b, length).astype("float32"),
+            "done": np.zeros((b, length), dtype="float32"),
+            "tag": np.zeros(b, dtype="int64"),
+        }
+
+
+class _FakeReg:
+    def __init__(self, td):
+        self.td = td
+
+    def tokens(self, tags):
+        n = len(tags)
+        return torch.randn(n, 5, self.td), torch.ones(n, 5, dtype=torch.bool)
+
+
+def test_imagine_hierarchy_runs_end_to_end():
+    """The load-bearing integration test: the two-level loop (manager picks codes, worker reaches
+    them, both train) executes one+ update on a tiny real RSSM and returns finite stats — pins the
+    shape/flatten/lambda-return wiring of imagine_hierarchy_rtfm."""
+    import copy
+
+    from world_model.models.continue_head import ContinueHead
+    from world_model.models.manual_conditioning import ConditionedRSSM
+    from world_model.models.twohot import TwoHotRewardHead
+    from world_model.train_rtfm import imagine_hierarchy_rtfm
+
+    torch.manual_seed(0)
+    ED, NA, TD = 32, 17, 384
+    rssm = ConditionedRSSM(embed_dim=ED, num_actions=NA, text_dim=TD, ctx_dim=32)
+    rew = TwoHotRewardHead(state_dim=rssm.state_dim, num_actions=NA)
+    cont = ContinueHead(rssm.state_dim)
+    worker, wcrit, manager, mcrit, cb = make_hierarchy(rssm.state_dim, NA, n_codes=16)
+    cb.fit(torch.randn(64, rssm.state_dim))
+    wtgt, mtgt = copy.deepcopy(wcrit), copy.deepcopy(mcrit)
+    opt = torch.optim.Adam(
+        [
+            *worker.parameters(),
+            *wcrit.parameters(),
+            *manager.parameters(),
+            *mcrit.parameters(),
+        ],
+        lr=1e-3,
+    )
+    stats = imagine_hierarchy_rtfm(
+        _FakeBuf(ED, NA),
+        _FakeReg(TD),
+        rssm,
+        rew,
+        cont,
+        worker,
+        wcrit,
+        wtgt,
+        manager,
+        mcrit,
+        mtgt,
+        cb,
+        opt,
+        updates=2,
+        seq_batch=4,
+        window=6,
+        burn_in=2,
+        horizon=4,
+        hier_k=2,
+        gamma=0.99,
+        lam=0.95,
+        ent_coef=0.01,
+        device="cpu",
+        hindsight_frac=0.5,
+    )
+    assert len(stats) == 4 and all(v == v for v in stats)  # no NaN (worker/mgr loss, task r, sim r)
+    # the worker's goal-similarity reward should be a real cosine in [-1, 1]
+    assert -1.01 <= stats[3] <= 1.01
