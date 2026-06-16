@@ -1997,3 +1997,15 @@ the imagined-vs-real REWARD-gap can be measured — decides the downstream fork 
 [[0053-rtfm-imagination-fidelity]]: reward-head over-optimism (→ conservatism) vs pure
 credit-assignment (→ planning/horizon). Note: exp0053 is a DIAGNOSTIC over existing checkpoints (no
 runs/exp0053 train dir); exp0054 is the fresh training run.
+
+## 2026-06-16 — exp0054 CONCLUDED: reward head is over-optimistic (the wall has a readout component)
+
+The reward-gap probe on the working ~0.10 baseline (folded VR 0.3, rew head saved): imagined−real
+reward = +0.67 (s0) / +0.79 (s1) over an 8-step imagined rollout, while the agent's real reward is
+≈0 (events 0–1/round) — so the imagined return is mostly PHANTOM. Dynamics stay faithful
+(h-divergence ~2× the sampling floor, reproduces [[0053-rtfm-imagination-fidelity]]). Verdict: the
+~0.10 wall has a confirmed reward-READOUT component (the exp0045 over-rating ghost, now measured on
+the working baseline). Next lever = CALIBRATED conservatism on the task reward head ([[0047]] blunt
+push-down over-suppressed → need gentler/scheduled or uncertainty-aware); residual after that =
+pure credit-assignment/execution ([[0043-rtfm-execution-wall]]). Page [[0054-rtfm-reward-gap]]
+finalized; fidelity plot embedded in assets/exp-0054.

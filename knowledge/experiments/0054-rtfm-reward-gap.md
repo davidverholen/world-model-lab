@@ -2,16 +2,63 @@
 status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-16
 ---
 
 # 0054: reward-gap probe — is the downstream wall the reward READOUT or credit-assignment?
 
-**Status: PRE-REGISTERED + IN FLIGHT** (`runs/exp0054`, 2 seeds, training). Follows the
-[[0053-rtfm-imagination-fidelity]] finding: the WM imagines *faithfully*, so the ~0.10 length-2
-swap_follow wall is **downstream** of the world model — in the policy / reward-readout. This run
-decides *which*.
+**Status: CONCLUDED.** The reward head is **over-optimistic** (both seeds): atop a faithful world
+model, the actor imagines ~+0.7 more cumulative reward over 8 steps than reality delivers. The ~0.10
+wall has a confirmed **reward-readout** component (the exp0045 over-rating ghost, now measured on the
+*working* baseline). Result below; follows the [[0053-rtfm-imagination-fidelity]] finding that the WM
+imagines faithfully, so the wall is downstream of the dynamics.
+
+## Result — reward head OVER-OPTIMISTIC (the fork resolves to the readout)
+
+`runs/exp0054` (folded VR 0.3, new save format with `rew` persisted). Probe = `imagine_report.py`,
+H=8, 16 seeds, single checkpoint per seed. "imagined − real reward" = sum over the 8-step imagined
+rollout of `rew(belief,action)` minus the real tutorial reward under the same plan:
+
+| | imagined − real reward (sum/H) | h-divergence @ step 8 (÷ floor) |
+|---|---|---|
+| seed 0, CORRECT | **+0.67** | 2.1× |
+| seed 0, SWAPPED | **+0.51** | 2.2× |
+| seed 1, CORRECT | **+0.79** | 2.2× |
+
+- **Robustly positive across both seeds** (+0.67 / +0.79 CORRECT). Since this ~0.05–0.08-swap_follow
+  agent almost never actually earns (events ≈0–1/round), the real reward over the window is ≈0 — so
+  the imagined return is **mostly phantom.** The actor optimises a reward landscape inflated by
+  over-prediction on the OOD states it reaches in imagination, which drowns the sparse true
+  gesture-reward (1.0, rare).
+- **Dynamics remain faithful** (h-divergence ~2× the sampling floor — reproduces
+  [[0053-rtfm-imagination-fidelity]]). So this is a reward-*readout* defect, not a world-model one.
+
+![exp0054 reward-gap fidelity (CORRECT): faithful dynamics, +0.67 reward over-prediction](../../assets/exp-0054/fidelity-rewardgap.png)
+
+_Faithful dynamics (h-divergence near the sampling floor) but the reward head over-predicts — the
+"imagined − real reward" line printed +0.67 (seed 0) / +0.79 (seed 1) over the 8-step rollout._
+
+**Caveats:** single checkpoint per seed; modest magnitude; small confound — the head was trained on
+`r_read = task + 0.3·VR` while "real" counts only tutorial achievements, so ~0.05 of the +0.7 is the
+head correctly predicting the (tiny) VR component the comparison excludes. The directional,
+both-seeds over-prediction is robust to this.
+
+## Verdict / next lever
+
+The downstream wall has a **confirmed reward-readout component** → the well-motivated lever is making
+the task reward head **conservative on OOD imagined actions** ([[0047-rtfm-conservative-reward]],
+CROP/CQL). **But** exp0047's blunt push-down *over-suppressed* — so the next step is *calibrated*
+conservatism (gentler/scheduled coef, or uncertainty-aware/ensemble reward head that abstains OOD),
+not a naive re-run. If careful reward-calibration still leaves swap_follow at ~0.10, the residual is
+**pure credit-assignment / execution** of the 2-step gesture ([[0043-rtfm-execution-wall]]) — needing
+planning/horizon, not a reward fix. This is the brainstorm fork.
+
+## Original pre-registration (for the record)
+
+Follows the [[0053-rtfm-imagination-fidelity]] finding: the WM imagines *faithfully*, so the ~0.10
+length-2 swap_follow wall is **downstream** of the world model — in the policy / reward-readout. This
+run decides *which*.
 
 ## Why this run exists (and why it's a fresh train)
 
