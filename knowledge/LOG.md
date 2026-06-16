@@ -2054,3 +2054,13 @@ lifted step-1 (0.28→0.42) but NOT conditional step-2 (~0.17) — uniform path 
 the path, not step-2's conditional reliability (likely exposure-starved: step-2 only practiced after
 step-1). exp0057 sweeps shaping-floor {0.5,1.0} (flag-only) to test reward-magnitude vs exposure;
 running concurrently with the exp0056 coverage sweep. New page [[0057-rtfm-path-reward]].
+
+## 2026-06-17 — exp0056 coverage DONE (promising): more distinct recipes lift step-2
+
+Coverage sweep (--n-train-seeds 100/400/1600, 1 seed each, length-2): n1600 (4× distinct recipes)
+~tripled conditional step-2 (P(s2|s1) 0.13–0.14 → 0.40) and ~2.4× exact swap_follow (0.046 → 0.112),
+with step-1 ~flat. So the depth-2 composition wall is at least partly COMBINATORIAL-COVERAGE-bound
+(the maintainer's hypothesis) — broader recipe exposure helps the model induce the chaining rule
+(distinct from exp0051's 2×-compute-same-distribution, which was flat). Single seed → needs multi-seed
+confirm + higher-coverage probe; combines with the path-reward levers. Then dispatched exp0058
+escalation sweep (factor 3/5/10, decay 0.5) into the freed GPU; exp0057 floor sweep still running.

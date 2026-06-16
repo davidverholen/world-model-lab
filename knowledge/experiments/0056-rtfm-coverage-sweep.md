@@ -3,12 +3,31 @@ status: draft
 owner: world-model
 scope: local
 verified: false
-last_reviewed: 2026-06-16
+last_reviewed: 2026-06-17
 ---
 
 # 0056: coverage sweep — is the 2-step wall combinatorial coverage or compositional binding?
 
-**Status: IN FLIGHT.** Follows the [[0055-rtfm-ensemble-pessimism]] reframe: the rung-4 wall is NOT
+**Status: DONE (1 seed/arm) — PROMISING: coverage helps step-2.** More distinct training recipes
+lifted the conditional step-2, supporting the combinatorial-coverage hypothesis. Needs a multi-seed
+confirm (single seed). Result:
+
+| n-train (distinct recipes) | step-1 (s1) | exact | **P(step-2\|step-1)** | correct |
+|---|---|---|---|---|
+| 100 | 0.36 | 0.046 | 0.13 | 0.104 |
+| 400 (baseline) | 0.32 | 0.046 | 0.14 | 0.070 |
+| **1600** | 0.28 | **0.112** | **0.40** | 0.100 |
+
+**4× more distinct recipes (n1600) ~tripled conditional step-2 (0.14→0.40) and ~2.4× the full chain
+(0.046→0.112)**, with step-1 ~flat (even slightly lower). So the depth-2 wall is at least partly
+**combinatorial-coverage-bound** — the model induces the chaining rule better with broader recipe
+exposure (NOT just more compute on the same distribution — exp0051's 2× budget was flat). Single seed,
+so seed-luck is possible; **queue a multi-seed n1600 confirm** + try even higher coverage. Combines
+naturally with the path-reward levers ([[0057-rtfm-path-reward]]/[[0058-rtfm-escalating-path-reward]]).
+
+## Original pre-registration
+
+Follows the [[0055-rtfm-ensemble-pessimism]] reframe: the rung-4 wall is NOT
 reading or reward — it's **2-step composition** (step-1 swap-follow ~0.4, full-chain ~0.08). This run
 tests the maintainer's specific hypothesis: does the agent fail to chain two steps because it hasn't
 *seen enough distinct recipes* to learn the depth-2 rule (combinatorial coverage), or because it
