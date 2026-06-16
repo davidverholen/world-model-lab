@@ -54,6 +54,24 @@ catastrophic forgetting (the [[retention]] thread). So the instant-and-permanent
 the *session-scale* version (mentored episodes feed the flywheel, the agent improves over the session)
 is buildable from parts that exist.
 
+## Staged capability order (maintainer call, 2026-06-16)
+
+Two capabilities, sequenced — do NOT blur them:
+
+1. **Reliably learn from a GOOD tutorial first** (current rung-4 work). Read → follow the path the
+   tutorial gives, step by step, reliably. The [[0055-rtfm-ensemble-pessimism]] reframe showed this is
+   really a *2-step path-following / composition* problem (reading works ~0.4 at step-1; the chain is
+   the wall) — so the lever is rewarding the **path**, not just the outcome (objective↔reward
+   alignment: we measure path-following via swap_follow, so reward path-following).
+2. **THEN robustness to imprecise/WRONG tutorials** (later). The agent overrides bad advice using
+   reality. This is NOT new machinery: the [[validated-reading-reward]] (reality as judge) already
+   supplies it — a wrong tutorial fails validation (VR≈0 → distrust the text, trust reality), exactly
+   the "bad advice fails validation → never consolidated" property above.
+
+Distinction to keep clean: the current **SWAPPED-eval is an honesty *probe*** (does it obey the
+displayed text → proof of genuine reading), NOT the wrong-tutorial capability. Robustness-to-wrong is
+the richer later milestone where the agent *overrides* the displayed text via reality.
+
 ## Why it matters now
 
 It is the use case that makes read-to-learn-dynamics worth climbing: an agent you can *teach by talking
