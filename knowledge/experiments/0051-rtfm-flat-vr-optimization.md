@@ -28,16 +28,23 @@ confirmed ~0.10 ([[0048-rtfm-validated-reading]] / [[0049-rtfm-sustained-vr]]).
 at this scale. (correct rose a little — more budget buys slightly better task completion, but not
 grounding.) So the lever is a **stronger/denser grounding incentive**, not more compute.
 
-## In flight + next (the incentive lever)
+## coef 0.5 — DONE: coef lever EXHAUSTED
 
-- **coef 0.5** (`runs/exp0051c05`, 2 seeds): cheap probe filling the dose-response gap (exp0048 tested
-  0.1/0.3 ≈ 0.10, 1.0 dark-rooms; 0.5 untested). Low-odds (likely ~0.10), but closes the coef question.
-- **On-deck — decoupled/denser actor-VR:** apply the maintainer's insight directly. Currently VR is
-  folded into the collection reward `r_read`, so the actor feels it only through the (blurred, shared)
-  reward head. Give VR its **own reward head** (predict the stored VR component separately) and have the
-  imagination actor optimize `task_reward + λ·VR_head` — a dedicated, undiluted grounding signal on the
-  acting policy, still reality-judged (VR is computed on real transitions at collection). Moderate
-  build; reviewer-gate. If coef 0.5 is flat, this is the next test.
+`runs/exp0051c05` (2 seeds): filled the dose-response gap (exp0048 tested 0.1/0.3 ≈ 0.10, 1.0
+dark-rooms; 0.5 was the hole). Result: length-2 swap_follow ~0.10 (s0 0.10, s1 0.0–0.15, noisy), **no
+better than 0.1/0.3.** Combined with the budget probe, the **coef knob is saturated** — reward strength
+cannot move the ~0.10 ceiling. (These checkpoints became the working-baseline substrate for the
+[[0053-rtfm-imagination-fidelity]] probe.)
+
+## Outcome — the lever ladder, and the pivot
+
+The on-deck "decoupled/denser actor-VR" idea was built and run as [[0052-rtfm-decoupled-vr-head]]:
+**NEGATIVE** — a dedicated, directly-actor-optimized VR head (λ=1.0) collapsed the policy (the actor
+reward-hacked the head's OOD over-predictions). So the full lever ladder — objective→folded-VR 0.10,
+coef-saturate (here), 2× compute (here), hierarchy ~0 ([[0050-rtfm-hierarchy]]), decoupled head collapse
+— shows **pushing the grounding incentive harder keeps failing**. Pivot: localize the wall instead.
+[[0053-rtfm-imagination-fidelity]] then showed the WM imagines faithfully → the ~0.10 wall is
+**downstream** (policy / reward-readout), not the world model or the grounding-incentive strength.
 
 ## Links
 

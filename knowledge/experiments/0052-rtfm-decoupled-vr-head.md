@@ -2,15 +2,60 @@
 status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-16
 ---
 
 # 0052: decoupled validated-reading reward HEAD — grounding incentive directly on the actor
 
-**Status: BUILT + reviewer-passed (SHIP), CPU-smoked; GPU dispatch pending (waiting for
-[[0051-rtfm-flat-vr-optimization]] coef-0.5 to free the 8 GB GPU).** Implements the on-deck lever
-named in exp0051: apply the maintainer's incentive-structure insight directly to the acting policy.
+**Status: CONCLUDED — NEGATIVE.** The decoupled VR head (λ=1.0) did not beat the ceiling; it
+**collapsed the policy** to a degenerate manual-blind fixed point (below the folded-VR baseline).
+Implements the on-deck lever named in exp0051: apply the maintainer's incentive-structure insight
+directly to the acting policy. Result + diagnosis below.
+
+## Result — NEGATIVE: policy collapse (2 seeds, length-2)
+
+`runs/exp0052` (2 seeds, `--vr-head-coef 1.0`, `--validated-reading-coef 0`, else the exp0051
+baseline config). The length-2 eval **froze for 13 straight rounds** (10–22) at a degenerate point:
+
+| length-2, last 6 rounds | exp0052 (decoupled VR head) | exp0051 baseline (folded VR) |
+|---|---|---|
+| swap_follow | **0.00–0.02 (frozen)** | ~0.10 (varies, peaks 0.15) |
+| correct / none / swapped | **all 0.02 (manual-blind)** | differentiated |
+| tutorial events / round | **0–1 (dead flywheel)** | 2–7 (turning) |
+| imagined_return (len-2) | **~15–25 (inflated)** | ~8–12 |
+
+`correct = none = swapped` exactly + frozen across rounds = a **manual-blind degenerate policy**: the
+greedy agent does the same first-2 actions regardless of the displayed manual; swap_follow 0.02 is
+just the chance that fixed pair matches. The flywheel is dead (≈0 events) — strictly worse than the
+folded-VR baseline it was meant to beat.
+
+## Diagnosis — a solved problem re-opened on a new channel
+
+The imagined return inflated to ~15–25 (vs ~8–12 baseline): the actor learned to chase states where
+the **VR head over-predicts**. The VR head is trained only on *real* collected transitions, so it gets
+**exploited on out-of-distribution imagined states** — the exact failure of [[0045-rtfm-oracle-probe]]
+(the reward head over-rated OOD action sequences), which [[0047-rtfm-conservative-reward]]'s CROP/CQL
+push-down was built to fix. We put **no such conservative guard on the VR head**, so a dense,
+directly-actor-optimized intrinsic head reward-hacks itself and the policy collapses. Decoupling is not
+proven wrong — an actor-optimized dense intrinsic head just needs the same OOD guard the task reward
+head has. [[0053-rtfm-imagination-fidelity]] corroborates: the WM *dynamics* imagine faithfully for
+both baseline and collapsed models, so the collapse is **downstream of the world model** (policy /
+reward-readout), consistent with this diagnosis.
+
+## Lesson
+
+(1) **Pushing the grounding incentive HARDER keeps failing** — the lever ladder (objective→folded VR
+0.10, coef-saturate, 2× compute, hierarchy ~0, decoupled head collapse) says the bottleneck is no
+longer incentive-strength but **downstream execution / reward-readout**. (2) A dense intrinsic reward
+optimized directly by the actor in imagination needs an **OOD conservatism guard** or it reward-hacks
+(same as the extrinsic reward head). (3) The robust best on the rung remains the **folded VR ~0.10**.
+→ pivot to localizing the wall ([[0053-rtfm-imagination-fidelity]]) rather than another reward variant.
+
+## Original pre-registration (for the record)
+
+Implements the on-deck lever named in exp0051: apply the maintainer's incentive-structure insight
+directly to the acting policy.
 
 ## Why (the maintainer's insight)
 

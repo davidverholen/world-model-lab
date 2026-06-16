@@ -413,6 +413,22 @@ verify at ingest.
       (validate predictions against real observations) vs JEPA's non-generative
       stance. Read as the pair to PAN; the explicit counter-argument to LeCun on
       our generative-vs-predictive axis.
+- [ ] arxiv:2507.23773 **SimuRA: General Agentic Planning Through Simulative
+      Reasoning with World Models** (Deng, Hou, Hu & Xing; Jul 2025, v3 May
+      2026; OpenReview id 6fDZYJYYgu) — LLM-based world model for general
+      goal-oriented agent planning: belief encoder → natural-language belief
+      states → LLM world model predicts future states → critic evaluates
+      terminal states for goal progress; System I (reactive) vs System II
+      (simulative) framing. Relevant axes: (a) the "world model in the loop for
+      planning" thesis at an LLM-scale we don't target; (b) natural-language
+      belief states as an alternative to continuous latents (contrast to our
+      RSSM); (c) agent architecture critique (goal / identity / decision / self-
+      regulation / learning) — the companion to "Critiques of World Models."
+      CAUTION: this is an LLM-orchestration paper, not a latent-predictive RL
+      paper — no RSSM, no imagination actor-critic, no manual-reading grounding,
+      no intrinsic motivation. Relevance to our specific wall (swap-follow
+      ceiling) is indirect. Read as broad-context, not a method source.
+      Pair with arxiv:2507.05169 and arxiv:2511.09057 (PAN). verified:false.
 ### Trust gate (synthetic-experience weighting)
 - [ ] arxiv:2104.04174 Learning to Reweight Imaginary Transitions — the ancestor
 - [ ] arxiv:2506.09270 Uncertainty Prioritized Experience Replay (RLC 2025)

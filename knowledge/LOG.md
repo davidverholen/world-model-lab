@@ -1,6 +1,20 @@
 # Knowledge Base Log
 
-Append-only. Entry format: `## [2026-06-16] experiment | exp0051 budget probe — flat-VR ~0.10 is a REAL ceiling (not compute-bound)
+Append-only. Entry format: `## [YYYY-MM-DD] <type> | <title>`
+
+## [2026-06-16] scout | OpenReview 6fDZYJYYgu — identified as SimuRA (Deng, Hou, Hu & Xing); queued
+
+OpenReview forum id 6fDZYJYYgu: API returned empty notes (double-blind embargo likely); forum
+WebFetch returned a plausible but unverifiable description. Cross-verified via WebSearch + arXiv
+fetch: the id belongs to arxiv:2507.23773 "SimuRA / General Agentic Planning Through Simulative
+Reasoning with World Models" (Deng, Hou, Hu, Xing; Jul 2025, v3 May 2026) — same authorship
+and theme as "Critiques of World Models" (arxiv:2507.05169, already queued). SimuRA is an
+LLM-orchestration paper (LLM as world model, natural-language belief states, System II planning)
+— not a latent-predictive RL paper. No RSSM/imagination/manual-reading/intrinsic-motivation
+content. Verdict: broad-context read, low priority relative to our active wall. 1 source added
+to SOURCES.md; 1 entry appended to QUEUE.md (LLM-as-latent-backbone / PAN section).
+
+## [2026-06-16] experiment | exp0051 budget probe — flat-VR ~0.10 is a REAL ceiling (not compute-bound)
 
 Post-hierarchy, optimizing the FLAT validated-reading architecture on the 2-step tutorial. Budget probe
 (coef 0.3, 2x training = 40 rounds/800 ac-updates vs the 30r/400u 0.105 baseline): length-2 swap_follow
@@ -1954,3 +1968,23 @@ upscaled 64×64 game frame; right: telemetry panel). SWAPPED mode is the diagnos
 follow the displayed-but-wrong manual?). Reusable helpers compose_frame()/write_gif() for a later
 imagination-viewer. Built by an opus impl subagent, reviewed in the main loop. GIFs live in runs/
 (gitignored); for report embedding they go to assets/. First assets rendered from exp0051c05.
+
+## 2026-06-16 — exp0052 NEGATIVE, exp0053 localizes the wall, exp0054 dispatched
+
+- **exp0052 (decoupled VR head) CONCLUDED NEGATIVE.** λ=1.0 collapsed the policy to manual-blind
+  (swap_follow 0.00–0.02 frozen 13 rounds, dead flywheel, imagined_return inflated 15–25). Diagnosis:
+  the actor reward-hacks the VR head's OOD over-predictions — exp0045/0047 redux on a new channel, no
+  conservative guard. Page [[0052-rtfm-decoupled-vr-head]] finalized (verified:true).
+- **exp0053 imagination-fidelity probe** (new tool `scripts/imagine_report.py`). Finding: the WM
+  imagines FAITHFULLY (deterministic-h divergence only ~1.5–2.7× the real-vs-real sampling floor, for
+  BOTH baseline and collapsed models) → the ~0.10 wall is NOT the world model; it's DOWNSTREAM
+  (policy / reward-readout). Baseline WM is manual-sensitive (CORRECT 1.5× vs SWAPPED 2.7×); the
+  collapsed exp0052 model lost that asymmetry. New page [[0053-rtfm-imagination-fidelity]].
+- **exp0051 finalized**: coef-0.5 ≈0.10 → coef lever exhausted; whole grounding-incentive axis
+  saturates/collapses across the lever ladder. Pivot recorded.
+- **Save format**: train_rtfm now persists recon_head/rew/cont/vr_head (extra keys; older loaders
+  unaffected) so the imagined-vs-real REWARD-gap metric works on future checkpoints.
+- **exp0054 dispatched** (`runs/exp0054`, 2 seeds): working baseline (folded VR coef 0.3) WITH the new
+  save format → then reward-gap probe to decide reward-readout-overoptimism vs pure credit-assignment.
+- Scout queued the Eric Xing cluster paper (SimuRA, arxiv:2507.23773, inferred from OpenReview id
+  6fDZYJYYgu which would not resolve) — verified:false, low priority; LLM-as-world-model, tangential.
