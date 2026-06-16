@@ -1268,6 +1268,14 @@ def main() -> None:
             "rtfm_agent": True,
             "rssm": rssm.state_dict(),
             "actor": actor.state_dict(),
+            # exp 0053: also persist the WM prediction heads so the imagination-fidelity probe can
+            # measure embedding-recon error and the imagined-vs-real reward/return gap (not just
+            # belief divergence, which needs rssm alone). Optional extra keys → older loaders that
+            # read only rssm/actor/config are unaffected. vr_head present only if it was built.
+            "recon_head": recon_head.state_dict(),
+            "rew": rew.state_dict(),
+            "cont": cont.state_dict(),
+            "vr_head": vr_head.state_dict() if vr_head is not None else None,
             "config": {
                 "pool": args.pool,
                 "num_actions": n_act,
