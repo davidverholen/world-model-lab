@@ -1,6 +1,21 @@
 # Knowledge Base Log
 
-Append-only. Entry format: `## [2026-06-16] experiment | exp0050 Phase A v1 DIVERGENT → v2 (stability fixes) running
+Append-only. Entry format: `## [2026-06-16] experiment | exp0050 hierarchy STALLED (2 attempts) — handed back to maintainer
+
+Phase A v2 (advantage-norm + grad-clip + --hier-flat-collect) ALSO NEGATIVE: length-2 correct/swap_follow
+0.00 on all 4 seeds even with clean flat-collection (good WM); worker_loss still oscillates ±30-90
+(policy collapse). Two attempts (v1 divergent, v2 stable-but-zero), headline did not move off ~0 → STALL
+RULE: stop, hand back, no 3rd attempt without justification. Consolidated diagnosis: the minimal first
+cut (raw belief-space goals + K-means codebook + cosine worker reward, NO learned goal autoencoder) is
+the likely culprit — exactly Director's load-bearing ablation (raw-RSSM cosine goals are uninformative;
+the worker never learns to reach subgoals). Hand-back options for the maintainer: (A) build the real
+VQ-VAE goal autoencoder (principled, bigger); (B) recursive decompose-or-execute MPC over the VR-WM
+(no trained manager, sidesteps co-training instability); (C) bank validated-reading (the confirmed
+0->0.10 objective-gap crack) and pause hierarchy. NOT Phase B (manual-directed manager) — the executor
+must work first. Hierarchy code (reviewer-cleared) banked. Autonomous loop PAUSED at this fork. Nothing
+running; GPU free; tree clean after milestone.
+
+## [2026-06-16] experiment | exp0050 Phase A v1 DIVERGENT → v2 (stability fixes) running
 
 The Director hierarchy built today (4 commits, reviewer-cleared) ran Phase A: NEGATIVE as a BUG, not a
 clean test. Partially worked at length-1 (correct→0.35) then collapsed+diverged at length-2 (correct

@@ -102,14 +102,33 @@ once it went degenerate it **poisoned the buffer** with junk data (vs the flat b
 collected competently). So this is NOT "grounding is the ceiling" — the hierarchy never functioned at
 length-2.
 
-**Fixes → Phase A v2 (running, `runs/exp0050av2`):** (1) **normalize** the worker+manager advantages
-per batch + `clip_grad_norm(100)` on the hierarchy optimizer (kills the divergence — v2 smoke:
-`worker_loss` bounded); (2) `--hier-flat-collect` keeps the **flat VR-actor collecting** competent data
-(and trains it) while the hierarchy trains *in imagination over that good WM* — isolating "is the
-hierarchy a good executor" from the v1 collection-poisoning. If v2 still ≈ flat, the next lever is Phase
-B (manual-directed manager) and/or hierarchy hyperparameters; if v2 diverges again, escalate to the
-maintainer (the co-training may need the recursive decompose-or-execute fallback,
-[[hierarchical-imagination-agent]] §3).
+**Phase A v2 (advantage-norm + grad-clip + `--hier-flat-collect`):** ALSO NEGATIVE. 4 seeds, final
+length-2: **correct 0.000, swap_follow 0.000 on EVERY seed** (vs flat 0.073 / 0.105). The advantage
+normalization + grad-clip *reduced* but did not eliminate the worker instability — `worker_loss` still
+oscillates ±30–90 across all seeds (policy collapse: peaked worker → extreme log-probs, not advantage
+explosion). And decisively: **even with clean flat-collection (a good WM + competent data), the
+hierarchy executes at zero.**
+
+## STATUS — hierarchy thread STALLED (2 failed attempts); STOP per the stall rule
+
+Two pre-registered attempts (v1 divergent, v2 stable-but-zero), headline (length-2 swap_follow/correct)
+**did not move off ~0** — below even the flat ~0.10. Per PROCESS.md §Efficiency guardrails (countable
+stall rule), the thread is a wall; a 3rd attempt needs written justification that it is not a
+known-class repeat. **Consolidated diagnosis:** the *minimal first cut* — goals in **raw belief space**,
+a **K-means codebook**, a **cosine** worker reward, and **no learned goal autoencoder** — is the likely
+culprit. This is exactly what [[director-2022]]'s own ablation flags as load-bearing ("removing the goal
+autoencoder causes failure in most environments"): raw-RSSM cosine goals give the worker an
+uninformative/unstable target, so it never learns to reach subgoals and the manager's codes are
+meaningless. We skipped the VQ-VAE goal autoencoder for the first probe; that skip appears fatal.
+
+**→ Handed back to the maintainer** (a genuine scope/design fork, not a clear one-flag experiment):
+(A) build the real **VQ-VAE goal autoencoder** (Director's load-bearing piece) — the principled fix,
+bigger build; (B) the lighter **recursive decompose-or-execute MPC** over the VR-trained WM
+([[hierarchical-imagination-agent]] §3) — no trained manager, sidesteps the co-training instability;
+(C) **bank validated-reading** (the confirmed 0→0.10 objective-gap result) and pause the hierarchy. NOT
+Phase B (manual-directed manager): manual-directing a non-functional executor can't help — the executor
+must work first. The hierarchy code (models/hierarchy.py + imagine_hierarchy_rtfm, reviewer-cleared) is
+banked for whichever direction resumes it.
 
 ## Links
 
