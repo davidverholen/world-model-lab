@@ -130,6 +130,32 @@ Phase B (manual-directed manager): manual-directing a non-functional executor ca
 must work first. The hierarchy code (models/hierarchy.py + imagine_hierarchy_rtfm, reviewer-cleared) is
 banked for whichever direction resumes it.
 
+## exp0050b/c — diagnostic-driven iteration (maintainer re-engaged 2026-06-16)
+
+Maintainer reopened the thread ("test more, propose prior"). Three diagnostic-driven tests localized
+the root cause:
+
+- **exp0050b (instrumented):** added `worker_sim` (goal-similarity), `code_entropy`, `codes_used`
+  logging. Found: worker_sim ~0.6, manager code-entropy healthy (diverse codes), worker_loss now
+  stable — yet correct = 0. *Initially* read as "machinery works, codebook lacks a success goal."
+- **exp0050c (success-biased codebook, `--hier-codebook-success 0.5`):** oversample reward-earning
+  beliefs into the codebook. **Still correct = 0**; the manager now *collapses* (entropy → 0, 1–2
+  codes used on s1).
+- **Consolidated diagnosis (the real one):** `worker_sim` is **flat ~0.6 and never rises**, invariant
+  to the codebook change — i.e. it is the **ambient belief-cosine** (any belief ≈ 0.6-similar to any
+  K-means centroid in raw 288-d belief space), NOT learned goal-reaching. **The goal space is
+  uninformative**: raw-belief cosine does not separate states, so codebook goals are meaningless
+  targets, the worker can't meaningfully reach a *specific* goal, and the manager rationally collapses
+  (all goals ≈ equivalent). This is exactly the piece [[director-2022]] §2 calls load-bearing — the
+  **learned goal autoencoder** (VQ-VAE) that gives a separable, low-dim goal space — which the minimal
+  first cut skipped. Three cheap tests cleanly establish: *the shortcut (raw-belief goals) cannot work;
+  the goal autoencoder is required.*
+
+**Decision point (not a quick flag-test anymore):** the next real fix is building the goal autoencoder
+(Director's load-bearing component) — a focused build, not a one-line change. So the fork is genuine:
+(A) build the goal-encoder/autoencoder properly, or (C) bank validated-reading (the confirmed 0→0.10
+result) and schedule the full Director build deliberately. Surfaced to the maintainer.
+
 ## Links
 
 [[hierarchical-imagination-agent]] · [[director-2022]] · [[0049-rtfm-sustained-vr]] · [[0048-rtfm-validated-reading]] · [[0043-rtfm-execution-wall]] · [[validated-reading-reward]] · [[mentored-learning-loop]] · [[hierarchy-and-credit]]
