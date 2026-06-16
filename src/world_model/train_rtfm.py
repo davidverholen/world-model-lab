@@ -253,6 +253,7 @@ def collect_rtfm(
     shaping_coef=0.0,
     recon_head=None,
     validated_reading_coef=0.0,
+    store_vr=False,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
@@ -261,7 +262,9 @@ def collect_rtfm(
     rng = np.random.default_rng(0)
     events = 0
     vr_sum, vr_n = 0.0, 0
-    use_vr = validated_reading_coef > 0.0 and recon_head is not None
+    # Compute VR when EITHER the old folded path (coef>0, added into r_read) OR the new decoupled
+    # path (store_vr, kept in its own channel for a dedicated VR head — exp 0052) is active.
+    use_vr = (validated_reading_coef > 0.0 or store_vr) and recon_head is not None
 
     def embed_of(obs):
         return agent.enc(torch.as_tensor(img_to_chw(obs["image"]), device=device).unsqueeze(0))
@@ -291,20 +294,26 @@ def collect_rtfm(
             r_read = float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
-            # exp 0048: intrinsic validated-reading reward — pay the agent when reading the manual
-            # made THIS real transition more predictable (the manual's marginal predictive value,
-            # judged by reality). Only with a live WM belief (use_agent) + a present manual.
+            # exp 0048/0052: intrinsic validated-reading reward — the manual's marginal predictive
+            # value on THIS real transition (judged by reality). Only with a live WM belief
+            # (use_agent) + a present manual. Compute the RAW (unscaled) signal once and route it:
+            #   • folded path (coef>0): add coef·VR into the task reward r_read (exp 0048).
+            #   • decoupled path (store_vr): keep RAW VR in its own channel for a dedicated VR head;
+            #     r_read stays the clean task reward and the actor optimises task + λ·VR_head
+            #     (exp 0052, the maintainer's "every acting level needs the grounding incentive").
+            raw_vr = 0.0
             if use_vr and use_agent and agent._tok is not None:
                 a_t = torch.tensor([a], device=device)
-                r_read += validated_reading_coef * validated_reading_reward(
+                raw_vr = validated_reading_reward(
                     agent.rssm, recon_head, agent._state, a_t, agent._tok, agent._mask, nemb
                 )
-                vr_sum += r_read - (
-                    float(len(info["tutorial_newly"])) + float(info.get("reading_shaping", 0.0))
-                )
+                if validated_reading_coef > 0.0:
+                    r_read += validated_reading_coef * raw_vr
+                vr_sum += raw_vr
                 vr_n += 1
             buffer.add(
-                Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done), tag=mid
+                Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done, vr=raw_vr),
+                tag=mid,
             )
             # Count honest tutorial achievements only (NOT shaping steps, which are dense once
             # shaping is on) — this stays the ignition diagnostic: are we EARNING the one_shot
@@ -336,6 +345,7 @@ def wm_train_rtfm(
     manual_aux_mask_frac=0.4,
     reward_conservative_coef=0.0,
     reward_conservative_samples=16,
+    vr_head=None,
 ):
     """Train the WM (recon/kl/reward/continue). When manual_aux_coef>0, ADD the dense
     masked-manual-reconstruction reading gradient ([[dynalang-2023]] option A, see
@@ -353,22 +363,24 @@ def wm_train_rtfm(
     belief is detached so the penalty shapes ONLY the reward head, not the representation. coef=0.0
     is byte-for-byte unchanged (the random-action forward is never run)."""
     recon = kl = torch.zeros(())
-    aux_last = cons_last = 0.0
+    aux_last = cons_last = vr_last = 0.0
     w = window
     use_aux = manual_aux_coef > 0.0 and manual_aux_head is not None
     use_cons = reward_conservative_coef > 0.0
+    use_vr_head = vr_head is not None  # exp 0052: dedicated, decoupled grounding head
     n_act_rew = rew.action_embed.num_embeddings
     for _step in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         rewards = torch.as_tensor(batch["reward"], device=device)
+        vr_tgt = torch.as_tensor(batch["vr"], device=device) if use_vr_head else None
         dones = torch.as_tensor(batch["done"], device=device, dtype=torch.float32)
         tok, mask = registry.tokens(batch["tag"])  # (B,L,td) manual tokens, same all window
         b, w = actions.shape
         state = rssm.initial(b, device)
         prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
-        recon = kl = r_l = c_l = aux = cons = torch.zeros((), device=device)
+        recon = kl = r_l = c_l = aux = cons = vr_l = torch.zeros((), device=device)
         for k in range(w):
             if use_aux:
                 # Aux belief uses the PRE-step state + prev_a → deter_noctx (anti-baking). Compute
@@ -394,9 +406,16 @@ def wm_train_rtfm(
                 )
                 bel_exp = bel_d.unsqueeze(1).expand(b, reward_conservative_samples, bel_d.shape[-1])
                 cons = cons + rew(bel_exp, rand_a).clamp_min(0.0).mean()
+            if use_vr_head:
+                # exp 0052: dedicated VR head, trained as a pure READOUT on the DETACHED belief —
+                # so the WM representation stays byte-identical to the validated baseline and the
+                # head only learns to predict the reality-judged VR for the actor to optimise.
+                # Added to the loss UNWEIGHTED (no coef, unlike aux/cons): the detach means its CE
+                # magnitude can't perturb the representation; vr_head_coef scales it at the actor.
+                vr_l = vr_l + vr_head.twohot_loss(belief.detach(), actions[:, k], vr_tgt[:, k])
             prev_a = actions[:, k]
         loss = (
-            recon + kl + r_l + c_l + manual_aux_coef * aux + reward_conservative_coef * cons
+            recon + kl + r_l + c_l + manual_aux_coef * aux + reward_conservative_coef * cons + vr_l
         ) / w
         opt.zero_grad()
         loss.backward()
@@ -404,7 +423,8 @@ def wm_train_rtfm(
         opt.step()
         aux_last = float(aux.item() / w)
         cons_last = float(cons.item() / w)
-    return float(recon.item() / w), float(kl.item() / w), aux_last, cons_last
+        vr_last = float(vr_l.item() / w)
+    return float(recon.item() / w), float(kl.item() / w), aux_last, cons_last, vr_last
 
 
 def imagine_ac_rtfm(
@@ -428,9 +448,12 @@ def imagine_ac_rtfm(
     device,
     beta_repval=0.3,
     success_frac=0.5,
+    vr_head=None,
+    vr_head_coef=0.0,
 ):
     from torch.distributions import Categorical
 
+    use_vr_head = vr_head is not None and vr_head_coef > 0.0
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
@@ -456,7 +479,13 @@ def imagine_ac_rtfm(
                 a = Categorical(logits=actor_logits(actor, bel, tok, mask)).sample()
                 beliefs.append(bel)
                 acts.append(a)
-                rews.append(rew(bel, a))
+                # exp 0052: the acting policy optimises task reward + λ·VR_head — a dedicated,
+                # undiluted grounding incentive ON THE ACTOR (the maintainer's insight: every
+                # acting level needs the grounding incentive, not just the WM's blended reward).
+                r_step = rew(bel, a)
+                if use_vr_head:
+                    r_step = r_step + vr_head_coef * vr_head(bel, a)
+                rews.append(r_step)
                 conts.append(torch.sigmoid(cont(bel)))
                 s, _ = rssm.img_step(s, a, tok, mask)
             bel_s = torch.stack(beliefs)
@@ -811,6 +840,12 @@ def main() -> None:
     # exp 0048: intrinsic validated-reading reward — pay the agent (at collection) for the manual's
     # marginal next-state predictive value, validated vs the real transition (0 = off/unchanged).
     p.add_argument("--validated-reading-coef", type=float, default=0.0)
+    # exp 0052: DECOUPLED validated-reading reward head. Stores RAW VR in its own buffer channel
+    # (task reward stays clean), trains a dedicated two-hot VR head as a detached readout, and the
+    # imagination actor optimises task_reward + λ·VR_head — a dedicated grounding incentive ON THE
+    # ACTOR (every acting level needs it). 0 = off/unchanged. Use INSTEAD of the folded
+    # --validated-reading-coef; they can co-exist, but the point is the decoupled signal alone.
+    p.add_argument("--vr-head-coef", type=float, default=0.0)
     # exp 0050: Director-style manager/worker hierarchy in imagination (OFF = flat path unchanged).
     # Phase A is state-only (manager not yet manual-conditioned). hier-k = manager clock (subgoal
     # every K steps); horizon should be a small multiple of hier-k (e.g. horizon 10, hier-k 5).
@@ -894,6 +929,12 @@ def main() -> None:
     if args.manual_aux_coef > 0.0:
         manual_aux_head = MaskedManualHead(belief_dim=rssm.state_dim, text_dim=td).to(device)
         wm_mods = wm_mods + [manual_aux_head]
+    # exp 0052: decoupled validated-reading head (built only when --vr-head-coef > 0). Trained in
+    # the WM optimizer as a detached readout; the imagination actor optimises task + λ·VR_head.
+    vr_head = None
+    if args.vr_head_coef > 0.0:
+        vr_head = TwoHotRewardHead(state_dim=sd, num_actions=n_act).to(device)
+        wm_mods = wm_mods + [vr_head]
     opt_wm = torch.optim.Adam([q for m in wm_mods for q in m.parameters()], lr=3e-4)
     opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
 
@@ -1020,6 +1061,7 @@ def main() -> None:
             shaping_coef,
             recon_head=recon_head,
             validated_reading_coef=args.validated_reading_coef,
+            store_vr=args.vr_head_coef > 0.0,
         )
         buffer.compute_returns(args.gamma)
         print(
@@ -1044,8 +1086,9 @@ def main() -> None:
             manual_aux_mask_frac=args.manual_aux_mask_frac,
             reward_conservative_coef=args.reward_conservative_coef,
             reward_conservative_samples=args.reward_conservative_samples,
+            vr_head=vr_head,
         )
-        recon, kl, aux_l, cons_l = wm_out
+        recon, kl, aux_l, cons_l, vr_l = wm_out
         if hier_on:
             # two-level imagination AC; print slots reused as (worker_loss, manager_loss, macro_r).
             hstats = imagine_hierarchy_rtfm(
@@ -1131,6 +1174,8 @@ def main() -> None:
                 args.lam,
                 args.ent_coef,
                 device,
+                vr_head=vr_head,
+                vr_head_coef=args.vr_head_coef,
             )
         if hier_on:
             for m in (rssm, worker, manager, goal_module):
@@ -1145,9 +1190,10 @@ def main() -> None:
         r = evaluate_rtfm(
             eval_agent, eval_seeds[: args.n_eval_seeds], cur_len, args.max_steps, args.one_shot
         )
+        vr_suffix = f" vr_loss={vr_l:.4f}" if vr_head is not None else ""
         print(
             f"  recon={recon:.3f} kl={kl:.3f} actor_loss={al:.3f} critic_loss={cl:.3f} "
-            f"imagined_return={ir:.3f} reward_cons={cons_l:.4f}",
+            f"imagined_return={ir:.3f} reward_cons={cons_l:.4f}{vr_suffix}",
             flush=True,
         )
         print(

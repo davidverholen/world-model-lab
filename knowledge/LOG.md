@@ -1921,3 +1921,17 @@ bottom). Backfilled exp0036/0038/0040/0041/0042/0043/0044/0045. exp0046 left un-
 run is still training (round 12/30); regenerate at write-up. Note: the 4-seed aggregate corrected a
 single-seed misread of exp0046 (grounding ignites ~0.3 at length-1 then collapses at the length-2
 switch, not pinned-near-zero) — read the aggregate, not one seed.
+
+## 2026-06-16 — exp0052 built: decoupled validated-reading reward head
+
+Built the on-deck lever from [[0051-rtfm-flat-vr-optimization]] (coef lever exhausted: budget-2× and
+coef-0.5 both ≈0.10). exp0052 applies the maintainer's insight — *every acting level needs the
+grounding incentive directly* — by decoupling validated-reading (VR) from the WM's blended reward
+head: new `Transition.vr` buffer channel (default 0 → all existing callers byte-for-byte unchanged),
+RAW VR stored separately (task reward stays clean), a dedicated two-hot `vr_head` trained as a
+DETACHED readout (WM representation identical to the validated baseline), and the imagination actor
+optimises `task + λ·VR_head` (`--vr-head-coef`). Added `test_vr_channel_roundtrip`. Reviewer (opus):
+SHIP (decoupling correct, detach preserves WM, two-hot represents small VR, backward-compatible, no
+train/eval leakage). CPU-smoked end-to-end (vr_loss trains, raw VR stored, actor picks it up). GPU
+dispatch pending — waiting for exp0051 coef-0.5 to free the 8 GB GPU. New page
+[[0052-rtfm-decoupled-vr-head]] (pre-registration), INDEX updated.

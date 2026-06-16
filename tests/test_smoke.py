@@ -95,6 +95,27 @@ def test_sequence_sampling():
     assert batch["next_obs"].shape == (8, 3, 4, 4)
 
 
+def test_vr_channel_roundtrip():
+    """exp 0052: the decoupled validated-reading channel stays separate from the task reward and is
+    returned by both flat and windowed sampling (defaults to 0 for non-VR callers)."""
+    buf = ReplayBuffer(capacity=20, obs_shape=(2,), seed=0)
+    obs = np.zeros((2,), dtype=np.float32)
+    for i in range(20):
+        # reward (task) and vr (grounding) are distinct per-transition channels.
+        buf.add(Transition(obs, i % 3, float(i), obs, done=(i % 5 == 4), vr=0.1 * i))
+    seq = buf.sample_sequences(6, length=3)
+    assert seq["vr"].shape == (6, 3)
+    # the vr channel must track its OWN value (0.1*i), distinct from the reward channel (i) — i.e.
+    # vr is not silently aliasing reward. vr == 0.1*reward here, so they must NOT be equal anywhere.
+    assert not np.allclose(seq["vr"], seq["reward"])
+    assert np.allclose(seq["vr"], 0.1 * seq["reward"])
+    # default (no vr kwarg) → 0, proving non-VR callers are unaffected.
+    buf2 = ReplayBuffer(capacity=4, obs_shape=(2,), seed=0)
+    for _ in range(3):
+        buf2.add(Transition(obs, 0, 1.0, obs, done=False))
+    assert float(buf2.sample_sequences(2, length=1)["vr"].sum()) == 0.0
+
+
 def test_curious_replay_prioritized_sampling():
     # Curious Replay (exp 0028): prioritized sampling biases toward high-priority starts,
     # and update_priorities applies p = c*beta^visits + (|loss|+eps)^alpha.

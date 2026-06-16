@@ -17,6 +17,11 @@ class Transition:
     reward: float
     next_obs: np.ndarray
     done: bool
+    # exp 0052: optional decoupled validated-reading reward channel (raw, unscaled). Kept SEPARATE
+    # from `reward` (the task channel) so a dedicated VR head learns it without blurring the task
+    # reward, and the imagination actor optimises task + λ·VR. Defaults to 0 → all non-VR callers
+    # (and any run with --vr-head-coef 0) are byte-for-byte unchanged.
+    vr: float = 0.0
 
 
 class ReplayBuffer:
@@ -41,6 +46,8 @@ class ReplayBuffer:
         self.actions = np.zeros(capacity, dtype=np.int64)
         self.rewards = np.zeros(capacity, dtype=np.float32)
         self.returns = np.zeros(capacity, dtype=np.float32)
+        # exp 0052: per-transition validated-reading reward (raw, unscaled). Parallel to `rewards`.
+        self.vr = np.zeros(capacity, dtype=np.float32)
         self.dones = np.zeros(capacity, dtype=bool)
         # optional per-transition integer tag (rung-4: the episode's manual id). Default 0.
         self.tags = np.zeros(capacity, dtype=np.int64)
@@ -62,6 +69,7 @@ class ReplayBuffer:
         self.next_obs[i] = np.round(t.next_obs * 255.0) if self._u8 else t.next_obs
         self.actions[i] = t.action
         self.rewards[i] = t.reward
+        self.vr[i] = t.vr
         self.dones[i] = t.done
         self.tags[i] = tag
         self.visits[i] = 0
@@ -153,6 +161,7 @@ class ReplayBuffer:
             "obs": self._to_float(self.obs[idx]),
             "action": self.actions[idx],
             "reward": self.rewards[idx],
+            "vr": self.vr[idx],  # exp 0052: decoupled validated-reading channel (raw)
             "return": self.returns[idx],
             "done": self.dones[idx],  # terminations (windows may end in one)
             "next_obs": self._to_float(self.next_obs[starts + length - 1]),
