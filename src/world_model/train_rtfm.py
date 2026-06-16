@@ -613,11 +613,18 @@ def imagine_hierarchy_rtfm(
             for tgt, src in ((worker_tgt, worker_critic), (manager_tgt, manager_critic)):
                 for pt, pc in zip(tgt.parameters(), src.parameters(), strict=True):
                     pt.mul_(0.98).add_(pc, alpha=0.02)
+        # exp0050b diagnostics: is the worker LEARNING to reach goals (sim ↑), and is the manager
+        # COLLAPSING (low code-entropy / few unique codes)? These localize the failure.
+        with torch.no_grad():
+            code_ent = Categorical(logits=manager(mb_f)).entropy().mean().item()
+            n_used = int(m_code.unique().numel())
         stats = (
             worker_loss.item(),
             manager_loss.item(),
             m_rew.mean().item(),
-            w_rew.mean().item(),
+            w_rew.mean().item(),  # worker goal-similarity reward (rising ⇒ worker reaches goals)
+            code_ent,  # manager code-entropy (→0 ⇒ collapse; max = ln(n_codes))
+            n_used,  # distinct codes the manager actually used this update
         )
     return stats
 
@@ -943,12 +950,19 @@ def main() -> None:
         recon, kl, aux_l, cons_l = wm_out
         if hier_on:
             # two-level imagination AC; print slots reused as (worker_loss, manager_loss, macro_r).
-            al, cl, ir = imagine_hierarchy_rtfm(
+            hstats = imagine_hierarchy_rtfm(
                 buffer, registry, rssm, rew, cont, worker, w_crit, w_tgt, manager, m_crit, m_tgt,
                 codebook, opt_hier, args.ac_updates_per_round, args.seq_batch, args.window,
                 args.burn_in, args.horizon, args.hier_k, args.gamma, args.lam, args.ent_coef,
                 device, hindsight_frac=args.hindsight_frac,
-            )[:3]
+            )
+            al, cl, ir = hstats[:3]
+            print(
+                f"  HIER worker_sim={hstats[3]:.3f} code_entropy={hstats[4]:.3f} "
+                f"codes_used={hstats[5]}/{args.hier_codes} (sim↑=worker reaches goals; "
+                f"ent→0=manager collapse)",
+                flush=True,
+            )
             if args.hier_flat_collect:
                 # also keep the flat VR-actor trained so it COLLECTS competent data (v2): the
                 # hierarchy trains in imagination over a good WM instead of poisoning the buffer.

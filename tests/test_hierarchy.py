@@ -158,6 +158,7 @@ def test_imagine_hierarchy_runs_end_to_end():
         device="cpu",
         hindsight_frac=0.5,
     )
-    assert len(stats) == 4 and all(v == v for v in stats)  # no NaN (worker/mgr loss, task r, sim r)
-    # the worker's goal-similarity reward should be a real cosine in [-1, 1]
-    assert -1.01 <= stats[3] <= 1.01
+    # (worker_loss, manager_loss, macro_r, worker_sim, code_entropy, codes_used)
+    assert len(stats) == 6 and all(v == v for v in stats)  # no NaN
+    assert -1.01 <= stats[3] <= 1.01  # worker goal-similarity is a cosine in [-1, 1]
+    assert stats[4] >= 0.0 and 1 <= stats[5] <= 16  # code entropy ≥0; codes_used in [1, n_codes]
