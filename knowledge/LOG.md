@@ -2,6 +2,24 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
+## [2026-06-16] experiment | exp0049 NULL — VR cracked the objective gap; ~0.10 is the EXECUTION ceiling → design fork
+
+Shaping-floor A/B (α=0.3, floor 0.2 vs the floor=0 control, 4 seeds): NO lift — swap_follow 0.094 vs
+0.105, flat. Length-2 swap_follow is a robust **~0.10** across α∈{0.1,0.3}, floor∈{0,0.2}, AND MPC
+(0.06–0.08 ≈ reactive — exp0044 reconfirmed on the VR-trained WM). Two-part conclusion: (1) the
+validated-reading reward SOLVED its target — moved swap_follow from a flat 0.00 (all 0042–0047, the
+[[0040-rtfm-actor-conditioning]] objective gap) to a confirmed ~0.10, anti-baking clean (the actor now
+follows the displayed text); (2) the new ~0.10 ceiling is the EXECUTION wall (exp0043/0044) re-met from
+above — invariant to reward strength, scaffold, and search, so it is "can't reliably execute the 2-step
+gesture," not "won't obey." KEY insight: reward-maximizing MPC can't break it because swap_follow is
+scored in SWAPPED mode where obeying earns no reward → a reward-maximizer won't follow the text. Past
+~0.10 needs manual-DIRECTED execution (plan toward what the manual predicts, not toward reward) =
+[[hierarchical-imagination-agent]] territory. This is a genuine DESIGN/SCOPE FORK → autonomous loop
+PAUSES here (per guardrail: next step isn't a clear one-flag experiment). Hand-back to maintainer with
+3 options: (A) manual-directed execution / hierarchy build, (B) scale up (compute — rented GPU, the
+maintainer's earlier idea; ~0.10 may climb with training), (C) accept VR as a confirmed partial result
+and bank the rung. 0049 finalized (verified). Nothing running; tree clean after milestone.
+
 ## [2026-06-16] experiment | exp0048 4-seed control — WEAK CONFIRM (phase-1 was inflated)
 
 The 4-seed control (α=0.3) at the comparable final window (rounds 25–29): length-2 swap_follow mean

@@ -1,8 +1,8 @@
 ---
-status: planned
+status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-16
 ---
 
@@ -54,6 +54,48 @@ floor *keeps rising* instead of plateauing.
 
 Held-out length-2 `swap_follow` sustained **> ~0.25** (past the exp0048 plateau), `swapped ≪ correct`,
 multi-seed — the read→act grounding strong enough to call the exp-0040 wall cracked, not just chipped.
+
+## Result — NULL on the floor; ~0.10 is a robust EXECUTION ceiling
+
+Lever B (shaping-floor) tested as a clean A/B vs the exp0048 floor=0 control (both α=0.3, 4 seeds, final
+length-2 rounds 25–29). Plus an α=0.1 multi-seed comparison.
+
+| config | swap_follow | swapped | events | oracle_pct |
+|---|---|---|---|---|
+| α0.3, floor 0 (exp0048 control) | 0.105 ±0.04 | 0.005 | 5.8 | 0.88 |
+| **α0.3, floor 0.2** (this exp) | **0.094 ±0.02** | 0.003 | 6.9 | 0.91 |
+| α0.1, floor 0 (2 seeds) | 0.090 ±0.04 | 0.000 | 4.9 | 0.93 |
+
+- **The shaping-floor gives NO lift:** 0.094 vs 0.105 — flat (slightly lower, just tighter variance;
+  secondary metrics marginally better). The pre-registered "plateau is intrinsic" counter-outcome.
+- **`swap_follow` is a robust ~0.10 across the board** — α ∈ {0.1, 0.3}, floor ∈ {0, 0.2}. Neither more
+  obedience-pressure (floor) nor a different coef moves it. (α=0.1 ≈ α=0.3 at the final window; the
+  phase-1 0.1≈0.3 *and* the round-20 0.1<0.3 were both single-seed noise.)
+- **MPC does not beat the reactive actor either:** over the *same* VR-trained WM, MPC `swap_follow`
+  = 0.06–0.08 ≈ reactive 0.09–0.10 (the exp0044 finding, reconfirmed). So the ceiling is not a
+  reward-strength problem *or* a naive-search problem.
+
+## Lesson — VR cracked the OBJECTIVE gap; the new wall is EXECUTION (and reward-MPC can't fix it)
+
+The validated-reading thread arrives at a clean two-part conclusion:
+1. **VR solved what it was for.** It moved length-2 `swap_follow` from a flat **0.00** (all of 0042–0047
+   — the [[0040-rtfm-actor-conditioning]] objective/identifiability gap) to a confirmed **~0.10**: the
+   actor now *follows the displayed text*, anti-baking-clean. The objective gap is genuinely addressable
+   by rewarding validated reading.
+2. **A new ceiling at ~0.10 is the EXECUTION wall, re-met.** It is invariant to reward strength
+   (coef), the shaping scaffold (floor), and search (MPC) — so it is not "the actor doesn't *want* to
+   obey" but "it can't reliably *execute* the 2-step gesture even when it wants to" (events confirm:
+   ~6/60 correct-mode completions = the same ~10% read-and-execute rate). This is the exp0043/0044
+   multi-step-execution wall, now hit from above with a non-zero floor.
+
+**Why reward-maximizing MPC can't break it (the subtle, load-bearing point):** `swap_follow` is scored
+in *swapped* mode where obeying the manual earns NO reward — so a reward-maximizing planner has no
+reason to follow the displayed text, which is exactly why MPC ≈ reactive here. Pushing past ~0.10
+needs **manual-DIRECTED execution** (plan toward what the manual *predicts/says*, using the VR-trained
+WM's manual-conditioned dynamics as the target), not reward-maximizing search — i.e. the decode-manual
+→ subgoal → execute machinery of [[hierarchical-imagination-agent]]. → this is a **design fork for the
+maintainer** (see the state-of-the-night hand-back); the autonomous loop pauses here because the next
+step is a genuine design/scope decision, not a clear one-flag experiment.
 
 ## Links
 
