@@ -104,6 +104,70 @@ class RTFMAgent:
         return a
 
 
+class HierarchyAgent:
+    """crafter-rtfm Policy (reset/act) for the Director-style hierarchy (exp 0050). Like RTFMAgent
+    but the action comes from manager→worker: ``act`` does one ``obs_step`` (real obs) to update the
+    belief, the MANAGER re-picks a codebook subgoal every ``hier_k`` steps, and the WORKER (goal-
+    conditioned) chooses the action toward it. Greedy at eval. Phase A: state-only manager."""
+
+    def __init__(
+        self, enc, text_enc, rssm, worker, manager, codebook, n_act, device, hier_k, epsilon=0.0,
+        seed=0,
+    ):
+        self.enc, self.text_enc, self.rssm = enc, text_enc, rssm
+        self.worker, self.manager, self.codebook = worker, manager, codebook
+        self.n_act, self.device, self.hier_k, self.epsilon = n_act, device, hier_k, epsilon
+        self.rng = np.random.default_rng(seed)
+        self._tok = self._mask = self._state = self._prev_a = self._goal = None
+        self._t = 0
+
+    @torch.no_grad()
+    def reset(self, obs, info) -> None:
+        self._tok, self._mask = self.text_enc.encode([obs["manual"]])
+        self._state = self.rssm.initial(1, self.device)
+        self._prev_a = torch.full((1,), self.rssm.no_action, device=self.device)
+        self._goal, self._t = None, 0
+
+    @torch.no_grad()
+    def act(self, obs, info) -> int:
+        e = torch.as_tensor(img_to_chw(obs["image"]), device=self.device).unsqueeze(0)
+        embed = self.enc(e)
+        self._state, _, _ = self.rssm.obs_step(
+            self._state, self._prev_a, embed, self._tok, self._mask
+        )
+        bel = self.rssm.belief(self._state)
+        if self._t % self.hier_k == 0:  # manager re-picks a subgoal at the macro clock
+            code = self.manager(bel).argmax(-1)
+            self._goal = self.codebook.vecs(code)
+        if self.epsilon > 0 and self.rng.random() < self.epsilon:
+            a = int(self.rng.integers(self.n_act))
+        else:
+            a = int(self.worker(bel, self._goal).argmax(-1))
+        self._prev_a = torch.tensor([a], device=self.device)
+        self._t += 1
+        return a
+
+
+@torch.no_grad()
+def collect_beliefs_for_codebook(buffer, registry, rssm, seq_batch, window, device, n_batches=4):
+    """Burn beliefs over sampled replay windows to fit the goal codebook (exp 0050). Returns
+    (N, state_dim) beliefs from the CURRENT world model (so codes track the live belief space)."""
+    bels = []
+    for _ in range(n_batches):
+        batch = buffer.sample_sequences(seq_batch, window)
+        embed = torch.as_tensor(batch["obs"], device=device)
+        actions = torch.as_tensor(batch["action"], device=device)
+        tok, mask = registry.tokens(batch["tag"])
+        b = actions.shape[0]
+        state = rssm.initial(b, device)
+        prev_a = torch.full((b,), rssm.no_action, dtype=torch.long, device=device)
+        for k in range(window):
+            state, _, _ = rssm.obs_step(state, prev_a, embed[:, k], tok, mask)
+            bels.append(rssm.belief(state))
+            prev_a = actions[:, k]
+    return torch.cat(bels)
+
+
 @torch.no_grad()
 def validated_reading_reward(rssm, recon_head, state, action, tok, mask, real_next_embed) -> float:
     """exp 0048: the manual's MARGINAL next-state predictive value, validated against the REAL
@@ -677,6 +741,15 @@ def main() -> None:
     # exp 0048: intrinsic validated-reading reward — pay the agent (at collection) for the manual's
     # marginal next-state predictive value, validated vs the real transition (0 = off/unchanged).
     p.add_argument("--validated-reading-coef", type=float, default=0.0)
+    # exp 0050: Director-style manager/worker hierarchy in imagination (OFF = flat path unchanged).
+    # Phase A is state-only (manager not yet manual-conditioned). hier-k = manager clock (subgoal
+    # every K steps); horizon should be a small multiple of hier-k (e.g. horizon 10, hier-k 5).
+    p.add_argument("--hierarchy", action=argparse.BooleanOptionalAction, default=False)
+    p.add_argument("--hier-k", type=int, default=5)
+    p.add_argument("--hier-codes", type=int, default=64)
+    p.add_argument("--hindsight-frac", type=float, default=0.5)
+    # rounds before fitting the codebook + training the hierarchy
+    p.add_argument("--hier-warmup", type=int, default=3)
     # OPTIONAL actor-conditioning (rung-4 §6.2 fallback) — flag-gated OFF by default. When ON the
     # ACTOR also cross-attends over the frozen manual tokens (concat(belief, ctx) → base Actor).
     # This is the baking-RISKIER policy-conditioning the design avoids by default; the EXISTING swap
@@ -743,6 +816,26 @@ def main() -> None:
     opt_wm = torch.optim.Adam([q for m in wm_mods for q in m.parameters()], lr=3e-4)
     opt_ac = torch.optim.Adam([*actor.parameters(), *critic.parameters()], lr=3e-4)
 
+    # exp 0050: Director-style hierarchy (built only when --hierarchy; flat path untouched).
+    hier = None
+    if args.hierarchy:
+        from world_model.models.hierarchy import make_hierarchy
+
+        worker, w_crit, manager, m_crit, codebook = make_hierarchy(sd, n_act, args.hier_codes)
+        for mod in (worker, w_crit, manager, m_crit, codebook):
+            mod.to(device)
+        w_tgt, m_tgt = copy.deepcopy(w_crit), copy.deepcopy(m_crit)
+        opt_hier = torch.optim.Adam(
+            [
+                *worker.parameters(),
+                *w_crit.parameters(),
+                *manager.parameters(),
+                *m_crit.parameters(),
+            ],
+            lr=3e-4,
+        )
+        hier = (worker, w_crit, w_tgt, manager, m_crit, m_tgt, codebook, opt_hier)
+
     registry = ManualRegistry(text_enc)
     cap = args.rounds * args.episodes_per_round * args.max_steps + 1000
     buffer = ReplayBuffer(cap, (ed,), seed=args.seed, obs_dtype=np.float32)
@@ -755,6 +848,11 @@ def main() -> None:
     for rnd in range(args.rounds):
         for m in wm_mods + [actor, critic]:
             m.train()
+        hier_on = hier is not None and rnd >= args.hier_warmup  # hierarchy after warmup
+        if hier is not None:
+            worker, w_crit, w_tgt, manager, m_crit, m_tgt, codebook, opt_hier = hier
+            for m in (worker, w_crit, manager, m_crit):
+                m.train()
         use_agent = rnd > 0
         # HO-0007 reading-shaping: dense reading-gated ignition gradient, linearly annealed toward
         # the FLOOR (exp 0049; default floor 0 → standing on the sparse honest reward, unchanged).
@@ -766,6 +864,20 @@ def main() -> None:
         # Length curriculum: length-1 warm-up for the first --curriculum-rounds, then the --length
         # target. cur_len drives BOTH collection and eval, so the round line shows the regime.
         cur_len = 1 if rnd < args.curriculum_rounds else args.length
+        # exp 0050: once the hierarchy is on, fit the goal codebook from current-WM beliefs and let
+        # the hierarchy DRIVE collection (Director runs manager+worker in the real env). Before
+        # warmup, the flat agent seeds the buffer + WM.
+        collect_agent = agent
+        if hier_on:
+            codebook.fit(
+                collect_beliefs_for_codebook(
+                    buffer, registry, rssm, args.seq_batch, args.window, device
+                )
+            )
+            collect_agent = HierarchyAgent(
+                enc, text_enc, rssm, worker, manager, codebook, n_act, device,
+                args.hier_k, epsilon=args.epsilon, seed=args.seed,
+            )
         print(
             f"round {rnd}: collecting {args.episodes_per_round} episodes "
             f"(len={cur_len} shaping_coef={shaping_coef:.3f}) ...",
@@ -774,7 +886,7 @@ def main() -> None:
         ev, vr = collect_rtfm(
             buffer,
             registry,
-            agent,
+            collect_agent,
             args.episodes_per_round,
             cur_len,
             train_seeds,
@@ -812,29 +924,47 @@ def main() -> None:
             reward_conservative_samples=args.reward_conservative_samples,
         )
         recon, kl, aux_l, cons_l = wm_out
-        al, cl, ir = imagine_ac_rtfm(
-            buffer,
-            registry,
-            rssm,
-            rew,
-            cont,
-            actor,
-            critic,
-            target_critic,
-            opt_ac,
-            args.ac_updates_per_round,
-            args.seq_batch,
-            args.window,
-            args.burn_in,
-            args.horizon,
-            args.gamma,
-            args.lam,
-            args.ent_coef,
-            device,
-        )
-        for m in [rssm, actor]:
-            m.eval()
-        eval_agent = RTFMAgent(enc, text_enc, rssm, actor, n_act, device, epsilon=0.0)
+        if hier_on:
+            # two-level imagination AC; print slots reused as (worker_loss, manager_loss, macro_r).
+            al, cl, ir = imagine_hierarchy_rtfm(
+                buffer, registry, rssm, rew, cont, worker, w_crit, w_tgt, manager, m_crit, m_tgt,
+                codebook, opt_hier, args.ac_updates_per_round, args.seq_batch, args.window,
+                args.burn_in, args.horizon, args.hier_k, args.gamma, args.lam, args.ent_coef,
+                device, hindsight_frac=args.hindsight_frac,
+            )[:3]
+        elif hier is not None:
+            al, cl, ir = 0.0, 0.0, 0.0  # hierarchy warmup: WM-only, policies not yet trained
+        else:
+            al, cl, ir = imagine_ac_rtfm(
+                buffer,
+                registry,
+                rssm,
+                rew,
+                cont,
+                actor,
+                critic,
+                target_critic,
+                opt_ac,
+                args.ac_updates_per_round,
+                args.seq_batch,
+                args.window,
+                args.burn_in,
+                args.horizon,
+                args.gamma,
+                args.lam,
+                args.ent_coef,
+                device,
+            )
+        if hier_on:
+            for m in (rssm, worker, manager):
+                m.eval()
+            eval_agent = HierarchyAgent(
+                enc, text_enc, rssm, worker, manager, codebook, n_act, device, args.hier_k
+            )
+        else:
+            for m in [rssm, actor]:
+                m.eval()
+            eval_agent = RTFMAgent(enc, text_enc, rssm, actor, n_act, device, epsilon=0.0)
         r = evaluate_rtfm(
             eval_agent, eval_seeds[: args.n_eval_seeds], cur_len, args.max_steps, args.one_shot
         )
