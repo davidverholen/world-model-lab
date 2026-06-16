@@ -253,6 +253,7 @@ def main() -> None:
     p.add_argument(
         "--gif-seeds", type=str, default="0,1,2", help="comma seeds rendered side-by-side"
     )
+    p.add_argument("--fps", type=float, default=1.0, help="side-by-side GIF speed (lower = slower)")
     p.add_argument("--out-dir", type=str, default=None)
     args = p.parse_args()
 
@@ -305,7 +306,7 @@ def main() -> None:
                 nw = r["newly"][k - 1] if 0 < k <= len(r["newly"]) else False
                 frames.append(compose_pair(img_frames[k], r["real_frames"][k], k, a, ir, rr, nw))
             gif_path = out_dir / f"imagine_seed{seed}.gif"
-            write_gif(frames, gif_path, fps=2)
+            write_gif(frames, gif_path, fps=args.fps)
             print(f"  wrote {gif_path} ({len(frames)} frames)")
 
     H = max(len(x) for x in all_l2)
