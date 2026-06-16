@@ -1,6 +1,19 @@
 # Knowledge Base Log
 
-Append-only. Entry format: `## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
+Append-only. Entry format: `## [2026-06-16] experiment | exp0050 Phase A v1 DIVERGENT → v2 (stability fixes) running
+
+The Director hierarchy built today (4 commits, reviewer-cleared) ran Phase A: NEGATIVE as a BUG, not a
+clean test. Partially worked at length-1 (correct→0.35) then collapsed+diverged at length-2 (correct
+0.00 all rounds vs flat 0.073; worker_loss exploded to ±80 = unbounded PG; manager imagined macro_r
+0.3-0.7 vs real ~0 = imagination exploitation). Compounded by the hierarchy driving its own collection
+from round 3 → poisoned the buffer once degenerate. NOT "grounding is the ceiling". Fixes → Phase A v2
+(running): normalize worker+manager advantages + clip_grad_norm(100) (kills divergence; v2 smoke
+worker_loss bounded); --hier-flat-collect keeps the flat VR-actor collecting competent data while the
+hierarchy trains in imagination over the good WM (isolates execution from collection-poisoning). If v2
+still ~= flat → Phase B (manual-directed manager); if v2 diverges → escalate to maintainer (recursive
+decompose-or-execute fallback). 0050 page updated with the v1 result+diagnosis.
+
+## [YYYY-MM-DD] <ingest|query|lint|curation> | <title>`
 
 ## [2026-06-16] decision | exp0050 pre-registered — manual-directed hierarchy (Director x manual) to break the ~0.10 ceiling
 

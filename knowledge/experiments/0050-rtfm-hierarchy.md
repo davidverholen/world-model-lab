@@ -83,6 +83,34 @@ length-2 `swap_follow` sustained **> ~0.25** with `swapped ≪ correct`, multi-s
 strong enough to call the exp-0040 wall cracked. Unblocks the directable-competence milestone
 ([[0007-crafter-mastery-milestone]]) and the next rung.
 
+## Result — Phase A v1: DIVERGENT (hierarchy degenerate; fixed → v2 running)
+
+First Phase-A dispatch (4 seeds, `--hierarchy`, state-only, K=5; same WM recipe as the flat exp0048ctl
+0.105 baseline). NEGATIVE, but as a *bug*, not a clean test:
+
+| | length-1 (r3–9) | length-2 (r10–29) | flat baseline |
+|---|---|---|---|
+| correct | up to 0.35 | **0.00** (all rounds) | 0.073 |
+| swap_follow | ~0.05 | **~0.01** | 0.105 |
+
+**Diagnosis (decisive, from the s0 trajectory):** the hierarchy *partially worked at length-1*
+(correct → 0.35) then **collapsed and diverged at length-2**: `worker_loss` exploded to **±10 → ±80**
+(unbounded policy-gradient — the two-hot value's symexp output blew up the raw advantage), and the
+manager's imagined macro-reward sat at 0.3–0.7 while real reward was ~0 (**imagination exploitation**,
+no critic-on-replay anchor). Compounding it, the hierarchy **drove its own collection from round 3**, so
+once it went degenerate it **poisoned the buffer** with junk data (vs the flat baseline, whose actor
+collected competently). So this is NOT "grounding is the ceiling" — the hierarchy never functioned at
+length-2.
+
+**Fixes → Phase A v2 (running, `runs/exp0050av2`):** (1) **normalize** the worker+manager advantages
+per batch + `clip_grad_norm(100)` on the hierarchy optimizer (kills the divergence — v2 smoke:
+`worker_loss` bounded); (2) `--hier-flat-collect` keeps the **flat VR-actor collecting** competent data
+(and trains it) while the hierarchy trains *in imagination over that good WM* — isolating "is the
+hierarchy a good executor" from the v1 collection-poisoning. If v2 still ≈ flat, the next lever is Phase
+B (manual-directed manager) and/or hierarchy hyperparameters; if v2 diverges again, escalate to the
+maintainer (the co-training may need the recursive decompose-or-execute fallback,
+[[hierarchical-imagination-agent]] §3).
+
 ## Links
 
 [[hierarchical-imagination-agent]] · [[director-2022]] · [[0049-rtfm-sustained-vr]] · [[0048-rtfm-validated-reading]] · [[0043-rtfm-execution-wall]] · [[validated-reading-reward]] · [[mentored-learning-loop]] · [[hierarchy-and-credit]]
