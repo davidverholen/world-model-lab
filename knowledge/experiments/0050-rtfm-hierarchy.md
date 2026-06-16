@@ -156,6 +156,39 @@ the root cause:
 (A) build the goal-encoder/autoencoder properly, or (C) bank validated-reading (the confirmed 0→0.10
 result) and schedule the full Director build deliberately. Surfaced to the maintainer.
 
+## exp0050d — VQ goal autoencoder: ALSO NEGATIVE; hierarchy thread CONCLUDED
+
+Built Director's load-bearing goal autoencoder (`GoalVQVAE`: encoder→quantize→decoder, straight-
+through + commitment loss; manager codes = the VQ codebook; worker reward = cosine in the learned
+encoder latent; success-biased codebook; flat-collect; reviewer-cleared). 4 seeds, full curriculum.
+
+**Result: correct 0.005, swap_follow 0.000 — still zero on all 4 seeds.** And the diagnostics rule out
+the obvious culprits: the VQ-VAE is *healthy* (`vq_used` 23–30/64, not dead codes; `vq_recon` ~0.45,
+reconstructing), yet **`worker_sim` stayed ~0.5 and never rose** — even in the *learned separable*
+latent the worker is not meaningfully goal-directed (same as the raw-belief ~0.6 ambient) — and the
+manager collapsed on 2/4 seeds. The *principled* fix did not crack it.
+
+## STATUS — hierarchy CONCLUDED NEGATIVE; recommend banking validated-reading
+
+The hierarchy gives ~0 at length-2 across **both** goal representations (raw-belief K-means: v1/v2/b/c;
+learned VQ autoencoder: d) and every stability fix (advantage-norm, grad-clip, flat-collect, hindsight,
+success-biased codebook). The decisive observation across all of them: **the worker never becomes
+goal-directed** (`worker_sim` flat ~0.5–0.6 regardless of goal space), and the manager collapses.
+
+**Leading interpretation (well-motivated, not certain): a Director-style hierarchy is the wrong tool
+for this wall.** Director's manager/worker (K=8) solves *long-horizon decomposition* (Crafter diamonds,
+Visual PinPad). Our wall is a **2-step gesture** — there is essentially *nothing to decompose*; the
+hierarchy just adds two actor-critics' worth of credit-assignment instability to a task whose real
+bottleneck is **short-horizon grounding + credit assignment**, not temporal abstraction. We likely
+mis-scoped the execution wall as "needs hierarchy."
+
+**Recommendation:** STOP the hierarchy thread. The confirmed deliverable of the rung-4 effort is
+**validated-reading** ([[0048-rtfm-validated-reading]]: the exp-0040 objective gap cracked, length-2
+swap_follow 0→~0.10, multi-seed, anti-baking-clean). Bank it + write up the rung-4 arc. If the
+execution wall is revisited, attack it as a *short-horizon* problem (not hierarchy): better
+short-horizon credit assignment, a manual-DIRECTED planner (not reward-max MPC), or scaling — a fresh
+design, deliberately. All hierarchy code (VQ autoencoder + two-level loop, reviewer-cleared) is banked.
+
 ## Links
 
 [[hierarchical-imagination-agent]] · [[director-2022]] · [[0049-rtfm-sustained-vr]] · [[0048-rtfm-validated-reading]] · [[0043-rtfm-execution-wall]] · [[validated-reading-reward]] · [[mentored-learning-loop]] · [[hierarchy-and-credit]]

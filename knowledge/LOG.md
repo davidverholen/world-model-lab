@@ -1,6 +1,21 @@
 # Knowledge Base Log
 
-Append-only. Entry format: `## [2026-06-16] experiment | exp0050 hierarchy STALLED (2 attempts) — handed back to maintainer
+Append-only. Entry format: `## [2026-06-16] experiment | exp0050d VQ autoencoder ALSO negative — hierarchy thread CONCLUDED
+
+Built Director's load-bearing VQ-VAE goal autoencoder (the principled fix for the diagnosed
+uninformative-goal-space cause; reviewer-cleared). Result: correct 0.005, swap_follow 0.000 across 4
+seeds — STILL zero. VQ healthy (vq_used 23-30/64, recon ~0.45) but worker_sim stayed ~0.5 (not goal-
+directed even in the learned latent) + manager collapsed on 2/4 seeds. Hierarchy now gives ~0 across
+BOTH goal representations (raw-belief + VQ) and every stability fix (adv-norm, grad-clip, flat-collect,
+hindsight, success-bias). CONCLUSION: hierarchy concluded negative for this wall. Leading read (well-
+motivated): Director hierarchy is the WRONG TOOL for a 2-step gesture — nothing to decompose; it solves
+long-horizon decomposition, our wall is short-horizon grounding+credit-assignment. RECOMMEND: bank
+validated-reading (exp0048, the confirmed 0->0.10 objective-gap crack) as the rung-4 deliverable; if
+execution is revisited, attack it as a short-horizon problem (manual-directed planner / better short-
+horizon credit-assignment / scaling), not hierarchy. All hierarchy code banked (reviewer-cleared).
+Surfaced to maintainer. GPU free; tree clean after milestone.
+
+## [2026-06-16] experiment | exp0050 hierarchy STALLED (2 attempts) — handed back to maintainer
 
 Phase A v2 (advantage-norm + grad-clip + --hier-flat-collect) ALSO NEGATIVE: length-2 correct/swap_follow
 0.00 on all 4 seeds even with clean flat-collection (good WM); worker_loss still oscillates ±30-90
