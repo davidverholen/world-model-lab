@@ -2,14 +2,53 @@
 status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-16
 ---
 
 # 0055: ensemble-uncertainty (MOPO) pessimism — fix the reward over-optimism WITHOUT over-suppressing
 
-**Status: BUILT + reviewer-passed (SHIP), CPU-smoked; λ-sweep dispatching.** Direct response to
-[[0054-rtfm-reward-gap]]: the task reward head over-predicts (+0.67/+0.79 over 8 imagined steps) atop a
+**Status: CONCLUDED — counter-outcome, but PIVOTAL.** Pessimism did NOT break the exact-swap_follow
+ceiling (λ∈{0.5,1,2,5} → 0.054/0.074/0.076/0.084, all ≈ or below the ~0.10 baseline; reward head
+still over-optimistic, c50 mean reward-gap +0.58 vs exp0054 +0.67). BUT the new per-step metric
+([[0054-rtfm-reward-gap]]→swap_follow_s1) revealed **why the whole reward thread (exp0045–0055) never
+moved the needle: the wall is NOT reading or reward — it is 2-STEP COMPOSITION.** Reframe below.
+
+## RESULT — the reframe: reading works (~0.4), chaining fails (~0.08)
+
+Backfilled per-step swap-following on the swapped manuals (step-1 match vs full-chain exact), 60 eval
+seeds, single seed/arm:
+
+| λ | exact (full 2-step) | **step-1** | ratio |
+|---|---|---|---|
+| 0.5 | 0.050 | **0.450** | 9.0× |
+| 1.0 | 0.067 | **0.417** | 6.2× |
+| 2.0 | 0.083 | **0.350** | 4.2× |
+| 5.0 | 0.100 | **0.350** | 3.5× |
+
+The agent follows the **first** displayed instruction **35–45%** of the time (≈7× the ~0.06
+single-action chance) — *genuine, working reading-to-action on held-out swapped manuals.* It completes
+the **whole 2-step chain only 5–10%.** The wall is **step-2-given-step-1**: a depth-2 composition /
+sequencing failure (the maintainer's hypothesis), NOT a grounding or reward-readout failure.
+
+**This relabels the entire rung-4 "~0.10 grounding ceiling."** It was an artifact of an all-or-nothing
+metric: real grounding is ~0.4 and working; the ceiling is **2-step composition** (the
+[[0043-rtfm-execution-wall]] multi-step credit-assignment wall, seen through a grounding lens). The
+reward machinery (conservatism [[0047-rtfm-conservative-reward]], validated-reading
+[[0048-rtfm-validated-reading]], pessimism here) was sanding a surface that was never the bottleneck.
+
+## Lesson
+
+(1) **Measure the right thing.** Five experiments chased reward over-optimism because the exact-match
+swap_follow hid that reading already works at depth-1; one per-step metric reframed the problem.
+(2) **The ensemble-pessimism build is sound** (reviewer SHIP; epistemic gap real) and stays available,
+but reward honesty is not the binding constraint at length-2. (3) The grounding result is actually
+ENCOURAGING — read→act is ~0.4 on held-out swapped manuals. → pivot to **2-step composition** levers
+([[0056-rtfm-coverage-sweep]] + curriculum/planning), watching swap_follow_s1 vs exact.
+
+## Original pre-registration (retained)
+
+Direct response to [[0054-rtfm-reward-gap]]: the task reward head over-predicts (+0.67/+0.79 over 8 imagined steps) atop a
 faithful WM, so the actor chases phantom reward. [[0047-rtfm-conservative-reward]] already tried the
 blunt fix (blanket CROP/CQL push-down) and it monotonically over-suppressed (crushed the true gesture
 too). This is the *targeted* version.

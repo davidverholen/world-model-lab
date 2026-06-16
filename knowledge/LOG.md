@@ -2031,3 +2031,14 @@ The diagnostic: swap_follow_s1 ≫ swap_follow ⇒ the agent composes the FIRST 
 2-step chain (the maintainer's depth-2 composition hypothesis). Co-plotted in the grounding-headline
 panel. CPU-smoked (s1=0.12 vs exact=0.00 round 0). Sets up the planned coverage sweep
 (vary --n-train-seeds) to separate combinatorial-coverage from compositional-binding failure.
+
+## 2026-06-16 — exp0055 CONCLUDED (pivotal reframe) + exp0056 coverage sweep dispatched
+
+exp0055 (ensemble MOPO pessimism) = counter-outcome on the exact metric (λ∈{0.5,1,2,5} → swap_follow
+0.054/0.074/0.076/0.084, no break past ~0.10; c50 reward-gap +0.58 vs exp0054 +0.67 — head still
+over-optimistic). BUT the new swap_follow_s1 backfill REFRAMED the whole rung: step-1 swap-follow is
+0.35–0.45 (≈7× chance) while the full 2-step chain is 0.05–0.10. **Reading→act WORKS; the wall is
+2-step COMPOSITION** (step-2-given-step-1), not grounding or reward. The five-experiment reward thread
+(0045–0055) was not the binding constraint. Pivot to composition. exp0056 dispatched: coverage sweep
+(--n-train-seeds 100/400/1600) to separate combinatorial-coverage from architectural-composition,
+watching swap_follow_s1 vs exact. Overnight autonomous exploration of composition levers underway.
