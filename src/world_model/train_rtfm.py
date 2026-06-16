@@ -607,7 +607,7 @@ def imagine_hierarchy_rtfm(
             # at the achieved belief under that goal — avoids mixing goals across macro boundaries).
             wr = w_rew.reshape(n_macro, K, b)
             wc = w_cont.reshape(n_macro, K, b)
-            w_inp = torch.cat([w_bel, w_goal], dim=-1)  # (T, b, 2sd)
+            w_inp = torch.cat([w_bel, w_goal], dim=-1)  # (T, b, sd+gd)
             v_w = worker_tgt(w_inp.flatten(0, 1)).reshape(n_macro, K, b)
             v_boot = worker_tgt(torch.cat([m_achieved, seg_goal], dim=-1).flatten(0, 1)).reshape(
                 n_macro, b
@@ -1133,7 +1133,7 @@ def main() -> None:
                 device,
             )
         if hier_on:
-            for m in (rssm, worker, manager):
+            for m in (rssm, worker, manager, goal_module):
                 m.eval()
             eval_agent = HierarchyAgent(
                 enc, text_enc, rssm, worker, manager, goal_module, n_act, device, args.hier_k
