@@ -1945,3 +1945,12 @@ compute-strategy.md: added a 2026-06-16 status note + relabelled the option tabl
 thermal/power-cap/benchmark measurements are now marked HISTORICAL (retired laptop), kept as
 reference data. Kept tracked files depersonalized (no GPU model name). Confirmed in practice: 4
 concurrent training runs (exp0051c05 ×2 + exp0052 ×2) sat at ~3.4 GB used / ~12.4 GB free.
+
+## 2026-06-16 — new tool: visualize_rtfm.py (watchable gameplay GIFs)
+
+Added scripts/visualize_rtfm.py — renders a watchable GIF of a trained rung-4 agent playing one
+crafter-rtfm episode, with the displayed manual + per-step action + tutorial score overlaid (left:
+upscaled 64×64 game frame; right: telemetry panel). SWAPPED mode is the diagnostic case (does it
+follow the displayed-but-wrong manual?). Reusable helpers compose_frame()/write_gif() for a later
+imagination-viewer. Built by an opus impl subagent, reviewed in the main loop. GIFs live in runs/
+(gitignored); for report embedding they go to assets/. First assets rendered from exp0051c05.
