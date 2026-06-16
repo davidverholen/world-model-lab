@@ -1,6 +1,16 @@
 # Knowledge Base Log
 
-Append-only. Entry format: `## [2026-06-16] experiment | exp0050d VQ autoencoder ALSO negative — hierarchy thread CONCLUDED
+Append-only. Entry format: `## [2026-06-16] experiment | exp0051 budget probe — flat-VR ~0.10 is a REAL ceiling (not compute-bound)
+
+Post-hierarchy, optimizing the FLAT validated-reading architecture on the 2-step tutorial. Budget probe
+(coef 0.3, 2x training = 40 rounds/800 ac-updates vs the 30r/400u 0.105 baseline): length-2 swap_follow
+0.115 — FLAT, no take-off → the ~0.10 grounding ceiling is real, not compute-bound at this scale
+(correct rose 0.073→0.115, but grounding pinned). Lever = stronger/denser grounding incentive (the
+maintainer's insight: the incentive is what works; every acting level needs it). Running coef 0.5 (cheap
+dose-response gap-fill, low-odds). On-deck: decoupled actor-VR (own reward head, actor optimizes
+task+λ·VR_head — dedicated reality-judged grounding signal on the acting policy). exp0051 page added.
+
+## [2026-06-16] experiment | exp0050d VQ autoencoder ALSO negative — hierarchy thread CONCLUDED
 
 Built Director's load-bearing VQ-VAE goal autoencoder (the principled fix for the diagnosed
 uninformative-goal-space cause; reviewer-cleared). Result: correct 0.005, swap_follow 0.000 across 4
