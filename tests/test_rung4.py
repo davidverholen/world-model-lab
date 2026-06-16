@@ -250,6 +250,40 @@ def test_conservative_reward_penalty_pushes_ood_reward_down():
     assert after < before  # OOD predicted reward was pushed down
 
 
+def test_ensemble_reward_head_shapes_and_epistemic_disagreement():
+    """exp 0055: the ensemble reward head must (a) be a drop-in (forward → (B,) scalar reward,
+    mean_std → two (B,) tensors, twohot_loss → trainable scalar) and (b) after training on a small
+    in-distribution set with per-member bootstrap, DISAGREE MORE on OOD inputs than on the trained
+    ones — that epistemic-uncertainty gap is what the MOPO pessimism penalty rides on."""
+    from world_model.models.twohot import EnsembleRewardHead
+
+    torch.manual_seed(0)
+    B, SD, NA, K = 16, 96, 17, 5
+    rew = EnsembleRewardHead(K, state_dim=SD, num_actions=NA)
+
+    # A small FIXED in-distribution set (few states/actions) so OOD is everything else.
+    in_bel = torch.randn(4, SD)
+    in_act = torch.randint(0, NA, (4,))
+    in_tgt = torch.tensor([1.0, 0.0, 1.0, 0.0])
+
+    mean, std = rew.mean_std(in_bel, in_act)
+    assert mean.shape == (4,) and std.shape == (4,)
+    assert rew(in_bel, in_act).shape == (4,)  # forward = ensemble mean
+
+    opt = torch.optim.Adam(rew.parameters(), lr=5e-3)
+    for _ in range(200):
+        loss = rew.twohot_loss(in_bel, in_act, in_tgt, bootstrap=True)
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+
+    with torch.no_grad():
+        in_std = rew.mean_std(in_bel, in_act)[1].mean()
+        ood_std = rew.mean_std(torch.randn(B, SD), torch.randint(0, NA, (B,)))[1].mean()
+    # members agree where they were trained, disagree off-distribution → the epistemic signal.
+    assert ood_std > in_std
+
+
 def test_validated_reading_reward_marginal_sign():
     """exp 0048: intrinsic validated-reading reward = clip≥0(err_without_manual − err_with_manual)
     against the REAL next embedding. If reality matches the WITH-manual prediction, the manual

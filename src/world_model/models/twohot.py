@@ -99,3 +99,58 @@ class TwoHotRewardHead(nn.Module):
     def twohot_loss(self, latent, action, target):
         tgt = _twohot_encode(symlog(target.detach()), self.bins)
         return -(tgt * F.log_softmax(self._logits(latent, action), dim=-1)).sum(-1).mean()
+
+
+class EnsembleRewardHead(nn.Module):
+    """Deep ensemble of K action-conditioned two-hot reward heads (exp 0055), for MOPO/MOReL-style
+    epistemic-uncertainty pessimism. Members differ by init + per-member bootstrap masks, so they
+    AGREE in-distribution and DISAGREE off-distribution. That disagreement (std across members) is
+    the epistemic signal: the imagination actor optimises ``mean - coef*std``, penalising the OOD
+    over-prediction exp0054 measured WITHOUT crushing the true gesture's learned value (the exp0047
+    blanket-CROP failure mode). See knowledge/experiments/0054-rtfm-reward-gap.md.
+
+    Drop-in for ``TwoHotRewardHead``: ``forward`` = ensemble-mean scalar reward; ``mean_std`` =
+    (mean, std) for the pessimistic imagined reward; ``twohot_loss`` trains all members
+    (bootstrapped). ``action_embed`` aliases member 0 so the exp0047 num_embeddings path works."""
+
+    def __init__(
+        self, n_members, state_dim, num_actions, num_bins=255, vmin=-20.0, vmax=20.0, hidden=256
+    ):
+        super().__init__()
+        self.members = nn.ModuleList(
+            [
+                TwoHotRewardHead(state_dim, num_actions, num_bins, vmin, vmax, hidden)
+                for _ in range(n_members)
+            ]
+        )
+        self.n_members = n_members
+
+    @property
+    def action_embed(self):  # compat shim: num_embeddings is identical across members
+        return self.members[0].action_embed
+
+    def forward(self, latent, action):
+        """Ensemble-mean scalar reward (drop-in for TwoHotRewardHead.forward)."""
+        return torch.stack([m(latent, action) for m in self.members], 0).mean(0)
+
+    def mean_std(self, latent, action):
+        """(mean, std) of the per-member scalar reward predictions — std = epistemic uncertainty.
+        ``unbiased=False`` so a degenerate K=1 ensemble yields std 0 (not nan)."""
+        preds = torch.stack([m(latent, action) for m in self.members], 0)
+        return preds.mean(0), preds.std(0, unbiased=False)
+
+    def twohot_loss(self, latent, action, target, bootstrap=True):
+        """Mean over members of each member's two-hot CE. With ``bootstrap``, each member trains on
+        an independent Bernoulli(0.5) subset of the batch elements (Osband bootstrapped ensemble) so
+        members stay diverse → meaningful OOD disagreement. Averaged over members so the loss
+        magnitude matches a single head (keeps the WM loss balance unchanged)."""
+        tgt = _twohot_encode(symlog(target.detach()), self.members[0].bins)
+        total = latent.new_zeros(())
+        for m in self.members:
+            ce = -(tgt * F.log_softmax(m._logits(latent, action), dim=-1)).sum(-1)  # (B,)
+            if bootstrap:
+                mask = (torch.rand_like(ce) < 0.5).float()
+                total = total + (ce * mask).sum() / mask.sum().clamp_min(1.0)
+            else:
+                total = total + ce.mean()
+        return total / self.n_members

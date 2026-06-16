@@ -29,7 +29,7 @@ from world_model.models.manual_aux import (
 )
 from world_model.models.manual_conditioning import ConditionedRSSM
 from world_model.models.text_encoder import FrozenTextEncoder
-from world_model.models.twohot import TwoHotRewardHead, TwoHotValueHead
+from world_model.models.twohot import EnsembleRewardHead, TwoHotRewardHead, TwoHotValueHead
 from world_model.train_rssm import kl_balanced
 from world_model.training import ReplayBuffer, Transition
 
@@ -450,10 +450,15 @@ def imagine_ac_rtfm(
     success_frac=0.5,
     vr_head=None,
     vr_head_coef=0.0,
+    reward_uncertainty_coef=0.0,
 ):
     from torch.distributions import Categorical
 
     use_vr_head = vr_head is not None and vr_head_coef > 0.0
+    # exp 0055: MOPO-style pessimism — subtract λ·(ensemble reward std) from the imagined reward, so
+    # the actor is penalised for OOD-uncertain states (where the reward head over-predicts, exp0054)
+    # without crushing the true gesture's value. Only when rew is an ensemble (has mean_std).
+    use_unc = reward_uncertainty_coef > 0.0 and hasattr(rew, "mean_std")
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
         batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
@@ -482,7 +487,12 @@ def imagine_ac_rtfm(
                 # exp 0052: the acting policy optimises task reward + λ·VR_head — a dedicated,
                 # undiluted grounding incentive ON THE ACTOR (the maintainer's insight: every
                 # acting level needs the grounding incentive, not just the WM's blended reward).
-                r_step = rew(bel, a)
+                # exp 0055: when rew is an ensemble, use the pessimistic mean − λ·std instead.
+                if use_unc:
+                    r_mean, r_std = rew.mean_std(bel, a)
+                    r_step = r_mean - reward_uncertainty_coef * r_std
+                else:
+                    r_step = rew(bel, a)
                 if use_vr_head:
                     r_step = r_step + vr_head_coef * vr_head(bel, a)
                 rews.append(r_step)
@@ -837,6 +847,12 @@ def main() -> None:
     # toward zero at WM-train time (coef=0 = off/unchanged). samples = M random actions per belief.
     p.add_argument("--reward-conservative-coef", type=float, default=0.0)
     p.add_argument("--reward-conservative-samples", type=int, default=16)
+    # exp 0055: ensemble reward head + MOPO-style pessimism. ensemble-size>1 builds K bootstrapped
+    # two-hot heads; uncertainty-coef λ subtracts λ·std (epistemic disagreement) from the imagined
+    # reward so the actor avoids OOD over-prediction without crushing the true gesture (vs exp0047's
+    # blanket push-down). size=1 / coef=0 = byte-for-byte unchanged.
+    p.add_argument("--reward-ensemble-size", type=int, default=1)
+    p.add_argument("--reward-uncertainty-coef", type=float, default=0.0)
     # exp 0048: intrinsic validated-reading reward — pay the agent (at collection) for the manual's
     # marginal next-state predictive value, validated vs the real transition (0 = off/unchanged).
     p.add_argument("--validated-reading-coef", type=float, default=0.0)
@@ -909,7 +925,14 @@ def main() -> None:
     rssm = ConditionedRSSM(embed_dim=ed, num_actions=n_act, text_dim=td).to(device)
     sd = rssm.state_dim
     recon_head = torch.nn.Linear(sd, ed).to(device)
-    rew = TwoHotRewardHead(state_dim=sd, num_actions=n_act).to(device)
+    # exp 0055: an ensemble reward head (when --reward-ensemble-size > 1) enables MOPO-style
+    # pessimism in imagination; size 1 = the plain single head (byte-for-byte unchanged).
+    if args.reward_ensemble_size > 1:
+        rew = EnsembleRewardHead(args.reward_ensemble_size, state_dim=sd, num_actions=n_act).to(
+            device
+        )
+    else:
+        rew = TwoHotRewardHead(state_dim=sd, num_actions=n_act).to(device)
     val = ValueHead(state_dim=sd).to(device)  # noqa: F841  (kept for parity / future repval)
     cont = ContinueHead(state_dim=sd).to(device)
     # OFF (default): the WM-only base Actor — unchanged. ON (--actor-cond): the OPTIONAL §6.2
@@ -1176,6 +1199,7 @@ def main() -> None:
                 device,
                 vr_head=vr_head,
                 vr_head_coef=args.vr_head_coef,
+                reward_uncertainty_coef=args.reward_uncertainty_coef,
             )
         if hier_on:
             for m in (rssm, worker, manager, goal_module):
@@ -1282,6 +1306,7 @@ def main() -> None:
                 "text_dim": td,
                 "embed_dim": ed,
                 "actor_cond": args.actor_cond,
+                "reward_ensemble_size": args.reward_ensemble_size,
             },
         },
         path,

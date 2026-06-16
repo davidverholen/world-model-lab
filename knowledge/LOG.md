@@ -2009,3 +2009,14 @@ the working baseline). Next lever = CALIBRATED conservatism on the task reward h
 push-down over-suppressed → need gentler/scheduled or uncertainty-aware); residual after that =
 pure credit-assignment/execution ([[0043-rtfm-execution-wall]]). Page [[0054-rtfm-reward-gap]]
 finalized; fidelity plot embedded in assets/exp-0054.
+
+## 2026-06-16 — exp0055 built: ensemble-uncertainty (MOPO) pessimism
+
+Built the targeted fix for the exp0054 reward over-optimism: EnsembleRewardHead (K bootstrapped
+two-hot heads) in models/twohot.py + imagination-time pessimism in imagine_ac_rtfm (actor optimises
+mean−λ·std). Penalises OOD epistemic disagreement, NOT all OOD actions → spares the true gesture
+(the exp0047 blanket-CROP failure mode). Flags --reward-ensemble-size / --reward-uncertainty-coef
+(size 1 / coef 0 = byte-for-byte unchanged). Reviewer (opus): SHIP (epistemic gap real: in-dist std
+~0.003 vs OOD ~0.15; loss magnitude preserved; default path unchanged; round-trips). Added
+test_ensemble_reward_head_shapes_and_epistemic_disagreement; fixed K=1 nan-std footgun (unbiased=False).
+CPU-smoked end-to-end. New page [[0055-rtfm-ensemble-pessimism]]; λ∈{0.5,1,2,5} sweep dispatching.

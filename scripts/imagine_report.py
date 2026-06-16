@@ -71,7 +71,7 @@ from visualize_rtfm import _FONT, ACTION_NAMES, GAME_PX, write_gif  # noqa: E402
 from world_model.models import Actor, ConditionedActor, FrozenDinoEncoder  # noqa: E402
 from world_model.models.manual_conditioning import ConditionedRSSM  # noqa: E402
 from world_model.models.text_encoder import FrozenTextEncoder  # noqa: E402
-from world_model.models.twohot import TwoHotRewardHead  # noqa: E402
+from world_model.models.twohot import EnsembleRewardHead, TwoHotRewardHead  # noqa: E402
 from world_model.train_rtfm import RTFMAgent, actor_logits, img_to_chw  # noqa: E402
 
 BG = (18, 18, 22)
@@ -105,7 +105,13 @@ def build_rtfm_modules(checkpoint: str | Path, device: str):
 
     heads: dict[str, torch.nn.Module] = {}
     if ckpt.get("rew") is not None:
-        rew = TwoHotRewardHead(state_dim=rssm.state_dim, num_actions=n_act).to(device)
+        k = cfg.get("reward_ensemble_size", 1)
+        if k > 1:
+            rew: torch.nn.Module = EnsembleRewardHead(
+                k, state_dim=rssm.state_dim, num_actions=n_act
+            ).to(device)
+        else:
+            rew = TwoHotRewardHead(state_dim=rssm.state_dim, num_actions=n_act).to(device)
         rew.load_state_dict(ckpt["rew"])
         rew.eval()
         heads["rew"] = rew
