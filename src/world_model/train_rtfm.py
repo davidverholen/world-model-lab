@@ -256,6 +256,7 @@ def collect_rtfm(
     store_vr=False,
     path_reward_coef=0.0,
     path_reward_factor=1.0,
+    path_reward_decay=1.0,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
@@ -294,7 +295,11 @@ def collect_rtfm(
         emb = embed_of(obs)
         # exp 0058: per-episode in-order pointer over the displayed gesture, for the escalating
         # path reward. Mirrors harness/env gesture extraction; gesture is fixed for the episode.
-        gesture, gptr = [], 0
+        # pos_count[k] = times position k already paid this episode → decay^count diminishing return
+        # (decay 1 = reward every time; decay 0 = once per episode; in between = the maintainer's
+        # "later executions in the same episode are worth less", so the skill stays rewarded but
+        # repeated re-runs can't farm unbounded reward).
+        gesture, gptr, pos_count = [], 0, {}
         if use_path:
             disp = info.get("displayed_facts", {}).get("rituals", {})
             gesture = list(next(iter(disp.values()))["gesture"]) if disp else []
@@ -319,7 +324,9 @@ def collect_rtfm(
             # env reading_shaping is 0 here (no double count).
             if use_path and gesture:
                 if env.action_names[a] == gesture[gptr]:
-                    r_read += path_reward_coef * (path_reward_factor**gptr)
+                    n = pos_count.get(gptr, 0)  # prior payouts of this position this episode
+                    r_read += path_reward_coef * (path_reward_factor**gptr) * (path_reward_decay**n)
+                    pos_count[gptr] = n + 1
                     gptr = (gptr + 1) % len(gesture)
                 else:
                     gptr = 0
@@ -910,6 +917,10 @@ def main() -> None:
     # the objective toward the under-weighted tail of the chain. 0 = off/unchanged.
     p.add_argument("--path-reward-coef", type=float, default=0.0)
     p.add_argument("--path-reward-factor", type=float, default=1.0)
+    # exp 0058: diminishing return on REPEATED in-episode executions of a gesture step — the n-th
+    # payout of a position is scaled by decay**n. 1.0 = reward every time (no decay); 0.0 = once per
+    # episode; in between = repeated re-runs worth progressively less (anti-farm, keeps the skill).
+    p.add_argument("--path-reward-decay", type=float, default=1.0)
     # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
@@ -1164,6 +1175,7 @@ def main() -> None:
             store_vr=args.vr_head_coef > 0.0,
             path_reward_coef=args.path_reward_coef,
             path_reward_factor=args.path_reward_factor,
+            path_reward_decay=args.path_reward_decay,
         )
         buffer.compute_returns(args.gamma)
         print(
