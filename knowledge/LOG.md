@@ -2020,3 +2020,14 @@ mean−λ·std). Penalises OOD epistemic disagreement, NOT all OOD actions → s
 ~0.003 vs OOD ~0.15; loss magnitude preserved; default path unchanged; round-trips). Added
 test_ensemble_reward_head_shapes_and_epistemic_disagreement; fixed K=1 nan-std footgun (unbiased=False).
 CPU-smoked end-to-end. New page [[0055-rtfm-ensemble-pessimism]]; λ∈{0.5,1,2,5} sweep dispatching.
+
+## 2026-06-16 — new eval metric: per-step swap_follow (swap_follow_s1)
+
+Added swap_follow_prefix() to evaluate_rtfm (train_rtfm.py): per-STEP swap-following computed on OUR
+side via the env's public interface (action_names + info['displayed_facts']) — NOT a benchmark edit
+(harness.swap_follow_rate stays the canonical exact metric in the read-only crafter_rtfm domain).
+Exposes swap_follow_s1 = step-1 match rate; the full chain (prefix[-1]) cross-checks the harness.
+The diagnostic: swap_follow_s1 ≫ swap_follow ⇒ the agent composes the FIRST instruction but not the
+2-step chain (the maintainer's depth-2 composition hypothesis). Co-plotted in the grounding-headline
+panel. CPU-smoked (s1=0.12 vs exact=0.00 round 0). Sets up the planned coverage sweep
+(vary --n-train-seeds) to separate combinatorial-coverage from compositional-binding failure.

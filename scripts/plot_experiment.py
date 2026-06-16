@@ -75,7 +75,7 @@ PANELS: list[tuple[str, list[str]]] = [
     ("optimization losses", ["actor_loss", "critic_loss"]),
     ("imagined_return (optimism)", ["imagined_return"]),
     ("eval scores [0-1]", ["correct", "none", "swapped"]),
-    ("grounding headline [0-1]", ["grounding", "swap_follow"]),
+    ("grounding headline [0-1]", ["grounding", "swap_follow", "swap_follow_s1"]),
     ("reading diagnostic", ["inv_ratio", "inv_correct", "inv_wrong"]),
     (
         "MPC eval [0-1]",

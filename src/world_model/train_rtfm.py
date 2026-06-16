@@ -719,6 +719,37 @@ def imagine_hierarchy_rtfm(
     return stats
 
 
+def swap_follow_prefix(env, agent, seeds, length):
+    """Per-STEP swap-following, computed on our side via the env's PUBLIC interface (action_names
+    + ``info['displayed_facts']``) — NOT a benchmark edit. Per SWAPPED episode, check whether the
+    agent's first k actions match the displayed gesture's first k, for k=1..length.
+
+    Returns ``prefix[k-1]`` = fraction of episodes matching the first k actions, so ``prefix[-1]``
+    is the canonical exact swap_follow (cross-checks ``harness.swap_follow_rate``). The diagnostic
+    for the 2-step wall: ``prefix[0]`` (got step 1) >> ``prefix[-1]`` (got the whole chain)
+    means the agent composes the FIRST instruction but not the chain — the depth-2 composition
+    question (exp 0055 thread). Mirrors harness.swap_follow_rate's gesture extraction."""
+    hits = [0] * length
+    n = 0
+    for seed in seeds:
+        obs, info = env.reset(seed=seed)
+        agent.reset(obs, info)
+        displayed = info.get("displayed_facts", {}).get("rituals", {})
+        target = next(iter(displayed.values()))["gesture"] if displayed else []
+        actions: list[str] = []
+        for _ in range(length):
+            a = agent.act(obs, info)
+            actions.append(env.action_names[a])
+            obs, _r, term, trunc, info = env.step(a)
+            if term or trunc:
+                break
+        for k in range(length):
+            if actions[: k + 1] == list(target[: k + 1]) and len(target) > k:
+                hits[k] += 1
+        n += 1
+    return [h / n for h in hits] if n else [0.0] * length
+
+
 def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
     """Score in each of the four modes + swap-follow rate. Grounding = correct − none."""
     out = {}
@@ -728,6 +759,10 @@ def evaluate_rtfm(agent, eval_seeds, length, max_steps, one_shot):
         out[mode.name] = float(np.mean(scores))
     swap_env = C.make_recipe_env(ManualMode.SWAPPED, length=length, one_shot=one_shot)
     out["swap_follow"] = float(harness.swap_follow_rate(swap_env, agent, list(eval_seeds), length))
+    # exp 0055: per-step swap-following (step-1 match vs full-chain) — localises WHERE a multi-step
+    # gesture breaks. swap_follow_s1 ≫ swap_follow ⇒ composes step 1 but not the chain.
+    prefix = swap_follow_prefix(swap_env, agent, list(eval_seeds), length)
+    out["swap_follow_s1"] = prefix[0] if prefix else 0.0
     out["grounding"] = out["CORRECT"] - out["NONE"]
     return out
 
@@ -1222,7 +1257,8 @@ def main() -> None:
         )
         print(
             f"  correct={r['CORRECT']:.2f} none={r['NONE']:.2f} swapped={r['SWAPPED']:.2f} "
-            f"grounding={r['grounding']:.2f} swap_follow={r['swap_follow']:.2f}",
+            f"grounding={r['grounding']:.2f} swap_follow={r['swap_follow']:.2f} "
+            f"swap_follow_s1={r['swap_follow_s1']:.2f}",
             flush=True,
         )
         if args.mpc_eval and cur_len == args.length:
