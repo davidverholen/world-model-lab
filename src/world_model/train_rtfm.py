@@ -491,8 +491,8 @@ def imagine_hierarchy_rtfm(
     from world_model.models.hierarchy import goal_similarity
 
     K = hier_k
+    assert horizon % K == 0 and horizon >= K, "horizon must be a positive multiple of hier_k"
     n_macro = horizon // K
-    assert n_macro >= 1, "horizon must be >= hier_k"
     sd = rssm.state_dim
     gamma_macro = gamma**K
     stats = (0.0, 0.0, 0.0, 0.0)
@@ -528,7 +528,10 @@ def imagine_hierarchy_rtfm(
                     w_cont.append(torch.sigmoid(cont(bel)))
                     s, _ = rssm.img_step(s, a, tok, mask)
                     w_bel.append(bel)
-                    w_beln.append(rssm.belief(s))  # NEXT belief → goal-similarity reward
+                    # worker reward is similarity of the NEXT belief to the goal (reward-on-
+                    # transition); the worker value at bel[t] predicts r[t]+γ·v[t+1], so this is
+                    # self-consistent — do NOT "fix" it to rew(bel) (the flat-loop convention).
+                    w_beln.append(rssm.belief(s))
                     w_act.append(a)
                 m_rew.append(macro_r)
                 achieved = rssm.belief(s)
