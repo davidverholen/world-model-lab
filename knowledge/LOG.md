@@ -2095,3 +2095,13 @@ historical ceiling): it improves the components but only recovers, not breaks, t
 conditional must rise → properly-parameterized back-loading. Dispatched exp0061: escalation at the
 WORKING base (coef 0.5, factor {1,2,3}, decay 1.0, 2 seeds each) — factor 1 = uniform control, 2/3 =
 back-loading on top of the working step-1 magnitude. Fixes the exp0058 step-1-starvation confound.
+
+## 2026-06-17 — exp0061: back-loading REFUTED; uniform-0.5 path reward is the winner; exp0062 dispatched
+
+exp0061 (escalation at the WORKING base: coef 0.5, factor 1/2/3, decay 1.0, 2 seeds each): back-loading
+HURTS the conditional (factor 1→0.33, 2→0.21, 3→0.20). Bigger step-2 reward makes the agent attempt
+step-1 more (step-1 up to 0.49 at factor 3) but follow through WORSE → the conditional is NOT
+step-2-reward-magnitude-limited; the satisficing hypothesis is refuted. The bottleneck is EXPOSURE /
+execution (data/coverage). Uniform 0.5 every time (factor 1) is the robust reward winner (exact 0.115,
+cond 0.33). Dispatched exp0062: coverage n1600 multi-seed (4 seeds) at the working uniform-0.5 path
+reward — clean test of whether the conditional is data/exposure-bound (vs exp0061f1 n400).

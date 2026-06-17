@@ -89,3 +89,21 @@ the lever (→ exposure).
 ## Links
 
 [[0057-rtfm-path-reward]] · [[0055-rtfm-ensemble-pessimism]] · [[0056-rtfm-coverage-sweep]] · [[0043-rtfm-execution-wall]] · [[mentored-learning-loop]]
+
+## exp0061 — back-loading done RIGHT (base 0.5): REFUTED
+
+Re-ran at the working base (`--path-reward-coef 0.5 --path-reward-factor {1,2,3} --path-reward-decay
+1.0`, 2 seeds each), last-5 length-2:
+
+| factor | step-1 | exact | conditional |
+|---|---|---|---|
+| **1 (uniform 0.5)** | 0.35 | **0.115** | **0.33** |
+| 2 | 0.39 | 0.081 | 0.21 |
+| 3 | 0.49 | 0.097 | 0.20 |
+
+**Back-loading HURTS the conditional** (0.33→0.21→0.20). Bigger step-2 reward makes the agent attempt
+step-1 MORE (chasing the payoff → step-1 up to 0.49) but follow through WORSE. So the conditional is NOT
+step-2-reward-magnitude-limited → the satisficing hypothesis is **refuted**; the bottleneck is
+EXPOSURE / execution (data/coverage axis). **Uniform 0.5, every time (factor 1) is the robust reward
+winner** (exact 0.115, cond 0.33) — a 2nd confirmation of the floor-0.5 lever. → pivot the conditional
+push to exposure (coverage confirm exp0062 / backward curriculum), not reward shape.
