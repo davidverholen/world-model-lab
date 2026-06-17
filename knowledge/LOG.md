@@ -2147,3 +2147,12 @@ Key reconciliation: exp0051's budget probe (flat ~0.11) had NO path reward; WITH
 trend is still climbing → a longer floor-0.5 run is a LIVE lever (contra my earlier "longer training
 won't help"). Corrected exp0059 (status/findings/lesson), added trend caveats to exp0061; exp0057/0056
 already single-seed-caveated via pointers to their confirms.
+
+## 2026-06-17 — exp0063 dispatched: longer run to test the ceiling (trend was still rising at r30)
+
+Per the audit (path-reward swap_follow still climbing at round 30, unlike exp0051's no-path-reward flat
+probe), dispatched a LONG run of the confirmed-best still-rising config — uniform-0.5 path reward
+(coef 0.5, factor 1, decay 1.0), n400 — at 20 curriculum + 60 length-2 = 80 rounds (vs the usual 30),
+4 seeds. Tests whether more training breaks swap_follow past the ~0.10 ceiling (watch swap_follow
+specifically, NOT correct, per the exp0051 experience-based-completion confound). Pre-registered before
+dispatch (page [[0063-rtfm-long-run-ceiling]]). exp0062 (coverage confirm) still finishing concurrently.
