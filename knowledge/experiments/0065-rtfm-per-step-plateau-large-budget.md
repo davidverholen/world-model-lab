@@ -15,6 +15,45 @@ achievable single-step ceiling), (c) a **larger budget** — 120 rounds, ~18×/r
 converged regime, so a flat tail is a *real* plateau), (d) **more seeds** per the exp0064 noise lesson.
 Runs as a [[rtfm-rollout-perf]] exploit: both arms concurrent, GPU idle.
 
+## Interim analysis (MID-RUN, ~round 56, 5 seeds — NOT a conclusion)
+
+A seed-level dissection of the length-2 arm while it runs, because the spread is mechanistically
+informative. **The differentiator between breakthrough and laggard is the conditional P(step-2 | step-1)
+— the chaining — NOT step-1 skill.**
+
+| seed | step-1 | full | conditional | 1-step skill entering len-2 | broke ≥0.18 |
+|---|---|---|---|---|---|
+| s0 | 0.45 | 0.08 | 0.18 | 0.57 | not yet |
+| s1 | 0.37 | 0.17 | 0.46 | 0.43 | not yet |
+| s2 | 0.38 | 0.18 | 0.47 | 0.37 | round 34 |
+| s3 | 0.50 | 0.28 | 0.56 | 0.61 | round 46 |
+| s4 | 0.35 | 0.05 | 0.14 | 0.54 | not yet |
+
+Composers (s1/s2/s3) sit at conditional 0.46–0.56; laggards (s0/s4) at 0.14–0.18. **Rules out the
+obvious stories:** (a) NOT the 1-step foundation — s0 entered length-2 with a strong 0.57 single-step
+skill and never composed, while s2 entered with the *worst* (0.37) and composed *earliest* (round 34);
+the starkest case is s0 (step-1 0.45, conditional 0.18 — does the first step well, almost never chains).
+(b) NOT reward shape/magnitude — back-loading refuted ([[0061-rtfm-backloading-confirm]]), magnitude null
+([[0064-rtfm-path-reward-coef-sweep]]).
+
+**Mechanism (all seeds identical but for the random seed):** the unlock is an *exploration/credit lottery
+for the later step*. Step-k states are visited ~p^(k-1) of the time (p ≈ step success ≈ 0.4), so the deep
+tail is reached exponentially rarely; the path reward only reinforces step-k when the agent happens to
+execute it in order. Composer seeds stumbled into that experience; s0/s4 didn't. This is **learnable and
+not architectural** (3/5 seeds prove it) — a high-variance composition unlock. It scales *badly*: at
+length 4–5 every seed would be a laggard.
+
+**Lever → exp0066 (backward curriculum in IMAGINATION).** Manufacture the deep-step experience that s3
+got by luck: mine the buffer for prefix-complete LATENT states (we already track the recipe-progress
+pointer), seed imagination rollouts there (oversample by steps-remaining), and train the actor-critic to
+complete the tail. **Imagination, not the real env, because step k-1 is usually a causal *precondition*
+for step k** — you can't reset reality to a step-k-ready state without doing step k-1 (and crafter-rtfm
+can't snapshot mid-recipe without an env handoff); a believed-done latent sidesteps that. Caveat: only
+trustworthy one step past the frontier (WM must have seen real step-k transitions, else hallucinated
+dynamics) → walk the curriculum back *gradually* so WM + policy co-evolve; critical at depth ≥3. Pairs
+with a progress-aware actor/critic (condition on the recipe pointer → per-step credit). Lit-first
+(reverse-curriculum / backplay / Go-Explore / HER) before building; reviewer-gated.
+
 ## Why
 
 The reward axis is exhausted ([[0064-rtfm-path-reward-coef-sweep]]: magnitude is a null; back-loading

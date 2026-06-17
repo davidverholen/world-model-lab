@@ -2242,3 +2242,19 @@ arms (rtfm-rollout-perf exploit, GPU idle): exp0065a len-1 x3 seeds (pure 1-step
 seeds (20 curriculum + 100 length-2). Config = proven n400 / uniform-0.5 path reward / aux 1.0 / VR 0.3.
 exp0063 marked SUPERSEDED (its vectorize-rebuild precondition was abandoned — world-gen is the floor).
 Tag LADDER-EXIT.
+
+## 2026-06-17 — exp0065 interim mechanism analysis + exp0066 lever identified (backward curriculum in imagination)
+
+Mid-run seed dissection of exp0065b (round ~56, 5 seeds): the breakthrough/laggard split is in the
+CONDITIONAL P(step-2|step-1), not step-1 skill. Composers s1/s2/s3 cond 0.46-0.56; laggards s0/s4
+0.14-0.18. Rules out the 1-step foundation (s0 entered at 0.57 single-step and never composed; s2
+entered worst at 0.37 and composed earliest) and reward shape/magnitude (already refuted/null).
+Mechanism: identical config -> exploration/credit lottery for the later step; deep states visited
+~p^(k-1) -> exponentially rare -> scales badly to longer chains. Learnable, not architectural (3/5
+break it). LEVER (exp0066): backward curriculum in IMAGINATION -- seed imagined rollouts from buffered
+prefix-complete latents (we track the recipe-progress pointer), train actor-critic to complete the tail.
+Imagination not real env because step k-1 is a causal precondition for step k (can't reset reality
+there; crafter-rtfm can't snapshot mid-recipe). Caveat: trustworthy only one step past the frontier
+(WM fidelity) -> walk back gradually, co-evolve WM+policy. Pairs with progress-aware actor/critic.
+Captured as an interim note on the exp0065 page; lit scout launched (reverse-curriculum/backplay/
+Go-Explore/HER/model-based start-states). Reviewer-gated build after exp0065 lands + lit ingested.
