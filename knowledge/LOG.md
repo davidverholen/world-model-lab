@@ -2173,3 +2173,15 @@ was an optimistic draw that did not replicate (3rd single-seed correction). Conf
 n1600 sees each recipe only ~1.1x (vs n400 ~4.5x) → per-recipe UNDER-TRAINED, not 'coverage hurts'.
 This MOTIVATES exp0063 (n1600, 80 rounds → ~3x per recipe): the proper test of whether high coverage
 pays off with enough exposure. exp0062 page documented with lean graph; exp0056 cross-linked.
+
+## 2026-06-17 — exp0063 RE-SCOPED: n1600 long-run → n400 long-run, "acceptable ceiling" framing
+
+exp0063 spec reframed (still PRE-REGISTERED, not run). Was n1600×80-rounds (generalization); maintainer
+re-scoped to the proven-best **n400** config at 80 rounds (20 curriculum + 60 length-2), single-variable
+vs exp0061f1 (training length only). Rationale: at n400, 80 rounds = ~9–12x/recipe (converged), so a
+plateau is a REAL settling point — clean for the new headline question, which is no longer "must break
+the ceiling" but "where does swap_follow settle, and is that an ACCEPTABLE (competent-agent) ceiling?".
+Acceptable = agent acts confidently in the env: swap_follow_s1 ≳0.35, grounding>0 & swapped≪correct,
+conditional ≳0.30, low variance/stable over r60–79 → residual is genuine 2-step composition difficulty,
+not training failure. n1600 generalization long-run split out as a separate future experiment (one
+variable per run). Tag stays LADDER-EXIT (break OR acceptable ceiling are both rung-4 decision points).
