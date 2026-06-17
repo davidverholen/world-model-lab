@@ -2164,3 +2164,12 @@ longer-run ceiling test) was dispatched once in error, then stopped immediately 
 its partial run dir removed — it remains PRE-REGISTERED and is queued for the next session to dispatch
 (command in its page §Setup). exp0062 (coverage confirm, 4 seeds) is finishing; its results will be
 documented on its page before the handoff.
+
+## 2026-06-17 — exp0062 DONE: coverage single-seed win did NOT replicate (under-trained confound)
+
+exp0062 (coverage n1600 × uniform-0.5, 4 seeds): exact 0.057 / conditional 0.16 — WORSE than n400 same
+reward (exp0061f1: 0.115 / 0.33), step-1 unchanged (0.345). The single-seed exp0056 n1600 (0.112/0.40)
+was an optimistic draw that did not replicate (3rd single-seed correction). Confound: at 30 rounds
+n1600 sees each recipe only ~1.1x (vs n400 ~4.5x) → per-recipe UNDER-TRAINED, not 'coverage hurts'.
+This MOTIVATES exp0063 (n1600, 80 rounds → ~3x per recipe): the proper test of whether high coverage
+pays off with enough exposure. exp0062 page documented with lean graph; exp0056 cross-linked.

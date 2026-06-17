@@ -29,6 +29,8 @@ naturally with the path-reward levers ([[0057-rtfm-path-reward]]/[[0058-rtfm-esc
 
 ![exp0056 exact swap_follow by n-train](../../assets/exp-0056/swap-follow.png)
 
+**Multi-seed follow-up ([[0062-rtfm-coverage-confirm]]):** the single-seed n1600 win did NOT replicate at 4 seeds (n1600 exact 0.057 < n400 0.115) — BUT at a fixed 30-round budget n1600 is per-recipe under-trained (~1.1×/recipe vs n400 4.5×), so that's the expected effect of a harder task, NOT a coverage refutation. Coverage's generalization benefit remains untested (needs equal per-recipe exposure / convergence).
+
 ## Original pre-registration
 
 Follows the [[0055-rtfm-ensemble-pessimism]] reframe: the rung-4 wall is NOT
