@@ -95,9 +95,15 @@ that gives the hierarchy its edges at inference time.
   depth). We get this guarantee by construction; corollary: **no learned reverse-dynamics model needed**,
   the replay buffer's real latents are the targets.
 - **Advance the frontier by a difficulty gate, not a fixed schedule** (Florensa's Starts-of-Intermediate-
-  Difficulty): only add step-(k-2) seeds once step-k success is *stable but non-trivial* (~10–90%). The
-  open risk is whether the buffer accumulates enough prefix-complete latents to supply the frontier — if
-  step-(k-j) latents go too sparse, a more active seeding mechanism is needed.
+  Difficulty): only add step-(k-2) seeds once step-k success is *stable but non-trivial* (~10–90%).
+  **Why this scales (the bootstrap):** the seed supply for level k is *manufactured by mastering level
+  k-1* — once the agent reliably completes 1…k-1, real (k-1)-done latents become abundant in the buffer,
+  and the WM (trained on the rare real step-k successes) stays faithful exactly *one step* past the
+  frontier; so the frontier, the buffer supply, and WM coverage co-evolve one step at a time. This is why
+  we never fabricate/imagine a start state or seed a deep step directly (no real data there) — the
+  one-step rule is load-bearing, not a nicety. The open risk: if, even after mastering k-1, the buffer
+  stays too sparse at the frontier, the organic supply isn't enough and a more active seeding mechanism
+  is needed.
 - **Actor conditioning (resolved):** the imagined-from-frontier actor conditions on the **frontier latent
   + the recipe TEXT** (our existing [[rung4-manual-conditioned-agent|ConditionedRSSM]]) — i.e. "you are
   here, here's the recipe, finish it." A LEXA-style explicit **goal-latent** signal is a later upgrade,
