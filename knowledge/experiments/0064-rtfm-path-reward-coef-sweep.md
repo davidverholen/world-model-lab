@@ -2,15 +2,50 @@
 status: draft
 owner: world-model
 scope: local
-verified: false
+verified: true
 last_reviewed: 2026-06-17
 ---
 
 # 0064: path-reward-coef sweep — does reward STRENGTH (at factor=1) move the step-2 conditional?
 
-**Status: PRE-REGISTERED — DISPATCHING (3 coeffs × 3 seeds, in PARALLEL).** First experiment to exploit
-the [[rtfm-rollout-perf]] finding: collection is CPU-world-gen-bound with the GPU idle, so 3 configs ×
-3 seeds run concurrently in the wall-time of a single config (~9 procs; GPU is never the limit).
+**Status: DONE (3 coeffs × 3 seeds, 30 rounds) — NULL / NOISE-DOMINATED.** Reward magnitude shows **no
+resolvable effect** on the step-2 conditional above a large seed-to-seed variance. The reward
+shape+magnitude axis now looks **exhausted** → the lever is coverage / backward-curriculum / architecture,
+not reward tuning. Also a methods finding: 30-round / 3-seed n400 is too noisy to resolve effects this
+small (now cheap to fix with more parallel seeds). Ran as the first [[rtfm-rollout-perf]] exploit — 9
+procs concurrent in one config's wall-time, GPU ~10%.
+
+## Result — flat within heavy seed noise (last-5 of 30 rounds, mean of 3 seeds)
+
+| coef | step1 (swap_follow_s1) | exact (swap_follow) | conditional | swapped | grounding |
+|---|---|---|---|---|---|
+| 0.25 | 0.433 | 0.118 | 0.27 | 0.021 | 0.104 |
+| **0.5** (ref) | 0.410 | 0.083 | 0.20 | 0.004 | 0.093 |
+| 1.0 | 0.311 | 0.078 | 0.25 | 0.014 | 0.097 |
+
+Per-seed `exact` spread (why this is a null, not an ordering): 0.25 → [0.150, 0.124, 0.080]; 0.5 →
+[0.124, 0.084, 0.040]; 1.0 → [0.128, 0.018, 0.088]. The arms **overlap completely**; the conditional
+(0.27 / 0.20 / 0.25) has no clean peak or monotone trend.
+
+**Reading the fork → the "flat" branch.** None of {peak-at-0.5, monotone} holds; within noise the
+conditional is flat in coef. Consistent with [[0061-rtfm-backloading-confirm]]'s "not
+step-2-magnitude-limited" — now extended from *shape* (back-loading) to *overall magnitude*. All arms
+read the manual (grounding ~0.09–0.10, `swapped ≈ 0`) and do step-1 at a real rate (0.31–0.43); the
+2-step conditional is the wall and reward magnitude doesn't move it.
+
+**Two caveats that keep this honest:**
+1. **Sanity anchor under-reproduced.** coef-0.5 here = exact 0.083 / cond 0.20, vs the exp0061f1
+   reference ~0.115 / ~0.33. Within the (large) variance band, but it confirms the protocol is
+   noise-dominated — a single 2–3-seed draw at 30 rounds is not a reliable point estimate.
+2. **Weak, unresolved hint only:** coef-1.0 has the lowest step-1 (0.311) with one near-collapsed seed
+   (step1 0.236 / exact 0.018) — *weakly* consistent with over-rewarding destabilising step-1, but well
+   inside noise. Not a claim.
+
+**Methods lesson (now actionable cheaply):** to resolve effects of this size, beat down variance with
+**more parallel seeds** (6–8/arm — still one wall-time window per [[rtfm-rollout-perf]]) rather than more
+rounds. Future small-effect comparisons at n400 should not run at 3 seeds.
+
+## Original pre-registration
 
 ## Why
 

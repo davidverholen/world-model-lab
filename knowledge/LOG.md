@@ -2220,3 +2220,15 @@ First experiment to exploit rtfm-rollout-perf: collection is CPU-world-gen-bound
 at factor=1/decay=1.0/n400/30 rounds to find whether reward MAGNITUDE moves the step-2 conditional (the
 last untested reward knob — shape axis exhausted: back-loading refuted in exp0058/0061). coef-0.5 arm
 doubles as an exp0061f1 reproduction check. Tag EXTRA-RIGOR (diagnostic).
+
+## 2026-06-17 — exp0064 DONE: path-reward-coef sweep is NULL (noise-dominated) → reward axis exhausted
+
+3 coeffs {0.25,0.5,1.0} x 3 seeds, 30 rounds, parallel (first rtfm-rollout-perf exploit: 9 procs in one
+config's wall-time, GPU ~10%). conditional 0.27/0.20/0.25, exact 0.118/0.083/0.078 — flat within heavy
+per-seed spread (exact spans 0.04-0.15 inside each arm; arms overlap fully). No sweet spot, no monotone
+trend → the "flat" fork: reward MAGNITUDE doesn't move the step-2 conditional at factor=1 (extends
+exp0061's "not step-2-magnitude-limited" from shape to magnitude). Reward shape+magnitude axis now
+EXHAUSTED → lever is coverage / backward-curriculum / architecture. Caveats: coef-0.5 under-reproduced
+its exp0061f1 anchor (0.083/0.20 vs 0.115/0.33) → protocol is noise-dominated; coef-1.0 weakly hints at
+step-1 destabilization (one near-collapsed seed) but within noise. METHODS LESSON: resolve small n400
+effects with MORE PARALLEL SEEDS (6-8/arm, still one wall-window), not 3.
