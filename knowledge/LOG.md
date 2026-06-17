@@ -2133,3 +2133,17 @@ step-2-reward-magnitude-limited; the satisficing hypothesis is refuted. The bott
 execution (data/coverage). Uniform 0.5 every time (factor 1) is the robust reward winner (exact 0.115,
 cond 0.33). Dispatched exp0062: coverage n1600 multi-seed (4 seeds) at the working uniform-0.5 path
 reward — clean test of whether the conditional is data/exposure-bound (vs exp0061f1 n400).
+
+## 2026-06-17 — claim audit (exp0050+) vs graph trends; corrected premature ceiling claims
+
+Audited every experiment 0050+ by extracting per-round length-2 trajectories and comparing first-vs-
+last-third trends to each page's claim (prompted by the exp0051 over-claim the maintainer caught).
+Findings: most claims hold (0050 flat~0, 0052 frozen, 0054, 0055 counter-outcome+reframe, 0058
+confounded-neg, 0060 no-stack). BUT the path-reward runs (0059/0061/0057f05/0056n1600) have swap_follow
+STILL GENTLY RISING at round 30 (exp0059 4-seed per-round: ~0.065 r20-23 → ~0.105 r26-29, r29≈0.13;
+exp0061f1 r29≈0.15) — NOT plateaued. So exp0059's "recovers ~0.10 but doesn't break the ceiling" was
+premature; corrected to "~0.10 is a 30-round snapshot mid-climb / lower bound — longer run untested."
+Key reconciliation: exp0051's budget probe (flat ~0.11) had NO path reward; WITH the path reward the
+trend is still climbing → a longer floor-0.5 run is a LIVE lever (contra my earlier "longer training
+won't help"). Corrected exp0059 (status/findings/lesson), added trend caveats to exp0061; exp0057/0056
+already single-seed-caveated via pointers to their confirms.

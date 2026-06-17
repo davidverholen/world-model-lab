@@ -54,6 +54,12 @@ data/coverage axis problem.
 **Uniform 0.5 every time (factor 1) is the robust reward winner** (exact 0.115, cond 0.33) — a 2nd
 independent confirmation of the floor-0.5 lever from [[0059-rtfm-floor-confirm]].
 
+**Trend caveat:** the *relative* finding (back-loading hurts the conditional; uniform-0.5 best) is a
+within-batch comparison and holds regardless of absolute level. But the *absolute* numbers (factor-1
+exact 0.115) are 30-round snapshots and swap_follow is **still rising at the cutoff** (f1 per-round
+r29 ≈ 0.15) — not a plateau (see [[0059-rtfm-floor-confirm]]). So treat "0.115" as a lower bound, not
+a ceiling.
+
 ## Lesson
 
 The satisficing hypothesis (step-2 is reward-magnitude-starved, so escalation helps) is REFUTED at the
