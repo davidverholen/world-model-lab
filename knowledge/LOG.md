@@ -2232,3 +2232,13 @@ EXHAUSTED → lever is coverage / backward-curriculum / architecture. Caveats: c
 its exp0061f1 anchor (0.083/0.20 vs 0.115/0.33) → protocol is noise-dominated; coef-1.0 weakly hints at
 step-1 destabilization (one near-collapsed seed) but within noise. METHODS LESSON: resolve small n400
 effects with MORE PARALLEL SEEDS (6-8/arm, still one wall-window), not 3.
+
+## 2026-06-17 — exp0065 pre-registered: per-step swap-follow plateau, LARGE budget (len1 + len2 parallel)
+
+Operationalizes exp0063's plateau-vs-climb question, sharpened: per-step tracking (swap_follow_s1 +
+full swap_follow), a length-1 reference arm (single-step ceiling), larger budget (120 rounds = ~18x/recipe
+at n400, converged so a flat tail is a REAL plateau), more seeds (exp0064 noise lesson). Two parallel
+arms (rtfm-rollout-perf exploit, GPU idle): exp0065a len-1 x3 seeds (pure 1-step), exp0065b len-2 x5
+seeds (20 curriculum + 100 length-2). Config = proven n400 / uniform-0.5 path reward / aux 1.0 / VR 0.3.
+exp0063 marked SUPERSEDED (its vectorize-rebuild precondition was abandoned — world-gen is the floor).
+Tag LADDER-EXIT.

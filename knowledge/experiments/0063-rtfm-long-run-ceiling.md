@@ -14,9 +14,11 @@ GPU-bound (GPU 52% util / 76 W of 300 W across 4 seeds, ~698 MiB/seed; each seed
 batch-1, sync-per-step collection loop). Burning ~5 h/seed on a pipeline that leaves the GPU 90% idle is
 waste, so the run is deferred until the collection path is optimized + parity-validated. **The
 hypothesis, config, and acceptance bar below are UNCHANGED** — only the implementation underneath gets
-faster. Re-dispatch the §Setup command once the vectorized-rollout PR lands and a compare experiment
-confirms it reproduces a known baseline (exp0061f1) within seed noise. Perf diagnosis + plan:
-[[rtfm-rollout-perf]].
+faster. Perf diagnosis + plan: [[rtfm-rollout-perf]] — **note: the vectorized-rollout rebuild was abandoned**
+(world-gen is the bottleneck, not the encode; the long run just runs at scalar speed, with idle-GPU
+parallelism for breadth). **SUPERSEDED by [[0065-rtfm-per-step-plateau-large-budget]]**, which runs this
+n400 ceiling question at a larger budget (120 rounds), with per-step tracking, a length-1 reference arm,
+and more seeds (exp0064 noise lesson). This page is kept for the acceptable-ceiling framing it originated.
 
 Reframed (2026-06-17): this is **not** a pure "break the ceiling" bet anymore. It runs the proven-best
 **n400** config much longer and asks a two-part question — (1) *does* swap_follow plateau, and (2) if it
