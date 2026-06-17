@@ -89,6 +89,22 @@ ready state without first doing step k-1 — which is why the curriculum lives i
 over** to build the subgoal tree. The thing that forces us into imagination at training time is the thing
 that gives the hierarchy its edges at inference time.
 
+**Lit-grounded design constraints for exp0066** (from [[romi-2021]] / [[florensa-2017]] / [[lexa-2021]]):
+- **Seed only from REAL buffered prefix-done latents — never imagination-of-imagination — and walk back
+  one step at a time** (ROMI's compounding-error argument: backward-imagination error grows with rollout
+  depth). We get this guarantee by construction; corollary: **no learned reverse-dynamics model needed**,
+  the replay buffer's real latents are the targets.
+- **Advance the frontier by a difficulty gate, not a fixed schedule** (Florensa's Starts-of-Intermediate-
+  Difficulty): only add step-(k-2) seeds once step-k success is *stable but non-trivial* (~10–90%). The
+  open risk is whether the buffer accumulates enough prefix-complete latents to supply the frontier — if
+  step-(k-j) latents go too sparse, a more active seeding mechanism is needed.
+- **Actor conditioning (resolved):** the imagined-from-frontier actor conditions on the **frontier latent
+  + the recipe TEXT** (our existing [[rung4-manual-conditioned-agent|ConditionedRSSM]]) — i.e. "you are
+  here, here's the recipe, finish it." A LEXA-style explicit **goal-latent** signal is a later upgrade,
+  not the first cut (isolate one lever). LEXA is the existence proof that an achiever trained *purely in
+  imagination* transfers to real multi-step execution, so the bet is sound; the risk is buffer supply,
+  not whether imagination transfers.
+
 **Discipline (when, not now):** the flat backward curriculum (exp0066) comes first; the recursive backward
 *decomposition* is the escalation for when goals get genuinely complex (branching sub-recipes, depth ≥3) —
 triggered by the same calibrated-confidence gate (§5), not built ahead of need.

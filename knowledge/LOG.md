@@ -2,6 +2,72 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <type> | <title>`
 
+## [2026-06-17] ingest | lit gate batch: ROMI + Florensa 2017 + LEXA (exp0066 READ-FIRST papers)
+
+Ingested the three READ-FIRST papers from the 2026-06-17 reverse-curriculum/chaining lit gate
+cluster as abstract-depth pages (full PDFs not fetched; ROMI's compounding-error theorem
+not formula-verified). All three arXiv ids were pre-verified in SOURCES.md on 2026-06-17.
+
+New pages created:
+- `knowledge/papers/romi-2021.md` (status: draft, verified: true, scope: local) — ROMI:
+  reverse dynamics model + backtracking rollout policy for backward imagined trajectories
+  in offline RL. Core exp0066 analog: conservatism-by-construction (seed from real observed
+  states), compounding-error caveat (walk one step at a time from real latents, never
+  imagination-of-imagination), and the key delta vs our design (ROMI targets OOD coverage,
+  we target chain step ordering — isomorphic mechanism, different motivation).
+
+- `knowledge/papers/florensa-2017.md` (status: draft, verified: true, scope: shared) —
+  Reverse Curriculum Generation: SoID filter (10–90% success), Brownian walk state generation,
+  reverse curriculum as the fix for p^(k-1) visitation decay. Theoretical anchor for exp0066;
+  scope:shared because the principle is domain-general.
+
+- `knowledge/papers/lexa-2021.md` (status: draft, verified: true, scope: local) — LEXA:
+  explorer/achiever over shared Dreamer RSSM; achiever trains exclusively in imagination on
+  explorer-discovered goal latents; 40-task NeurIPS 2021 results including multi-object
+  sequential manipulation. Structurally identical to our frontier-latent seeding + imagination
+  actor-critic design. Foresight-based explorer (planning ahead to find novel states) vs our
+  retrospective buffer — raised as a potential escalation if buffer sparsity is a problem.
+
+QUEUE.md updated: three READ-FIRST items in the "2026-06-17 — reverse-curriculum / chaining
+lit" cluster marked [x] with ingestion pointers; remaining 7 items in that cluster unchanged.
+
+INDEX.md updated: three new paper entries added after marino-hypothesis-2020.
+
+Pages touched by cross-links but NOT modified (content is correct as-is):
+- `knowledge/design/hierarchical-imagination-agent.md` — §3a already references
+  [[0066-rtfm-imagination-backward-curriculum]] and describes the backward primitive; the
+  new paper pages reinforce but do not contradict any claims there. One tension flagged
+  (see human-judgment section below).
+
+Depth note: all three pages are `status: draft` and `verified: true` at abstract read depth.
+They must NOT be cited as authority for claims that require full-paper verification (e.g.,
+ROMI's exact compounding-error formula, Florensa's formal complexity theorem, LEXA's exact
+rollout length). Promotion to `current` requires human review.
+
+## [2026-06-17] scout | 10 found, 10 queued — reverse-curriculum / chaining lit gate (exp0066)
+
+Targeted scout for the multi-step gesture-chain wall (p^(k-1) visitation decay). Five clusters
+searched: reverse/backward curriculum, Go-Explore frontier-return, model-based imagination
+curriculum, hindsight/relabeling, skill chaining. All arXiv ids batch-verified via API.
+
+New sources added to SOURCES.md (10): arxiv:1707.05300 (Florensa Reverse Curriculum),
+arxiv:1812.03381 (Salimans & Chen Montezuma), arxiv:1807.06919 (Backplay), arxiv:2405.03379
+(RFCL), arxiv:2004.12919 (Go-Explore Nature), arxiv:1901.10995 (Go-Explore preprint),
+arxiv:2110.00188 (ROMI), arxiv:2509.13341 (IMAC), arxiv:2110.09514 (LEXA),
+openreview:B1gqipNYwH (Deep Skill Chaining — no arXiv id, OpenReview only).
+
+New section added to QUEUE.md: "## 2026-06-17 — reverse-curriculum / chaining lit (for exp0066)"
+with 5 clusters and READ-FIRST flags on: Florensa 2017, Go-Explore Nature 2021, and ROMI 2021.
+
+NOTE: HER (1707.01495) was already in QUEUE; no duplicate added.
+NOTE: Bagaria Deep Skill Chaining has no arXiv preprint; registered under openreview id.
+
+Wiki pages potentially affected by these findings:
+- knowledge/experiments/ — any upcoming exp0066 page (this is the direct lit gate for it)
+- knowledge/design/architecture-strategy.md — the imagination-rollout design may now reference
+  ROMI (reverse dynamics model) and LEXA (explorer/achiever in imagination) as prior art
+- knowledge/concepts/ — if a "curriculum in imagination" concept page is created later
+
 ## [2026-06-17] curate | rung-4 documentation pass — exp0059/0060/0061 pages created; trajectory graphs embedded; 0057/0058 trimmed
 
 Created three new experiment pages:

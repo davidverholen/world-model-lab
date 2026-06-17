@@ -7,6 +7,98 @@ Corrections found in that pass: DINO-WM is 2411.04983 (2411.04958 is an astronom
 paper); "General agents CONTAIN world models" (not "need"); Sutton-lab plasticity
 paper is "MAINTAINING Plasticity in Deep Continual Learning".
 
+## 2026-06-17 — reverse-curriculum / chaining lit (for exp0066)
+
+Targeted lit gate for the proposed mechanism: backward/reverse curriculum done IN IMAGINATION
+(Dreamer-style) to address the p^(k-1) visitation decay wall in multi-step gesture chains.
+All arXiv ids batch-verified via arXiv API or abstract fetch. Items marked READ-FIRST are the
+three highest-priority reads before designing any experiment.
+
+### Cluster 1 — Reverse / backward curriculum and start-state distributions
+
+- [x] arxiv:1707.05300 **Reverse Curriculum Generation for Reinforcement Learning**
+      (Florensa, Held, Wulfmeier, Zhang & Abbeel, CoRL 2017) — **READ-FIRST**
+      INGESTED 2026-06-17 → papers/florensa-2017.md (abstract depth: SoID mechanism,
+      Brownian walk state generation, exploration complexity argument, exp0066 mapping).
+
+- [ ] arxiv:1812.03381 **Learning Montezuma's Revenge from a Single Demonstration**
+      (Salimans & Chen, NeurIPS workshop 2018) — start episodes from demo states rather than
+      the fixed initial state; shows theoretical improvement from exponential to quadratic
+      scaling in sparse-reward envs; directly establishes why starting from step-(k-1) states
+      beats starting from scratch for deep chains.
+
+- [ ] arxiv:1807.06919 **Backplay: "Man muss immer umkehren"**
+      (Resnick, Raileanu, Kapoor, Peysakhovich, Cho & Bruna, 2018) — reverse curriculum from
+      a single demonstration: start from end of demo, move backward over training; achieves
+      74,500 on Montezuma. Close relative to Salimans & Chen; read for the exact backward-
+      shift schedule and comparison with forward-only training.
+
+- [ ] arxiv:2405.03379 **Reverse Forward Curriculum Learning for Extreme Sample and
+      Demonstration Efficiency in RL** (Tao, Shukla, Chan & Su, ICLR 2024) —
+      combines reverse curriculum (per-demo state resets) with a subsequent forward curriculum
+      to expand to full task distribution; most recent published instantiation of the
+      reverse+forward two-phase design. Shows generalisation beyond single-demo setting.
+
+### Cluster 2 — Frontier-return exploration (Go-Explore family)
+
+- [ ] arxiv:2004.12919 **First return, then explore** — **READ-FIRST**
+      (Ecoffet, Huizinga, Lehman, Stanley & Clune, Nature 2021) — the definitive Go-Explore
+      paper (Nature 590:580). Mechanism: store a cell archive of promising states; return to
+      a cell WITHOUT exploration noise, then explore from it. Directly addresses the
+      p^(k-1) visitation decay by EXPLICITLY caching frontier states and revisiting them.
+      The return-then-explore logic is exactly what our "seed imagined rollouts from buffered
+      latent states" does in latent space; ingest to understand what the archive lookup buys
+      vs what our replay buffer already provides.
+
+- [ ] arxiv:1901.10995 **Go-Explore: a New Approach for Hard-Exploration Problems**
+      (Ecoffet, Huizinga, Lehman, Stanley & Clune, 2019) — original preprint; lower priority
+      than the Nature version above but useful for technical details (cell representation,
+      robustification via imitation). Skip if time-constrained; 2004.12919 supersedes it.
+
+### Cluster 3 — Model-based / in-imagination curricula and start-state reweighting
+
+- [x] arxiv:2110.00188 **Offline RL with Reverse Model-based Imagination — ROMI**
+      (Wang, Li, Jiang, Zhu, Li & Zhang, NeurIPS 2021) — **READ-FIRST**
+      INGESTED 2026-06-17 → papers/romi-2021.md (abstract depth: reverse dynamics model,
+      backtracking rollout policy, conservatism-by-construction, compounding-error caveat,
+      walk-back schedule implication, exp0066 design takeaways; full PDF error theorem
+      not formula-verified).
+
+- [ ] arxiv:2509.13341 **Imagined Autocurricula — IMAC**
+      (Güzel, Jackson, Liesen, Rocktäschel, Foerster, Bogunovic & Parker-Holder, NeurIPS 2025)
+      — world-model-agnostic autocurriculum: induces a UED-style curriculum OVER GENERATED
+      WORLDS in imagination. Trains exclusively inside the world model; strong transfer to
+      novel environments. Highly relevant: confirms that curriculum in imagination (not real
+      env) is practical and can generalise; the procedural-world version of what we want at
+      the chain level. Note: this targets environment diversity, not chain-step sequencing;
+      read for the imagination-curriculum infrastructure and compounding-error mitigations.
+
+- [x] arxiv:2110.09514 **LEXA: Discovering and Achieving Goals via World Models**
+      (Mendonca, Rybkin, Daniilidis, Hafner & Pathak, NeurIPS 2021)
+      INGESTED 2026-06-17 → papers/lexa-2021.md (abstract depth: explorer/achiever split,
+      shared RSSM world model, achiever trains exclusively in imagination, foresight vs
+      retrospective exploration, 40-task NeurIPS results; rollout length not formula-verified).
+
+### Cluster 4 — Hindsight / relabeling for partial chains
+
+NOTE: HER (arxiv:1707.01495, Andrychowicz et al., NeurIPS 2017) is already queued in the
+Rung-4 reading-ignition section above. That entry covers its relevance to exp0066:
+relabeling failed gesture episodes as successes toward the actual achieved state could give
+dense positives for partial chains. No duplicate entry needed here.
+
+### Cluster 5 — Skill chaining / hierarchical credit assignment
+
+- [ ] openreview:B1gqipNYwH **Option Discovery using Deep Skill Chaining**
+      (Bagaria & Konidaris, ICLR 2020; no arXiv id — OpenReview only) — scales the classic
+      skill-chaining algorithm (Konidaris & Barto 2009) to continuous high-dimensional
+      domains using deep neural networks. Mechanism: learns option initiation sets and
+      termination conditions so that executing one skill enables the next. Most directly
+      on-point for the P(step-k | step-(k-1)) chaining wall: this is the algorithm that
+      chains k skills end-to-end reliably. VERIFIED via OpenReview ICLR 2024 proceedings
+      + paperswithcode listing.
+
+---
+
 ## Rung-4: reading-ignition literature gate (scouted 2026-06-14; all ids verified via arXiv API or abstract fetch)
 
 This cluster is the lit gate for HO-0007 (dense shaping to ignite reading) and the KEY RISK question

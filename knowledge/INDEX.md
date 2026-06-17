@@ -58,6 +58,9 @@ calls these elaborate).
 - [crop-2023](papers/crop-2023.md) — CROP: CQL-style push-down applied directly to the learned REWARD estimator in MBRL; conservative Q lower-bound; exp0047 lit anchor (draft)
 - [vime-2016](papers/vime-2016.md) — VIME: intrinsic reward = KL(posterior||prior) over BNN dynamics-model parameters (information gain); NeurIPS 2016; single-source IG ancestor of exp0048 marginal-IG validated-reading reward (draft)
 - [marino-hypothesis-2020](papers/marino-hypothesis-2020.md) — Empirically Verifying Hypotheses Using RL: agent acts to confirm/refute pre/action/post triplets against real environment; 2020; closest structural analog to exp0048 act-to-verify loop; missing: reading, marginal-value framing, contrastive dual pass (draft)
+- [romi-2021](papers/romi-2021.md) — ROMI: reverse dynamics model + backtracking policy generates backward imagined trajectories toward offline dataset targets; NeurIPS 2021; closest published analog to exp0066 backward-imagination curriculum; compounding-error analysis bounds walk-back schedule (draft)
+- [florensa-2017](papers/florensa-2017.md) — Reverse Curriculum Generation: start-state distribution begins near goal, shifts backward as agent masters each start; SoID filter; CoRL 2017; theoretical anchor for exp0066's p^(k-1) decay fix via imagination seeding (draft)
+- [lexa-2021](papers/lexa-2021.md) — LEXA: explorer discovers surprising latent states, achiever trains EXCLUSIVELY in imagination to reach them over shared Dreamer/RSSM world model; NeurIPS 2021; structurally identical to our frontier-latent seeding + imagination actor-critic design (draft)
 
 ## Labs
 
