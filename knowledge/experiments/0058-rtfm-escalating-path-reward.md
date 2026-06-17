@@ -3,14 +3,40 @@ status: draft
 owner: world-model
 scope: local
 verified: false
-last_reviewed: 2026-06-16
+last_reviewed: 2026-06-17
 ---
 
 # 0058: escalating per-step path reward — reward later gesture steps MORE
 
-**Status: BUILT + reviewer-passed (SHIP), CPU-smoked; dispatch when a GPU slot frees.** The
-maintainer's lever: *increase the reward for each step by a factor.* Targets the
-[[0057-rtfm-path-reward]] finding that a UNIFORM per-step reward leaves step-2 under-optimized.
+**Status: DONE — CONFOUNDED NEGATIVE (base coef too low).** The escalation arms scored BELOW baseline
+(step-1 collapsed to 0.13–0.17 vs 0.28), but the cause is a parameterization confound, not a refutation
+of back-loading. Lesson + the fix below. The maintainer's lever: *increase the reward for each step by
+a factor.* Targets the [[0057-rtfm-path-reward]] finding that a UNIFORM per-step reward leaves step-2
+under-optimized.
+
+## Result — confounded negative: I under-fed step-1
+
+`--path-reward-coef 0.2 --path-reward-factor {3,5,10} --path-reward-decay 0.5`, last-5 length-2:
+
+| factor | step-1 | exact | P(step-2\|step-1) | imagined_return |
+|---|---|---|---|---|
+| 3 | 0.126 | 0.022 | 0.17 | 1.4 |
+| 5 | 0.140 | 0.008 | 0.06 | 1.3 |
+| 10 | 0.174 | 0.024 | 0.14 | 1.4 |
+
+All below baseline. **Confound:** base `coef 0.2` gave step-1 a reward of only 0.2, but
+[[0057-rtfm-path-reward]] showed step-1 needs ~**0.5** (floor 0.5 → step1 0.36; floor 0.2 → starts to
+work). Plus `decay 0.5` halved repeats. So step-1 was **starved** (0.13–0.17), and you can't complete a
+chain you rarely start — the low exact follows mechanically. imagined_return ~1.4 (vs baseline ~8–12)
+confirms the arms were under-rewarded overall. **NOT a clean test of back-loading.**
+
+**Lesson: step-1 reward magnitude is load-bearing** — match the working base (~0.5) before escalating.
+Fix (deferred, lower priority since uniform floor-0.5 already works): re-run with
+`--path-reward-coef 0.5 --path-reward-factor {2,3} --path-reward-decay 1.0` so step-1 gets the working
+0.5 and step-2 gets 0.5·factor on top. Prioritised instead: multi-seed confirm of the floor-0.5 winner
+([[0059]]) and coverage×floor combination ([[0060]]).
+
+## Original pre-registration
 
 ## Why (the satisficing argument)
 

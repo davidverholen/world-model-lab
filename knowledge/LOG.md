@@ -2074,3 +2074,13 @@ just step-1. Floor 1.0 over-shapes (cond back to 0.18) → there's a magnitude S
 exact ~0.11-0.14) — two independent levers agree the depth-2 wall IS movable. Single seed each → needs
 multi-seed confirm. exp0058 escalation (factor 3/5/10 @ decay 0.5) still running to test back-loading
 vs uniform.
+
+## 2026-06-17 — exp0058 escalation CONFOUNDED NEGATIVE; dispatched confirm + combo
+
+exp0058 (escalation factor 3/5/10 @ coef 0.2, decay 0.5): below baseline — step-1 collapsed to
+0.13-0.17 (vs 0.28). Confound: base coef 0.2 under-fed step-1, which exp0057 showed needs ~0.5; decay
+0.5 halved repeats; imagined_return ~1.4 (vs ~8-12) confirms under-reward. NOT a clean back-loading
+test. Lesson: step-1 reward magnitude is load-bearing. Escalation re-run (base 0.5) deferred — the
+uniform floor-0.5 already works. Dispatched the high-value wave instead: exp0059 = floor-0.5 multi-seed
+confirm (4 seeds, de-risk the single-seed winner); exp0060 = coverage n1600 × floor 0.5 combined (2
+seeds, do the two convergent levers stack).
