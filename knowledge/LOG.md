@@ -2156,3 +2156,11 @@ probe), dispatched a LONG run of the confirmed-best still-rising config — unif
 4 seeds. Tests whether more training breaks swap_follow past the ~0.10 ceiling (watch swap_follow
 specifically, NOT correct, per the exp0051 experience-based-completion confound). Pre-registered before
 dispatch (page [[0063-rtfm-long-run-ceiling]]). exp0062 (coverage confirm) still finishing concurrently.
+
+## 2026-06-17 — clean cut after exp0062; exp0063 queued for next session
+
+Maintainer decision: clean cut after exp0062 and hand over to a fresh Claude session. exp0063 (the
+longer-run ceiling test) was dispatched once in error, then stopped immediately (round 0, no data) and
+its partial run dir removed — it remains PRE-REGISTERED and is queued for the next session to dispatch
+(command in its page §Setup). exp0062 (coverage confirm, 4 seeds) is finishing; its results will be
+documented on its page before the handoff.

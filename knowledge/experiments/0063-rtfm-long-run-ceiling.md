@@ -8,9 +8,12 @@ last_reviewed: 2026-06-17
 
 # 0063: does a LONGER run break the ~0.10 ceiling? (the trend was still rising at round 30)
 
-**Status: PRE-REGISTERED (documented before dispatch).** Directly tests the claim-audit finding: the
-confirmed reward lever's `swap_follow` was **still rising at round 30**, not plateaued — so the
-"~0.10 ceiling" may be a *training-length artifact* at this reward, not a real wall.
+**Status: PRE-REGISTERED — NOT YET RUN (queued for the next session).** Was dispatched once in error
+then stopped immediately (round 0, no data) for a clean cut after exp0062; the maintainer is handing
+over to a fresh session to run this. Directly tests the claim-audit finding: the confirmed reward
+lever's `swap_follow` was **still rising at round 30**, not plateaued — so the "~0.10 ceiling" may be
+a *training-length artifact* at this reward, not a real wall. **Next session: dispatch the command in
+§Setup.**
 
 ## Why (the audit finding)
 
