@@ -27,6 +27,10 @@ Per-seed `exact` spread (why this is a null, not an ordering): 0.25 → [0.150, 
 [0.124, 0.084, 0.040]; 1.0 → [0.128, 0.018, 0.088]. The arms **overlap completely**; the conditional
 (0.27 / 0.20 / 0.25) has no clean peak or monotone trend.
 
+![exp0064 swap_follow (exact 2-step), thin line per seed per arm — a=0.25 (blue), b=0.5 (red), c=1.0 (green). Across the length-2 rounds (10–29) the three arms are fully interwoven 0–0.23; no arm separates → the null is visible as overlap.](../../assets/exp-0064/swap-follow.png)
+
+![exp0064 swap_follow_s1 (step-1) per arm: still rising at r29 (no plateau), arms overlapping. coef-1.0 (c, green) tends to lag a touch at the top end — the weak, within-noise step-1 destabilization hint.](../../assets/exp-0064/swap-follow-s1.png)
+
 **Reading the fork → the "flat" branch.** None of {peak-at-0.5, monotone} holds; within noise the
 conditional is flat in coef. Consistent with [[0061-rtfm-backloading-confirm]]'s "not
 step-2-magnitude-limited" — now extended from *shape* (back-loading) to *overall magnitude*. All arms
