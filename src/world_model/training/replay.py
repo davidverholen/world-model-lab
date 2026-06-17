@@ -22,6 +22,13 @@ class Transition:
     # reward, and the imagination actor optimises task + λ·VR. Defaults to 0 → all non-VR callers
     # (and any run with --vr-head-coef 0) are byte-for-byte unchanged.
     vr: float = 0.0
+    # exp 0066 (backward curriculum): in-order gesture-prefix progress AT this transition — the
+    # number of leading displayed-gesture steps the agent has completed in order as of this step
+    # (0 = none / pointer reset by a miss; k = first k steps done, the agent is at the frontier
+    # between step k and step k+1). -1 = NOT TRACKED (no displayed gesture, or a non-rtfm caller).
+    # The backward curriculum mines this to oversample imagination start states whose prefix is
+    # already complete. Default -1 keeps every non-rtfm caller byte-for-byte unchanged.
+    gesture_pos: int = -1
 
 
 class ReplayBuffer:
@@ -48,6 +55,9 @@ class ReplayBuffer:
         self.returns = np.zeros(capacity, dtype=np.float32)
         # exp 0052: per-transition validated-reading reward (raw, unscaled). Parallel to `rewards`.
         self.vr = np.zeros(capacity, dtype=np.float32)
+        # exp 0066: per-transition in-order gesture-prefix progress (see Transition.gesture_pos).
+        # -1 = not tracked. Parallel to `rewards`; mined by the backward curriculum start sampler.
+        self.gesture_pos = np.full(capacity, -1, dtype=np.int64)
         self.dones = np.zeros(capacity, dtype=bool)
         # optional per-transition integer tag (rung-4: the episode's manual id). Default 0.
         self.tags = np.zeros(capacity, dtype=np.int64)
@@ -70,6 +80,7 @@ class ReplayBuffer:
         self.actions[i] = t.action
         self.rewards[i] = t.reward
         self.vr[i] = t.vr
+        self.gesture_pos[i] = t.gesture_pos  # exp 0066: in-order gesture-prefix progress (-1=n/a)
         self.dones[i] = t.done
         self.tags[i] = tag
         self.visits[i] = 0
@@ -122,6 +133,38 @@ class ReplayBuffer:
         reward_idx = np.flatnonzero(np.abs(self.rewards[: self.size]) > 1e-6)
         return self._valid_starts(reward_idx - length + 1, length)
 
+    def prefix_done_starts(
+        self, length: int, burn_in: int, min_pos: int = 1, max_pos: int | None = None
+    ) -> np.ndarray:
+        """exp 0066 (backward curriculum): valid window starts whose IMAGINATION-START belief has an
+        in-order gesture prefix of at least ``min_pos`` (and, if ``max_pos`` given, strictly fewer
+        than ``max_pos``) steps complete.
+
+        ``imagine_ac_rtfm`` burns in ``burn_in`` real steps then imagines from the posterior ``s``.
+        Index trace (reviewer-confirmed): the last burn-in iteration is
+        ``obs_step(state, prev_a=a[start+burn_in-2], embed=obs[start+burn_in-1])`` and the *next*
+        real action ``a[start+burn_in-1]`` is OVERRIDDEN by the actor in imagination — so ``s``
+        embodies real progress only through ``a[start+burn_in-2]``. The gesture progress true at the
+        imagination start is therefore ``gesture_pos[start + burn_in - 2]`` (NOT burn_in-1: that
+        would tag by the first imagined action's discarded real counterpart, selecting states one
+        step BEFORE the frontier — the exp0066 bug the reviewer caught).
+
+        ``max_pos`` (exclusive, = the gesture length) excludes already-COMPLETED chains
+        (``gesture_pos == length``): for length-2, ``min_pos=1, max_pos=2`` selects exactly the
+        strict frontier (step-1 done, step-2 still to do), per §3a's one-level curriculum. Only REAL
+        buffered latents are returned (ROMI: never seed from imagined states). Possibly empty — the
+        caller falls back to the normal distribution and logs the supply shortfall."""
+        off = max(0, burn_in - 2)  # window position whose gesture_pos the start belief embodies
+        all_cand = np.arange(0, self.size - length + 1)
+        valid = self._valid_starts(all_cand, length)
+        if len(valid) == 0:
+            return valid
+        gp = self.gesture_pos[valid + off]
+        sel = gp >= min_pos
+        if max_pos is not None:
+            sel &= gp < max_pos
+        return valid[sel]
+
     def sample_sequences(
         self, batch_size: int, length: int, success_frac: float = 0.0
     ) -> dict[str, np.ndarray]:
@@ -154,6 +197,50 @@ class ReplayBuffer:
             starts[found : found + take] = valid[:take]
             found += take
         return self._window_batch(starts, length)
+
+    def sample_sequences_prefix_curriculum(
+        self,
+        batch_size: int,
+        length: int,
+        burn_in: int,
+        bc_frac: float,
+        min_pos: int = 1,
+        max_pos: int | None = None,
+    ) -> tuple[dict[str, np.ndarray], float]:
+        """exp 0066 (backward curriculum): like ``sample_sequences`` but OVERSAMPLE windows whose
+        imagination-start belief has a complete gesture prefix (``prefix_done_starts`` carries
+        the reviewer-confirmed ``burn_in-2`` offset and the optional ``max_pos`` frontier bound).
+        A ``bc_frac`` fraction of the batch is drawn (with replacement) from the prefix-done
+        pool, the rest uniformly from all valid starts. Returns (batch, realized_prefix_frac) where
+        the second value is the ACTUAL fraction of batch starts that are prefix-done — the caller
+        logs it as the buffer-supply telemetry.
+
+        Buffer-supply fallback (the §3a 'buffer supply' risk): if the prefix-done pool is empty the
+        whole batch falls back to the uniform distribution, so the AC update never stalls for lack
+        of frontier seeds. Uses ONLY real buffered latents (start indices are real buffer rows)."""
+        if self.total_adds > self.capacity:
+            raise NotImplementedError("sequence sampling assumes an unwrapped buffer")
+        bc_frac = float(np.clip(bc_frac, 0.0, 1.0))  # guard: bc_frac>1 would overflow starts[:want]
+        off = max(0, burn_in - 2)
+        pool = self.prefix_done_starts(length, burn_in, min_pos, max_pos)
+        starts = np.empty(batch_size, dtype=np.int64)
+        found = 0
+        if len(pool) > 0 and bc_frac > 0:
+            want = int(round(batch_size * bc_frac))
+            starts[:want] = pool[self.rng.integers(0, len(pool), size=want)]
+            found = want
+        while found < batch_size:
+            cand = self.rng.integers(0, self.size - length, size=2 * batch_size)
+            valid = self._valid_starts(cand, length)
+            take = min(len(valid), batch_size - found)
+            starts[found : found + take] = valid[:take]
+            found += take
+        gp = self.gesture_pos[starts + off]
+        sel = gp >= min_pos
+        if max_pos is not None:
+            sel &= gp < max_pos
+        realized = float(np.mean(sel))
+        return self._window_batch(starts, length), realized
 
     def _window_batch(self, starts: np.ndarray, length: int) -> dict[str, np.ndarray]:
         idx = starts[:, None] + np.arange(length)

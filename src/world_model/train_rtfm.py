@@ -304,10 +304,13 @@ def collect_rtfm(
         # (decay 1 = reward every time; decay 0 = once per episode; in between = the maintainer's
         # "later executions in the same episode are worth less", so the skill stays rewarded but
         # repeated re-runs can't farm unbounded reward).
-        gesture, gptr, pos_count = [], 0, {}
-        if use_path:
-            disp = info.get("displayed_facts", {}).get("rituals", {})
-            gesture = list(next(iter(disp.values()))["gesture"]) if disp else []
+        # exp 0066: the in-order gesture pointer is tracked whenever a gesture is DISPLAYED (not
+        # only when use_path) so the prefix-progress tag is populated for the backward curriculum
+        # even without the path reward. The pointer (gptr) drives BOTH the path-reward (use_path)
+        # and the per-transition `gesture_pos` tag below; gptr==k means the first k steps are done.
+        disp = info.get("displayed_facts", {}).get("rituals", {})
+        gesture = list(next(iter(disp.values()))["gesture"]) if disp else []
+        gptr, pos_count = 0, {}
         for t in range(max_steps):
             a = agent.act(obs, info) if use_agent else int(rng.integers(env.action_space.n))
             obs, r, term, trunc, info = env.step(a)
@@ -327,14 +330,26 @@ def collect_rtfm(
             # correctly (a repeatable SKILL reward — the one-time part is the achievement,
             # tutorial_newly). Escalation makes the full chain dominate any step-1 re-farm.
             # env reading_shaping is 0 here (no double count).
-            if use_path and gesture:
+            # exp 0066: advance the in-order pointer whenever a gesture is displayed (tag is needed
+            # for the backward curriculum even with use_path off); pay the escalating path reward
+            # only when use_path. `gesture_pos` = leading in-order steps complete AS OF this
+            # transition (0=miss/reset, k=first k done; a full-chain completion is recorded as
+            # len(gesture), the maximal prefix, before the pointer wraps to 0 for the next cycle).
+            gesture_pos = -1  # default: no displayed gesture → not tracked
+            if gesture:
                 if env.action_names[a] == gesture[gptr]:
-                    n = pos_count.get(gptr, 0)  # prior payouts of this position this episode
-                    r_read += path_reward_coef * (path_reward_factor**gptr) * (path_reward_decay**n)
-                    pos_count[gptr] = n + 1
-                    gptr = (gptr + 1) % len(gesture)
+                    if use_path:
+                        n = pos_count.get(gptr, 0)  # prior payouts of this position this episode
+                        r_read += (
+                            path_reward_coef * (path_reward_factor**gptr) * (path_reward_decay**n)
+                        )
+                        pos_count[gptr] = n + 1
+                    gptr += 1
+                    gesture_pos = gptr  # k leading steps complete (== len(gesture) on full chain)
+                    gptr %= len(gesture)  # wrap for the next in-episode repeat
                 else:
                     gptr = 0
+                    gesture_pos = 0  # miss → prefix reset, no leading steps complete
             done = term or trunc or (t == max_steps - 1)  # cap at the task horizon
             nemb = embed_of(obs)
             # exp 0048/0052: intrinsic validated-reading reward — the manual's marginal predictive
@@ -356,7 +371,7 @@ def collect_rtfm(
                 vr_n += 1
             nemb_np = nemb[0].cpu().numpy()
             buffer.add(
-                Transition(emb_np, a, r_read, nemb_np, done, vr=raw_vr),
+                Transition(emb_np, a, r_read, nemb_np, done, vr=raw_vr, gesture_pos=gesture_pos),
                 tag=mid,
             )
             # Count honest tutorial achievements only (NOT shaping steps, which are dense once
@@ -495,17 +510,43 @@ def imagine_ac_rtfm(
     vr_head=None,
     vr_head_coef=0.0,
     reward_uncertainty_coef=0.0,
+    backward_curriculum=False,
+    bc_frac=0.5,
+    bc_min_pos=1,
+    bc_max_pos=None,
 ):
+    """exp 0066 backward curriculum (knowledge/design/hierarchical-imagination-agent.md §3a): when
+    ``backward_curriculum`` is on, BIAS the imagination START-state distribution to oversample
+    REAL buffered windows whose gesture prefix is already complete (``bc_frac`` of starts drawn
+    from ``prefix_done_starts``), so the actor-critic gets dense credit for completing the tail —
+    the deep-step experience exploration reaches only ~p^(k-1) of the time
+    ([[0065-rtfm-per-step-plateau-large-budget]]). One level only (length-2: step-1-done →
+    complete step-2; bc_min_pos=1). Off (default) = byte-for-byte the success_frac path. Returns
+    (actor_loss, critic_loss, imagined_return[, bc_realized_frac] when on). Honors the lit
+    constraints: real latents only (ROMI), single fixed level with a clean frontier-advance hook
+    (Florensa), actor conditions on frontier latent + recipe text (LEXA option b)."""
     from torch.distributions import Categorical
 
     use_vr_head = vr_head is not None and vr_head_coef > 0.0
+    bc_realized_sum, bc_realized_n = 0.0, 0  # buffer-supply diagnostic (mean realized prefix frac)
     # exp 0055: MOPO-style pessimism — subtract λ·(ensemble reward std) from the imagined reward, so
     # the actor is penalised for OOD-uncertain states (where the reward head over-predicts, exp0054)
     # without crushing the true gesture's value. Only when rew is an ensemble (has mean_std).
     use_unc = reward_uncertainty_coef > 0.0 and hasattr(rew, "mean_std")
     stats = (0.0, 0.0, 0.0)
     for _ in range(updates):
-        batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
+        if backward_curriculum:
+            # exp 0066: oversample prefix-done imagination starts (real latents only). burn_in sets
+            # which window position the start belief embodies (= burn_in-2, reviewer-confirmed; see
+            # prefix_done_starts). bc_max_pos = gesture length excludes already-complete chains
+            # (strict frontier). Falls back to uniform when the pool is empty (logged via realized).
+            batch, bc_realized = buffer.sample_sequences_prefix_curriculum(
+                seq_batch, window, burn_in, bc_frac, bc_min_pos, bc_max_pos
+            )
+            bc_realized_sum += bc_realized
+            bc_realized_n += 1
+        else:
+            batch = buffer.sample_sequences(seq_batch, window, success_frac=success_frac)
         embed = torch.as_tensor(batch["obs"], device=device)
         actions = torch.as_tensor(batch["action"], device=device)
         ret_real = torch.as_tensor(batch["return"], device=device)  # real MC returns
@@ -577,7 +618,10 @@ def imagine_ac_rtfm(
             for pt, pc in zip(target_critic.parameters(), critic.parameters(), strict=True):
                 pt.mul_(0.98).add_(pc, alpha=0.02)
         stats = (actor_loss.item(), critic_loss.item(), returns.mean().item())
-    return stats
+    # 4th slot: mean realized prefix-done fraction of the imagination starts (nan when the
+    # curriculum is off). When on but well below bc_frac it flags the §3a buffer-supply shortfall.
+    bc_realized_frac = (bc_realized_sum / bc_realized_n) if bc_realized_n else float("nan")
+    return (*stats, bc_realized_frac)
 
 
 def imagine_hierarchy_rtfm(
@@ -927,6 +971,15 @@ def main() -> None:
     # payout of a position is scaled by decay**n. 1.0 = reward every time (no decay); 0.0 = once per
     # episode; in between = repeated re-runs worth progressively less (anti-farm, keeps the skill).
     p.add_argument("--path-reward-decay", type=float, default=1.0)
+    # exp 0066 backward curriculum (knowledge/design/hierarchical-imagination-agent.md §3a): bias
+    # the imagination-AC START distribution to oversample REAL buffered windows whose gesture prefix
+    # is already complete (step-1 done for length-2), so the actor-critic gets dense credit for
+    # completing the tail — the deep-step experience exploration reaches only ~p^(k-1) of the time
+    # ([[0065]] mechanism). OFF (default) = byte-for-byte the existing success_frac path.
+    # bc-frac = fraction of imagination starts drawn from the prefix-done pool (rest = uniform);
+    # falls back to uniform + logs a low realized frac when the pool is starved (the supply risk).
+    p.add_argument("--backward-curriculum", action=argparse.BooleanOptionalAction, default=False)
+    p.add_argument("--bc-frac", type=float, default=0.5)
     # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
@@ -1279,7 +1332,7 @@ def main() -> None:
         elif hier is not None:
             al, cl, ir = 0.0, 0.0, 0.0  # hierarchy warmup: WM-only, policies not yet trained
         else:
-            al, cl, ir = imagine_ac_rtfm(
+            al, cl, ir, bc_realized = imagine_ac_rtfm(
                 buffer,
                 registry,
                 rssm,
@@ -1301,7 +1354,17 @@ def main() -> None:
                 vr_head=vr_head,
                 vr_head_coef=args.vr_head_coef,
                 reward_uncertainty_coef=args.reward_uncertainty_coef,
+                backward_curriculum=args.backward_curriculum,
+                bc_frac=args.bc_frac,
+                bc_max_pos=args.length,  # exclude completed chains → strict step-(k-1) frontier
             )
+            if args.backward_curriculum:
+                # exp 0066 buffer-supply diagnostic: realized fraction of imagination starts that
+                # were prefix-done. Far below --bc-frac ⇒ the prefix-done pool is starved (§3a).
+                print(
+                    f"  BC prefix_done_start_frac={bc_realized:.2f} (target={args.bc_frac})",
+                    flush=True,
+                )
         if hier_on:
             for m in (rssm, worker, manager, goal_module):
                 m.eval()
