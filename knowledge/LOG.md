@@ -2335,3 +2335,16 @@ prefix-done latents and learn the tail; inference-time = regress from the goal t
 skeleton. And preconditions are both obstacle (block real-env reset -> forces imagination) and scaffold
 (the decomposition edges). Discipline preserved: flat curriculum first, recursive decomposition only
 when goals get complex (depth >=3). Cross-linked exp0065/exp0066.
+
+## 2026-06-17 — exp0066 implemented (reviewer-gated) + pre-registered; awaiting exp0065 GPU
+
+Implemented the imagination backward curriculum (default-off --backward-curriculum / --bc-frac), commit
+32a2fe0. opus reviewer gate caught a load-bearing OFF-BY-ONE before any run: the imagination-start
+offset is burn_in-2 (the start belief embodies real actions only through a[start+burn_in-2]; a[burn_in-1]
+is overridden by the actor), NOT burn_in-1 — the latter would oversample states one step BEFORE the
+frontier, silently testing the wrong hypothesis. Fixed + added a discriminating sanity test that pins
+burn_in-2 (the original whole-tail test passed under either offset). Also: strict frontier (bc_max_pos =
+gesture length excludes completed chains), bc_frac clamp. OFF = byte-identical; sanity + pytest 52 + ruff
+green. Pre-registered exp0066 (ON vs OFF at length-2/30 rounds, multi-seed; watch conditional + seed
+variance + bc_realized_frac supply telemetry; LADDER-EXIT). Dispatch waits for exp0065 (~96/120, GPU 99%,
+RAM 2G free) to finish.
