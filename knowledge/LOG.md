@@ -2258,3 +2258,14 @@ there; crafter-rtfm can't snapshot mid-recipe). Caveat: trustworthy only one ste
 (WM fidelity) -> walk back gradually, co-evolve WM+policy. Pairs with progress-aware actor/critic.
 Captured as an interim note on the exp0065 page; lit scout launched (reverse-curriculum/backplay/
 Go-Explore/HER/model-based start-states). Reviewer-gated build after exp0065 lands + lit ingested.
+
+## 2026-06-17 — design note: backward-from-goal unifies the exp0066 curriculum and the hierarchy decomposition
+
+Added §3a to design/hierarchical-imagination-agent.md (maintainer insight): the decompose-or-execute
+operator runs BACKWARD from the final goal (goal regression through preconditions), depth adapts to
+complexity via the confidence gate (lazy/only-when-needed). KEY unification: this is the SAME backward
+primitive as the exp0066 imagination backward curriculum — training-time = seed imagination from
+prefix-done latents and learn the tail; inference-time = regress from the goal to emit the subgoal
+skeleton. And preconditions are both obstacle (block real-env reset -> forces imagination) and scaffold
+(the decomposition edges). Discipline preserved: flat curriculum first, recursive decomposition only
+when goals get complex (depth >=3). Cross-linked exp0065/exp0066.

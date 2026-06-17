@@ -62,6 +62,37 @@ binding machinery (manual → world-model conditioning) is exactly what turns a 
 latent goal the planner can reach. Director's learned VQ-VAE goal manager is the **fallback** for the
 parts of a task not covered by a manual.
 
+### 3a. The decomposition operator runs BACKWARD from the goal — and it's the SAME primitive as the training curriculum
+
+The decompose-or-execute operator (§3) is naturally **backward**: start at the final goal and ask *"what
+must be true just before this?"* — goal regression through **preconditions**. Each precondition is the
+next subgoal back; recurse. Depth **adapts to complexity** by the §5 confidence gate: recurse only until a
+leaf is reactively (System-1) executable with confidence — a simple goal bottoms out immediately (no
+hierarchy at all), a complex goal regresses several levels. So the hierarchy stays **lazy / only-when-we-
+need-it**, never a fixed tower (consistent with the §7 "don't build the tower early" discipline).
+
+**The payoff — one backward primitive, two uses (training + inference).** This is the *same* operation as
+the [[0066-rtfm-imagination-backward-curriculum]] training lever:
+- **Training time** (learn the chain): seed actor-critic imagination from buffered **prefix-complete
+  latents** and learn to complete the tail — manufacturing the deep-step experience that exploration
+  reaches only ~p^(k-1) of the time ([[0065-rtfm-per-step-plateau-large-budget]] mechanism).
+- **Inference time** (plan the chain): regress backward from the goal through preconditions to emit the
+  subgoal skeleton, then execute the leaves by imagination/MPC.
+
+Both are "work backward from the goal." Building the backward curriculum first therefore *also* exercises
+the substrate the recursive decomposition will reuse — the same lazy escalation as the read↔LLM seam (§4).
+
+**Preconditions are both the obstacle and the scaffold.** The precondition relation (step k-1 enables
+step k) is exactly what *blocks* a real-env backward curriculum — you can't reset reality into a step-k-
+ready state without first doing step k-1 — which is why the curriculum lives in **imagination** (seed a
+*believed*-done latent). That same precondition relation is the structure the decomposition **regresses
+over** to build the subgoal tree. The thing that forces us into imagination at training time is the thing
+that gives the hierarchy its edges at inference time.
+
+**Discipline (when, not now):** the flat backward curriculum (exp0066) comes first; the recursive backward
+*decomposition* is the escalation for when goals get genuinely complex (branching sub-recipes, depth ≥3) —
+triggered by the same calibrated-confidence gate (§5), not built ahead of need.
+
 ## 4. Text is the System-2 *sketch* interface — read now, LLM later
 
 The abstraction layer's input is a **textual plan** (an ordered list of subgoal descriptions), and its
@@ -145,4 +176,4 @@ leaf) works. Each rung pre-registers a falsifiable hypothesis and a kill signal.
 
 ## Links
 
-[[0007-crafter-mastery-milestone]] · [[0043-rtfm-execution-wall]] · [[director-2022]] · [[hierarchy-and-credit]] · [[temporal-abstraction]] · [[imagination-training]] · [[rung4-manual-conditioned-agent]] · [[language-grounding]] · [[dreamer4-2025]]
+[[0007-crafter-mastery-milestone]] · [[0043-rtfm-execution-wall]] · [[0065-rtfm-per-step-plateau-large-budget]] · [[0066-rtfm-imagination-backward-curriculum]] · [[director-2022]] · [[hierarchy-and-credit]] · [[temporal-abstraction]] · [[imagination-training]] · [[rung4-manual-conditioned-agent]] · [[language-grounding]] · [[dreamer4-2025]]
