@@ -28,6 +28,8 @@ confirmed ~0.10 ([[0048-rtfm-validated-reading]] / [[0049-rtfm-sustained-vr]]).
 at this scale. (correct rose a little — more budget buys slightly better task completion, but not
 grounding.) So the lever is a **stronger/denser grounding incentive**, not more compute.
 
+![exp0051 budget probe — swap_follow plateaus ~0.11 over 40 rounds (2 seeds)](../../assets/exp-0051/grounding-budget.png)
+
 ## coef 0.5 — DONE: coef lever EXHAUSTED
 
 `runs/exp0051c05` (2 seeds): filled the dose-response gap (exp0048 tested 0.1/0.3 ≈ 0.10, 1.0
@@ -35,6 +37,8 @@ dark-rooms; 0.5 was the hole). Result: length-2 swap_follow ~0.10 (s0 0.10, s1 0
 better than 0.1/0.3.** Combined with the budget probe, the **coef knob is saturated** — reward strength
 cannot move the ~0.10 ceiling. (These checkpoints became the working-baseline substrate for the
 [[0053-rtfm-imagination-fidelity]] probe.)
+
+![exp0051 coef-0.5 — swap_follow noisy ~0.10, no better than coef 0.1/0.3 (2 seeds)](../../assets/exp-0051/grounding-c05.png)
 
 ## Outcome — the lever ladder, and the pivot
 
