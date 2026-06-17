@@ -1,5 +1,5 @@
 ---
-status: draft
+status: stale
 owner: world-model
 scope: local
 verified: false
@@ -8,9 +8,15 @@ last_reviewed: 2026-06-17
 
 # 0063: n400 long run — where does swap_follow settle, and is it an *acceptable* (competent-agent) ceiling?
 
-**Status: PRE-REGISTERED — NOT YET RUN (queued for the next session).** Was dispatched once in error
-then stopped immediately (round 0, no data) for a clean cut after exp0062; the maintainer is handing
-over to a fresh session to run this. **Next session: dispatch the command in §Setup.**
+**Status: PRE-REGISTERED — DEFERRED pending a rollout-perf rebuild (stale, NOT a result).** Dispatched
+2026-06-17 and stopped after ~4 rounds: live profiling showed the run is **rollout-latency-bound**, not
+GPU-bound (GPU 52% util / 76 W of 300 W across 4 seeds, ~698 MiB/seed; each seed pegs ~1 CPU core on the
+batch-1, sync-per-step collection loop). Burning ~5 h/seed on a pipeline that leaves the GPU 90% idle is
+waste, so the run is deferred until the collection path is optimized + parity-validated. **The
+hypothesis, config, and acceptance bar below are UNCHANGED** — only the implementation underneath gets
+faster. Re-dispatch the §Setup command once the vectorized-rollout PR lands and a compare experiment
+confirms it reproduces a known baseline (exp0061f1) within seed noise. Perf diagnosis + plan:
+[[rtfm-rollout-perf]].
 
 Reframed (2026-06-17): this is **not** a pure "break the ceiling" bet anymore. It runs the proven-best
 **n400** config much longer and asks a two-part question — (1) *does* swap_follow plateau, and (2) if it

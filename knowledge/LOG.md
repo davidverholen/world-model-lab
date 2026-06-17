@@ -2185,3 +2185,16 @@ Acceptable = agent acts confidently in the env: swap_follow_s1 ≳0.35, groundin
 conditional ≳0.30, low variance/stable over r60–79 → residual is genuine 2-step composition difficulty,
 not training failure. n1600 generalization long-run split out as a separate future experiment (one
 variable per run). Tag stays LADDER-EXIT (break OR acceptable ceiling are both rung-4 decision points).
+
+## 2026-06-17 — exp0063 STOPPED for a rollout-perf rebuild; safe changes landed
+
+Live profiling of the exp0063 dispatch (4 seeds) showed the rung-4 RTFM run is ROLLOUT-LATENCY-BOUND,
+not GPU-bound: GPU 52% util / 76 W of 300 W across 4 seeds, ~698 MiB/seed, each seed pegs ~1 CPU core
+on the batch-1, sync-per-step collection loop (~5 h/seed with the GPU ~90% idle). Stopped the run +
+dashboard, staled the exp0063 page (hypothesis/config/bar UNCHANGED — only the impl gets faster). New
+page knowledge/design/rtfm-rollout-perf.md captures the diagnosis + mitigations + parity protocol.
+Safe changes committed (PR1): TF32 (set_float32_matmul_precision, consistent w/ sibling scripts) +
+parity-preserving transfer dedup in the rollout (emb is last step's nemb → keep a rolling host copy,
+one device sync/step not two; byte-identical buffer). Smoke 52 passed, ruff clean. NEXT: the real win
+— vectorized/batched rollout behind a flag (reviewer-gated + seed-parity test), then a compare
+experiment vs exp0061f1 (validate metrics within seed noise + measure speedup) before re-running exp0063.

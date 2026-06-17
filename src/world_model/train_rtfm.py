@@ -293,6 +293,11 @@ def collect_rtfm(
         if use_agent:
             agent.reset(obs, info)
         emb = embed_of(obs)
+        # Perf (rtfm-rollout-perf.md, mitigation B): `emb` is always the PREVIOUS step's `nemb`
+        # (see `emb = nemb` at the loop tail), so transferring `emb[0].cpu().numpy()` every step
+        # re-copies a tensor already pulled to host last step. Keep a rolling CPU copy and transfer
+        # only the fresh `nemb` once → byte-identical buffer contents, one device sync/step not two.
+        emb_np = emb[0].cpu().numpy()
         # exp 0058: per-episode in-order pointer over the displayed gesture, for the escalating
         # path reward. Mirrors harness/env gesture extraction; gesture is fixed for the episode.
         # pos_count[k] = times position k already paid this episode → decay^count diminishing return
@@ -349,15 +354,16 @@ def collect_rtfm(
                     r_read += validated_reading_coef * raw_vr
                 vr_sum += raw_vr
                 vr_n += 1
+            nemb_np = nemb[0].cpu().numpy()
             buffer.add(
-                Transition(emb[0].cpu().numpy(), a, r_read, nemb[0].cpu().numpy(), done, vr=raw_vr),
+                Transition(emb_np, a, r_read, nemb_np, done, vr=raw_vr),
                 tag=mid,
             )
             # Count honest tutorial achievements only (NOT shaping steps, which are dense once
             # shaping is on) — this stays the ignition diagnostic: are we EARNING the one_shot
             # achievement, not merely collecting the reading-shaping gradient.
             events += len(info["tutorial_newly"])
-            emb = nemb
+            emb_np = nemb_np  # roll host-side copy forward (next step's prev-embed; no re-transfer)
             if done:
                 break
     return events, (vr_sum / vr_n if vr_n else 0.0)
@@ -999,6 +1005,10 @@ def main() -> None:
     device = args.device
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
+    # TF32 matmuls on Ampere+ (consistent with train_recurrent/dreamer/rssm). The rung-4 run is
+    # rollout-latency-bound (knowledge/design/rtfm-rollout-perf.md), so this is a small, safe win on
+    # the training forward — the big lever is the vectorized rollout, not precision.
+    torch.set_float32_matmul_precision("high")
 
     enc = FrozenDinoEncoder(pool=args.pool).to(device)
     text_enc = FrozenTextEncoder(device=device)
