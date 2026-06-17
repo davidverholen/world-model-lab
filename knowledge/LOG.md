@@ -2212,3 +2212,11 @@ runs, GPU never the limit → run coeff sweeps in parallel (serves the maintaine
 at once"); (2) world-gen caching by seed (~12x regen over 80 rounds) — but that's benchmark-env domain
 (crafter_rtfm, read-only) → a commons handoff, not a local edit. Lesson: profile before optimizing;
 GPU-idle meant CPU-bound, not GPU-latency-fixable.
+
+## 2026-06-17 — exp0064 pre-registered: path-reward-coef sweep (PARALLEL, first idle-GPU exploit)
+
+First experiment to exploit rtfm-rollout-perf: collection is CPU-world-gen-bound with the GPU idle, so
+3 coeffs x 3 seeds run concurrently in one config's wall-time. Sweeps --path-reward-coef {0.25,0.5,1.0}
+at factor=1/decay=1.0/n400/30 rounds to find whether reward MAGNITUDE moves the step-2 conditional (the
+last untested reward knob — shape axis exhausted: back-loading refuted in exp0058/0061). coef-0.5 arm
+doubles as an exp0061f1 reproduction check. Tag EXTRA-RIGOR (diagnostic).
