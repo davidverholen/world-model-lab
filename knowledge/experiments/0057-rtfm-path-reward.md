@@ -58,6 +58,23 @@ Open question carried to [[0058-rtfm-escalating-path-reward]]: does *back-loadin
 (escalation) beat a uniform floor-0.5, and is the exposure component still limiting beyond the sweet
 spot?
 
+## Multi-seed confirm (exp0059, floor 0.5 × 4 seeds) — REAL but the single seed was optimistic
+
+| | step-1 | exact | cond P(s2\|s1) |
+|---|---|---|---|
+| single seed (above) | 0.36 | 0.14 | 0.38 |
+| **4-seed mean** | **0.36** | **0.103** | **0.285** |
+| (per seed exact) | — | 0.078 / 0.144 / 0.120 / 0.070 | — |
+
+Floor 0.5 lifts step-1 (0.28→0.36) and **conditional step-2 (0.17→0.285) on all 4 seeds** — real and
+consistent. But **exact swap_follow lands ~0.10** (the historical ceiling), because 0.36·0.285 ≈ 0.10:
+it improves the *components* robustly but only *recovers* the ~0.10 ceiling rather than breaking it. The
+single-seed 0.14/0.38 was an optimistic draw (honest correction, cf. [[0048-rtfm-validated-reading]]).
+**exp0060** (coverage n1600 × floor 0.5, 2 seeds) did NOT stack (exact 0.052, below floor-alone) — no
+synergy, possibly negative; inconclusive at 2 seeds. To push *exact* past 0.10 the conditional must go
+higher → back-loading on top of the working 0.5 base ([[0058-rtfm-escalating-path-reward]] re-run,
+exp0061).
+
 ## Standing bar — diagnostic (tag: `EXTRA-RIGOR`)
 
 Succeeds by moving (or definitively not moving) the conditional step-2 with a kept/stronger path

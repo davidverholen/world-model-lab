@@ -2084,3 +2084,14 @@ test. Lesson: step-1 reward magnitude is load-bearing. Escalation re-run (base 0
 uniform floor-0.5 already works. Dispatched the high-value wave instead: exp0059 = floor-0.5 multi-seed
 confirm (4 seeds, de-risk the single-seed winner); exp0060 = coverage n1600 × floor 0.5 combined (2
 seeds, do the two convergent levers stack).
+
+## 2026-06-17 — exp0059 multi-seed confirm (honest correction) + exp0060 combo (no stack) + exp0061
+
+exp0059 (floor 0.5 × 4 seeds): step-1 0.36, exact 0.103, conditional 0.285 — floor 0.5 robustly lifts
+step-1 (0.28→0.36) and conditional step-2 (0.17→0.285, all 4 seeds), but EXACT lands ~0.10 (the
+historical ceiling): it improves the components but only recovers, not breaks, the ceiling (0.36·0.285
+≈0.10). The single-seed 0.14/0.38 was optimistic (honest correction). exp0060 (coverage n1600 × floor
+0.5, 2 seeds): did NOT stack (exact 0.052, below floor-alone) — no synergy. To push exact past 0.10 the
+conditional must rise → properly-parameterized back-loading. Dispatched exp0061: escalation at the
+WORKING base (coef 0.5, factor {1,2,3}, decay 1.0, 2 seeds each) — factor 1 = uniform control, 2/3 =
+back-loading on top of the working step-1 magnitude. Fixes the exp0058 step-1-starvation confound.
