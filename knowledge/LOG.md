@@ -2348,3 +2348,14 @@ gesture length excludes completed chains), bc_frac clamp. OFF = byte-identical; 
 green. Pre-registered exp0066 (ON vs OFF at length-2/30 rounds, multi-seed; watch conditional + seed
 variance + bc_realized_frac supply telemetry; LADDER-EXIT). Dispatch waits for exp0065 (~96/120, GPU 99%,
 RAM 2G free) to finish.
+
+## 2026-06-18 — exp0065 DONE: old ~0.10 ceiling WAS a length artifact, but plateaus at ~0.20 (generalizes)
+
+len-2 ×5 / len-1 ×3, 120 rounds. Full 2-step swap_follow climbed 0.04→~0.20 and plateaued r79-119; ALL
+5 seeds converged to 0.186-0.210 (sd 0.010) — the mid-run s3 outlier was transient, the break
+generalizes. conditional 0.40, step1 0.50, swapped ~0.01 (honest). len-1 ceiling 0.70. Verdict: the old
+~0.10 ceiling was a training-length artifact (broke to ~0.20) but ~0.20 is a NEW, real plateau — an
+ACCEPTABLE competent ceiling (meets all exp0063 criteria: step1>=0.35, cond>=0.30, swapped~0, low
+variance/stable) with genuine residual composition difficulty. Reframes exp0066: at length-2 the
+exploration lottery self-resolves given budget (curriculum value = sample-efficiency + lifting the
+plateau); the curriculum's NECESSITY is at depth>=3 (p^(k-1)). Plots embedded. Motivates exp0066 (next).
