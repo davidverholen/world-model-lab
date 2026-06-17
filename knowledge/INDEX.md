@@ -132,7 +132,7 @@ calls these elaborate).
 - [0060-rtfm-coverage-floor-combo](experiments/0060-rtfm-coverage-floor-combo.md) — coverage n1600 × floor-0.5 combined (2 seeds): levers do NOT stack; mean exact 0.052, below floor-alone (0.103); inconclusive at 2 seeds, no synergy observed (verified)
 - [0061-rtfm-backloading-confirm](experiments/0061-rtfm-backloading-confirm.md) — back-loading done right (base 0.5, factor 1/2/3, 2 seeds): REFUTED — back-loading hurts conditional (0.33→0.21→0.20); satisficing hypothesis ruled out; uniform factor-1 is reward winner; bottleneck is exposure/data axis (verified)
 - [0062-rtfm-coverage-confirm](experiments/0062-rtfm-coverage-confirm.md) — coverage n1600 multi-seed confirm at the working uniform-0.5 reward; tests whether the step-2 conditional is data/exposure-bound; IN FLIGHT (draft)
-- [0063-rtfm-long-run-ceiling](experiments/0063-rtfm-long-run-ceiling.md) — LONGER run (20 curriculum + 60 length-2 = 80 rounds) of the confirmed uniform-0.5 path reward, to test whether the still-rising-at-r30 trend breaks the ~0.10 ceiling. PRE-REGISTERED, NOT YET RUN — queued for the next session (draft)
+- [0063-rtfm-long-run-ceiling](experiments/0063-rtfm-long-run-ceiling.md) — LONGER run (20 curriculum + 60 length-2 = 80 rounds) of uniform-0.5 path reward at HIGH COVERAGE (n1600, generalization focus), to test whether the still-rising-at-r30 trend breaks the ~0.10 ceiling. Combines both step-2 levers + training length; exp0062 (n1600, 30r) is the clean 30-round reference. PRE-REGISTERED, NOT YET RUN — queued for next session (draft)
 
 ## Wanted pages (linked but not yet written)
 
