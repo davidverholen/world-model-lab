@@ -25,6 +25,10 @@ exposure (NOT just more compute on the same distribution — exp0051's 2× budge
 so seed-luck is possible; **queue a multi-seed n1600 confirm** + try even higher coverage. Combines
 naturally with the path-reward levers ([[0057-rtfm-path-reward]]/[[0058-rtfm-escalating-path-reward]]).
 
+![exp0056 conditional via swap_follow_s1 + exact, by n-train](../../assets/exp-0056/swap-follow-s1.png)
+
+![exp0056 exact swap_follow by n-train](../../assets/exp-0056/swap-follow.png)
+
 ## Original pre-registration
 
 Follows the [[0055-rtfm-ensemble-pessimism]] reframe: the rung-4 wall is NOT

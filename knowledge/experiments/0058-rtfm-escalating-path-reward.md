@@ -34,7 +34,11 @@ confirms the arms were under-rewarded overall. **NOT a clean test of back-loadin
 Fix (deferred, lower priority since uniform floor-0.5 already works): re-run with
 `--path-reward-coef 0.5 --path-reward-factor {2,3} --path-reward-decay 1.0` so step-1 gets the working
 0.5 and step-2 gets 0.5·factor on top. Prioritised instead: multi-seed confirm of the floor-0.5 winner
-([[0059]]) and coverage×floor combination ([[0060]]).
+([[0059-rtfm-floor-confirm]]) and coverage×floor combination ([[0060-rtfm-coverage-floor-combo]]).
+
+![exp0058 swap_follow_s1 by factor (base 0.2, confounded — step-1 starved)](../../assets/exp-0058/swap-follow-s1.png)
+
+![exp0058 exact swap_follow by factor](../../assets/exp-0058/swap-follow.png)
 
 ## Original pre-registration
 
@@ -92,18 +96,4 @@ the lever (→ exposure).
 
 ## exp0061 — back-loading done RIGHT (base 0.5): REFUTED
 
-Re-ran at the working base (`--path-reward-coef 0.5 --path-reward-factor {1,2,3} --path-reward-decay
-1.0`, 2 seeds each), last-5 length-2:
-
-| factor | step-1 | exact | conditional |
-|---|---|---|---|
-| **1 (uniform 0.5)** | 0.35 | **0.115** | **0.33** |
-| 2 | 0.39 | 0.081 | 0.21 |
-| 3 | 0.49 | 0.097 | 0.20 |
-
-**Back-loading HURTS the conditional** (0.33→0.21→0.20). Bigger step-2 reward makes the agent attempt
-step-1 MORE (chasing the payoff → step-1 up to 0.49) but follow through WORSE. So the conditional is NOT
-step-2-reward-magnitude-limited → the satisficing hypothesis is **refuted**; the bottleneck is
-EXPOSURE / execution (data/coverage axis). **Uniform 0.5, every time (factor 1) is the robust reward
-winner** (exact 0.115, cond 0.33) — a 2nd confirmation of the floor-0.5 lever. → pivot the conditional
-push to exposure (coverage confirm exp0062 / backward curriculum), not reward shape.
+Properly-parameterized redo in [[0061-rtfm-backloading-confirm]]: back-loading REFUTED (uniform factor-1 best, cond 0.33; factor 2/3 drop to 0.20–0.21).

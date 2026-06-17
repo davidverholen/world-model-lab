@@ -2,6 +2,34 @@
 
 Append-only. Entry format: `## [YYYY-MM-DD] <type> | <title>`
 
+## [2026-06-17] curate | rung-4 documentation pass — exp0059/0060/0061 pages created; trajectory graphs embedded; 0057/0058 trimmed
+
+Created three new experiment pages:
+- `knowledge/experiments/0059-rtfm-floor-confirm.md` (status: current, verified) — 4-seed confirm of
+  floor-0.5 path reward; step-1 0.36, exact 0.103, conditional 0.285; single-seed exp0057 corrected
+  (optimistic draw).
+- `knowledge/experiments/0060-rtfm-coverage-floor-combo.md` (status: current, verified) — coverage
+  n1600 × floor-0.5 combined (2 seeds); no stacking, mean exact 0.052; inconclusive.
+- `knowledge/experiments/0061-rtfm-backloading-confirm.md` (status: current, verified) — back-loading
+  with proper base 0.5 (factor 1/2/3, 2 seeds/arm); satisficing hypothesis REFUTED; uniform factor-1
+  best (exact 0.115, cond 0.33); bottleneck is exposure/data.
+
+Embedded trajectory graphs into existing pages:
+- `assets/exp-0056/swap-follow-s1.png` and `swap-follow.png` → added after result table in 0056.
+- `assets/exp-0057/swap-follow-s1.png` and `swap-follow.png` → added after result table in 0057.
+- `assets/exp-0058/swap-follow-s1.png` → added after result table in 0058.
+- `assets/exp-0059/grounding-headline-0-1.png` and `overview.png` → in new 0059 page.
+- `assets/exp-0060/grounding-headline-0-1.png` and `overview.png` → in new 0060 page.
+- `assets/exp-0061/swap-follow-s1.png` and `swap-follow.png` → in new 0061 page.
+
+Trimmed duplicated sections in existing pages:
+- `0057-rtfm-path-reward.md` §"Multi-seed confirm" — replaced duplicated table + prose with a
+  one-line pointer to [[0059-rtfm-floor-confirm]].
+- `0058-rtfm-escalating-path-reward.md` §"exp0061 — back-loading done RIGHT" — replaced duplicated
+  table + prose with a one-line pointer to [[0061-rtfm-backloading-confirm]].
+
+INDEX.md updated: added entries for 0059, 0060, 0061 (verified), and 0062 (draft, IN FLIGHT).
+
 ## [2026-06-16] scout | OpenReview 6fDZYJYYgu — identified as SimuRA (Deng, Hou, Hu & Xing); queued
 
 OpenReview forum id 6fDZYJYYgu: API returned empty notes (double-blind embargo likely); forum
