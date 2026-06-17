@@ -34,7 +34,7 @@ calls these elaborate).
 - [architecture-strategy](design/architecture-strategy.md) — modes (configurator) + the real decision is the INTERFACE not model-count + reusable pretrained components (Minecraft WM); decide empirically at rung 3/5b (draft)
 - [environment-ladder](design/environment-ladder.md) — our staged env progression with exit criteria; living spec for ADR 0003 (current)
 - [compute-strategy](design/compute-strategy.md) — measured local-vs-desktop-vs-rented GPU trade-offs per rung; parallel-seeds corollary (draft)
-- [rtfm-rollout-perf](design/rtfm-rollout-perf.md) — rung-4 training is rollout-latency-bound (GPU ~90% idle/seed); root causes + mitigations (vectorize rollout = the win) + parity protocol (verified)
+- [rtfm-rollout-perf](design/rtfm-rollout-perf.md) — rung-4 collection is bound by crafter WORLD-GEN (~79%, simplex noise at reset), not GPU/encode; vectorizing the encode REFUTED (~0 win, reverted); real levers = process-parallelism (now) + world-gen caching (handoff) (verified)
 - [rung4-manual-conditioned-agent](design/rung4-manual-conditioned-agent.md) — the reading-to-learn-dynamics agent: condition the WORLD MODEL (not policy) on the manual; anti-baking as a layered env+eval+probe+arch strategy (draft)
 - [grounding-env-spec](design/grounding-env-spec.md) — the read-to-learn-dynamics benchmark spec (authored here → crafter-rtfm); the env side rung-4 consumes (current)
 - [hierarchical-imagination-agent](design/hierarchical-imagination-agent.md) — dual-process planning: System-1 reactive default / System-2 deliberate (recursive read-grounded decomposition + imagination/MPC) / compilation / confidence-gated arbitration; the next major capability for the multi-step-execution wall (draft)

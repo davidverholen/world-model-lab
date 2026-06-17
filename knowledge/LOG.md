@@ -2198,3 +2198,17 @@ parity-preserving transfer dedup in the rollout (emb is last step's nemb → kee
 one device sync/step not two; byte-identical buffer). Smoke 52 passed, ruff clean. NEXT: the real win
 — vectorized/batched rollout behind a flag (reviewer-gated + seed-parity test), then a compare
 experiment vs exp0061f1 (validate metrics within seed noise + measure speedup) before re-running exp0063.
+
+## 2026-06-17 — rollout-perf: bottleneck is crafter WORLD-GEN, not GPU/encode (vectorize REFUTED)
+
+cProfile of a real collection: ~79% of time is crafter world generation (opensimplex simplex noise at
+every env.reset()); DINO encode + RSSM forward < 8%. So the GPU is idle because the CPU is generating
+worlds, NOT because of fixable batch-1 encode latency. The vectorized-rollout optimization (mitigation
+A, --vec-collect) was A/B-timed on the real GPU at batch-60: scalar 564.8s vs vec 554.8s (~1.8%, no
+win) — and REVERTED (220 lines of parity-risk for ~0 gain; PR1 TF32+transfer-dedup kept). Corrected
+design/rtfm-rollout-perf.md + INDEX. Real levers now: (1) process-level parallelism — each run is ~1
+core + ~1GB GPU + ~2.5GB RAM with the GPU idle, box has 16 cores/21GB free/16GB GPU → ~10-12 concurrent
+runs, GPU never the limit → run coeff sweeps in parallel (serves the maintainer's "test several coeffs
+at once"); (2) world-gen caching by seed (~12x regen over 80 rounds) — but that's benchmark-env domain
+(crafter_rtfm, read-only) → a commons handoff, not a local edit. Lesson: profile before optimizing;
+GPU-idle meant CPU-bound, not GPU-latency-fixable.

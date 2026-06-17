@@ -6,61 +6,66 @@ verified: true
 last_reviewed: 2026-06-17
 ---
 
-# rtfm rollout performance — the collection loop is latency-bound, not GPU-bound
+# rtfm rollout performance — the collection loop is bound by crafter WORLD-GEN, not the GPU
 
-Live profiling of an exp0063 dispatch (4 seeds, n400, 80 rounds) on the desktop 16 GB GPU,
-2026-06-17. **Conclusion: the rung-4 RTFM training is bottlenecked on the per-step collection loop, not
-on the GPU.** A single seed leaves the GPU ~90% idle; we currently hide that only by running 4 seeds at
-once (they overlap to ~52% util — the [[compute-strategy]] "concurrent seeds fill the idle GPU" trick).
+Profiled the rung-4 RTFM collection on the desktop 16 GB GPU, 2026-06-17. **Conclusion: training
+throughput is bottlenecked on CPU world generation at every episode `reset()`, NOT on the GPU and NOT on
+the DINO encode.** A single seed leaves the GPU ~90% idle because the CPU is busy generating crafter
+worlds (pure-Python simplex noise); we currently hide that idle GPU only by running several seeds at once
+(the [[compute-strategy]] "concurrent seeds fill the idle GPU" trick).
 
 ## Evidence
 
-| Signal | Reading | Meaning |
+System snapshot (4 seeds): GPU 52% util / 76 W of 300 W / ~698 MiB/seed; each seed pegs ~1 CPU core,
+state `R`; host 55% idle. Rate ~225 s/round → ~5 h/seed.
+
+`cProfile` of one real collection (30 episodes × 16 steps, real DINO, cuda), top by internal time:
+
+| function | tottime | share |
 |---|---|---|
-| GPU util | 52% across **4** seeds | one seed ≈ 13% |
-| GPU power | 76 W / 300 W | barely working |
-| GPU mem | 698 MiB/seed (3.8/16 GB) | batch-1 forwards |
-| CPU/seed | ~109% (≈1 core), state `R` | single-core CPU-bound rollout |
-| Host | 55% idle, 17% iowait | cores to spare |
-| Rate | ~225 s/round early → ~5 h/seed | the four seeds overlap on the GPU |
+| `opensimplex._extrapolate3` | 12.0 s | 63% |
+| `opensimplex._noise3` | 2.2 s | 11% |
+| `crafter/worldgen._set_material` (cum) | 15.6 s | (world-gen total **~79%**) |
+| `torch._C._nn.linear` (DINO) | 0.40 s | 2% |
+| all DINO/RSSM torch ops combined | < 1.5 s | < 8% |
 
-## Root causes (all in [[rung4-manual-conditioned-agent]]'s collection loop, `train_rtfm.py:306-360`)
+**~79% of collection time is crafter world generation at `env.reset()`** (every episode builds a fresh
+procedural world via simplex noise). The encode and the world-model forward are a rounding error.
 
-1. **Batch-1 DINO encode every env step** (`embed_of`, l.283) — the frozen ViT runs on one frame at a
-   time (`unsqueeze(0)`). Batch-1 ViT is pure launch-latency: the GPU does microseconds of work then
-   waits. Dominant GPU-side cost, spent inefficiently.
-2. **Per-step GPU→CPU sync** (l.353) — `emb[0].cpu().numpy()` AND `nemb[0].cpu().numpy()` every step
-   force two device syncs that serialize CPU↔GPU. `emb` is just last step's `nemb` re-transferred (a
-   redundant copy).
-3. **Pure-CPU env stepping, sequential** — 60 episodes/round stepped one at a time on one core; the
-   crafter-rtfm env + per-step path-reward pointer is the CPU cost pegging the core. A fresh env is even
-   rebuilt per episode (l.287).
-4. **No TF32 / AMP / `torch.compile`** — `set_float32_matmul_precision` + autocast exist in
-   `train_recurrent`/`dreamer` but are absent from `train_rtfm`; the training forward runs full fp32.
-   (The encoder is correctly `@torch.no_grad()`, so no autograd leak.)
+## What was tried and REFUTED
 
-## Mitigations, by ROI
+**Mitigation A — vectorize the rollout (batch the encode across parallel envs).** Implemented behind a
+default-off `--vec-collect` flag and A/B-timed on the real GPU at the real batch (60 envs), length-2,
+training minimized so wall ≈ collection: **scalar 564.8 s vs vectorized 554.8 s — a ~1.8% difference,
+i.e. no win.** Correct prediction from the profile: batching the encode cannot help a workload whose
+time is in CPU world-gen, not GPU encode. The vectorized code was **reverted** (220 lines of
+parity-risk for ~0 gain). Lesson: profile before optimizing — the GPU being idle meant the CPU was the
+floor, not that batch-1 GPU latency was the fixable cost.
 
-- **A — vectorize the rollout (the real win):** step B envs in parallel, ONE batched encode of B frames,
-  bulk-transfer once per round. Attacks #1+#2+#3 together. Touches the pre-registered collection path
-  (incl. the stateful path-reward pointer) → **reviewer-gate + a seed-parity test** (same seed ⇒
-  equivalent replay/metrics) is mandatory so the exp0057→0063 ladder stays comparable. Implement behind
-  a flag; keep the scalar loop for parity.
-- **B — kill the per-step sync** (subset of A, parity-preserving on its own): keep a rolling CPU copy of
-  the previous embed and transfer only `nemb` once. Halves per-step syncs with byte-identical buffers.
-- **C — TF32 + opt-in bf16 autocast** on the train forward (`--amp`, ~1.2× proven in `train_recurrent`).
-  Non-rollout, low-risk; modest here because the bottleneck is collection, not the update.
-- **D — more concurrent seeds/experiments:** GPU has ~13 GB + ~50% util free → raises *throughput*, not
-  per-seed latency. Already the standing strategy.
-- **F — xFormers (DINO falls back to slow attention per the load warnings) / reuse env across episodes:**
-  marginal while batch-1 (encode is latency- not compute-bound); revisit after A makes encode GPU-bound.
+## Mitigations that actually fit the bottleneck
 
-## Validation protocol (before any optimized pipeline becomes the new baseline)
+- **D — process-level parallelism (the immediate, no-code win).** Each run is ~1 CPU core + ~0.7–1 GB
+  GPU + ~2.5 GB RAM, with the GPU otherwise idle. The box has **16 cores / ~21 GB free RAM / 16 GB GPU**,
+  so ~10–12 runs fit concurrently (RAM-bound near ~8–10), GPU is never the limit. → run coefficient
+  sweeps (many configs × seeds) **at once** instead of serially. This is the real throughput lever given
+  the bottleneck, and it directly serves "test several coeffs in parallel." Tooling exists:
+  `scripts/dispatch_rtfm.sh` (N seeds) + `scripts/sweep.py` / `/sweep`.
+- **World-gen caching by seed (the real per-RUN latency lever — likely a crafter-rtfm handoff).** Seeds
+  repeat: n_train_seeds=400 over 80 rounds × 60 episodes regenerates each seed's world ~12×. Memoizing
+  the generated world per seed (snapshot once, restore on reuse) would cut world-gens ~12× and collapse
+  the dominant 79% → a potential multi-× single-run speedup. But world generation lives in the
+  benchmark-env domain (`crafter_rtfm` / crafter), which is **read-only to us** per the coordinator
+  charter → this is a `../commons` handoff (a requirement: faster/cacheable world-gen for repeated
+  seeds, or a JIT/numba simplex), not a local edit.
+- **C — TF32 + transfer dedup (shipped, PR1 cc643e6).** Harmless and consistent with sibling scripts;
+  immaterial to this bottleneck but kept.
+
+## Validation protocol (for any change that touches collection semantics)
 
 Run the optimized code at **exp0061f1's exact config** (n400, uniform-0.5, 30 rounds) and confirm
 swap_follow / swap_follow_s1 / conditional land within seed noise of the recorded baseline
-(exact ~0.115, conditional ~0.33, step-1 ~0.345) AND measure the speedup. Only then re-dispatch the
-deferred [[0063-rtfm-long-run-ceiling]] on the fast pipeline.
+(exact ~0.115, conditional ~0.33, step-1 ~0.345) AND measure the speedup. (Byte-parity is impossible if
+the change reorders RNG draws.)
 
 ## Links
 
