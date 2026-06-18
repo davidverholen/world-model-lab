@@ -2383,3 +2383,16 @@ made the actor chase reward the WM hallucinates, harder -> the bimodal collapse.
 constraint is WM/reward CALIBRATION (hierarchical-imagination-agent §5), not the curriculum mechanism.
 Stopped the 80-round control (ON still trailing at r32); next is length-3 (does the curriculum help where
 the wall doesn't self-resolve) — pending after a break. GIFs embedded in the exp0066 page.
+
+## 2026-06-18 — exp0067 DONE: reading is MEANING-based, not token-lookup (NOT a dead end)
+
+Paraphrase probe on the best 2 exp0065 checkpoints (s3,s2), reword manual L0/L1/L2 via an env wrapper
+(crafter-rtfm untouched), reuse swap_follow_rate. Under FULL natural-language rewording (env tokens ->
+"forge an iron sword"), full swap-following retains ~0.79-0.83 of baseline (step-1 ~0.75-0.77). A pure
+token-lookup would collapse toward 0 -> it doesn't, so the binding reads meaning (MiniLM bridges
+token<->paraphrase); the "language as commodity" design holds. Answers the maintainer's dead-end worry
+on the reading axis: NOT a lookup table. Caveats: consistent ~20% NL penalty (in s2 specifically the
+token->NL swap) -> reading not fully abstract -> paraphrase-augment the manual distribution to close it;
+small noisy numbers (per-checkpoint weak, cross-checkpoint direction is the signal); and the cross-domain
+WM axis (unseen game) is still untested (the bigger far gap). Strategic: don't over-grind crafter
+execution; NL-augment manuals + start testing transfer up the ladder. scripts/paraphrase_probe.py added.

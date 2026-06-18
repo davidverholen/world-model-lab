@@ -8,12 +8,47 @@ last_reviewed: 2026-06-18
 
 # 0067: reading-generalization probe — does the agent read MEANING or surface tokens? (paraphrase invariance)
 
-**Status: PRE-REGISTERED — the dead-end check.** Replaces the length-3 idea as the next experiment (the
-maintainer's strategic question 2026-06-18): the rung-4 north star is reading **real** tutorials, but we
-have only ever evaluated **held-out recipe configs within the templated vocabulary** — which can't tell
-genuine reading from a sophisticated lookup over a closed token set. This probe tests the distinction
-directly, cheaply (no training; the best exp0065 checkpoint), and **entirely on our side** (a manual-
-rewording env wrapper — the crafter-rtfm env is untouched).
+**Status: DONE (best 2 exp0065 checkpoints) — NOT a dead end. The agent reads MEANING, not surface
+tokens: swap-following retains ~79–83% under FULL natural-language rewording** (env tokens →
+"forge an iron sword"). A pure token-lookup would collapse toward 0; it doesn't. The "language as
+commodity" design (frozen MiniLM bridges token↔paraphrase) holds empirically — the env vocabulary is a
+*training distribution*, not a hard wall. Caveat: a consistent **~20% NL penalty** (reading isn't fully
+abstract) and the **cross-domain-WM axis is still untested** (the bigger remaining gap).
+
+## Result — swap-following survives natural-language rewording (60 SWAPPED seeds, len-2)
+
+| level | s3 full | (ratio) | s2 full | (ratio) | s3 step-1 | s2 step-1 |
+|---|---|---|---|---|---|---|
+| L0 original | 0.200 | 1.00 | 0.233 | 1.00 | 0.500 | 0.600 |
+| L1 surface (keep tokens) | 0.167 | 0.83 | 0.267 | 1.14 | 0.417 | 0.567 |
+| **L2 natural language** | 0.167 | **0.83** | 0.183 | **0.79** | 0.383 (0.77) | 0.450 (0.75) |
+
+Example L2 the agent read and still followed: *"…Your task: gather a sapling, stone, then carry out
+**forge an iron sword, forge an iron sword**."* — i.e. the backtick env-tokens fully replaced by NL.
+
+**Read:** under full NL, both checkpoints keep **~0.79–0.83** of their full swap-following and **~0.75–0.77**
+of step-1. If the binding were a lookup on the `make_iron_sword`-style tokens, L2 (tokens gone) would
+fall toward the no-manual floor — instead it barely moves beyond the surface-structure cost. So the
+binding is **meaning-based**: MiniLM places the token near its paraphrase and the learned WM-conditioning
+generalises across that gap. This directly answers the maintainer's dead-end worry on the **reading axis:
+we are not building a lookup table.**
+
+**Honest caveats (where the real work is):**
+1. **A real ~20% NL penalty.** Both checkpoints L2 < L0, and in s2 it's specifically the token→NL swap
+   (L1 0.267 → L2 0.183), so reading isn't *fully* abstract — there's residual surface/token dependence.
+   Cheap fix to test next: **paraphrase-augment the training manual distribution** (the env already
+   varies preambles; widen it) — likely closes the gap and is a direct robustness win for real tutorials.
+2. **Small, noisy numbers** (0.18–0.27, 60 seeds, ~0.05 sd) — per-checkpoint significance is weak; the
+   *consistent* L2<L0 direction across two checkpoints is the signal, not the exact ratio.
+3. **This tests reading/binding ONLY.** "Read a real tutorial in a game it didn't train on" also needs
+   **cross-domain world-model transfer**, which rung-4 does not build — that's the bigger, far gap
+   ([[mentored-learning-loop]] / the env ladder), and the honest next strategic axis once reading is banked.
+
+**Strategic takeaway:** not a dead end on reading → don't over-grind crafter *execution*; the higher-
+leverage moves are (a) NL-augment the manuals to close the 20% gap, and (b) start testing **transfer** up
+the ladder rather than perfecting one env.
+
+## Original pre-registration
 
 ## The manual today (real example)
 
