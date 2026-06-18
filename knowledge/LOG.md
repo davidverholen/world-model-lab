@@ -2372,3 +2372,14 @@ self-resolves anyway, and a length-1-contamination caveat (curriculum-round gp==
 not the length-2 frontier). Committed e0a079c. Dispatched the disambiguation: exp0066off80 vs on80
 (80 rounds, mature WM) — does the curriculum help once the WM has learned step-2 (lift/accelerate the
 ~0.20 plateau, resolve the bimodality)? If ON<OFF even at 80r → curriculum's value is at depth≥3.
+
+## 2026-06-18 — exp0066 interpretability GIFs: curriculum AMPLIFIED imagined-reward over-optimism
+
+Rendered gameplay + imagine (dream-vs-reality, NN-retrieval) GIFs from the v1 ON/OFF checkpoints
+(scripts/visualize_rtfm.py + imagine_report.py). Key diagnostic: imagined-minus-real reward over the
+horizon = ON +2.30 vs OFF +1.75 (>0 = WM imagines more reward than reality gives). State-fidelity ~equal
+(belief L2 ~8.4 vs ~6.4 floor, cos ~0.85). So the backward curriculum didn't worsen the state dream — it
+made the actor chase reward the WM hallucinates, harder -> the bimodal collapse. Confirms the binding
+constraint is WM/reward CALIBRATION (hierarchical-imagination-agent §5), not the curriculum mechanism.
+Stopped the 80-round control (ON still trailing at r32); next is length-3 (does the curriculum help where
+the wall doesn't self-resolve) — pending after a break. GIFs embedded in the exp0066 page.

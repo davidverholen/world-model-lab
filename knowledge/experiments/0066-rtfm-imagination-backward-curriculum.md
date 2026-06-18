@@ -38,7 +38,37 @@ value. Two suspected contributors, to disambiguate next: (a) **WM immaturity at 
 (b) the **length-1 contamination** caveat — during the length-1 curriculum rounds the pool's `gp==1` states
 are length-1-COMPLETE, not the length-2 frontier, so early curriculum updates seed the wrong states.
 
-## Follow-up (dispatched) — the prematurity control
+## Interpretability — what the WM actually imagines (gameplay + dream-vs-reality GIFs)
+
+To *see* why the curriculum hurt, rendered the v1 ON (curriculum) checkpoint: a gameplay clip (the agent
+reading a SWAPPED manual and acting) and an imagination clip (the WM's imagined rollout decoded by
+nearest-neighbour retrieval — it predicts DINO latents, we have no pixel decoder — side-by-side with
+reality executing the same action plan).
+
+![gameplay: the v1 ON agent reading a swapped manual and (trying to) execute the recipe](../../assets/exp-0066/gameplay-on-swapped.gif)
+
+![imagination vs reality: left = the WM's imagined rollout (NN-retrieved frames), right = reality under the same plan](../../assets/exp-0066/imagine-on/imagine_seed1.gif)
+
+**The diagnostic number — the curriculum AMPLIFIED imagined-reward over-optimism.** Imagined-minus-real
+reward over the horizon: **ON +2.30 vs OFF +1.75** (>0 = the WM imagines more reward than reality
+delivers). State-fidelity was ~equal (belief L2 ~8.4 vs a ~6.4 sampling floor; cos ~0.85 both). So the
+backward curriculum didn't make the *dream* diverge more in state — it made the actor **chase reward the
+WM hallucinates**, harder. That is the mechanism behind the bimodal collapse: training the actor on
+imagined rollouts from prefix-done seeds, on a WM whose reward head over-predicts at the frontier, pulls
+the unlucky seeds toward fantasy reward. Confirms the §3a "imagination only trustworthy where the WM is
+faithful" caveat is the binding constraint, and that the missing prerequisite is **calibration**
+([[hierarchical-imagination-agent]] §5), not the curriculum mechanism itself.
+
+![imagination fidelity (ON): belief divergence vs sampling floor + over-optimistic reward gap](../../assets/exp-0066/imagine-on/fidelity.png)
+
+## Follow-up — the prematurity control (length-2, 80 rounds) — STOPPED
+
+Ran briefly (to ~r32: ON 0.07 still trailing OFF 0.13, one ON seed collapsed to 0) then **stopped** — the
+direction shifted to the more decisive question: does the curriculum help at **length-3**, where the wall
+does NOT self-resolve (the depth where the lever should actually be needed)? That is the next experiment
+(pending — a break first).
+
+## Original follow-up plan
 
 `exp0066off80` vs `exp0066on80`: same config at **80 rounds** (OFF should reproduce exp0065's ~0.20
 plateau on a *mature* WM). Question: once the WM has learned step-2 (~r50+), does the curriculum help —
