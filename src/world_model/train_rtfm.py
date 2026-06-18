@@ -20,6 +20,7 @@ import torch.nn.functional as F
 from crafter_rtfm import ManualMode, harness, splits
 
 from world_model.agents.rtfm_mpc import RTFMMPCAgent
+from world_model.envs.manual_paraphrase import sample_paraphrase
 from world_model.models import Actor, ConditionedActor, FrozenDinoEncoder, ValueHead
 from world_model.models.continue_head import ContinueHead
 from world_model.models.manual_aux import (
@@ -257,6 +258,7 @@ def collect_rtfm(
     path_reward_coef=0.0,
     path_reward_factor=1.0,
     path_reward_decay=1.0,
+    paraphrase_aug=False,
 ):
     """Roll crafter-rtfm episodes (capped at max_steps = the task horizon); store DINO embeds +
     per-transition manual id (tag). one_shot kills within-episode search (HO-0006) → reading is the
@@ -289,6 +291,11 @@ def collect_rtfm(
         )
         seed = int(seeds[ep % len(seeds)])
         obs, info = env.reset(seed=seed)
+        # exp 0068: paraphrase-augment the manual during collection (OUR side; env untouched) so the
+        # binding reads MEANING across surface variation, not exact tokens — closing the ~20%
+        # natural-language penalty exp0067 measured. OFF (default) = original manual verbatim.
+        if paraphrase_aug:
+            obs = {**obs, "manual": sample_paraphrase(obs["manual"], rng)}
         mid = registry.intern(obs["manual"])
         if use_agent:
             agent.reset(obs, info)
@@ -980,6 +987,10 @@ def main() -> None:
     # falls back to uniform + logs a low realized frac when the pool is starved (the supply risk).
     p.add_argument("--backward-curriculum", action=argparse.BooleanOptionalAction, default=False)
     p.add_argument("--bc-frac", type=float, default=0.5)
+    # exp 0068: paraphrase-augment manuals during collection (OUR side, env untouched) — randomly
+    # reword to surface/natural-language form so the binding reads MEANING, not the exact tokens,
+    # closing the ~20% natural-language penalty exp0067 measured. OFF (default) = original manuals.
+    p.add_argument("--paraphrase-aug", action=argparse.BooleanOptionalAction, default=False)
     # Dynalang option A: dense masked-manual-reconstruction reading gradient (world_model.models.
     # manual_aux). 0.0 = OFF (default; existing runs unaffected). >0 adds coef*aux to the WM loss.
     p.add_argument("--manual-aux-coef", type=float, default=0.0)
@@ -1239,6 +1250,7 @@ def main() -> None:
             path_reward_coef=args.path_reward_coef,
             path_reward_factor=args.path_reward_factor,
             path_reward_decay=args.path_reward_decay,
+            paraphrase_aug=args.paraphrase_aug,
         )
         buffer.compute_returns(args.gamma)
         print(

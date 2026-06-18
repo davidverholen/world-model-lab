@@ -13,7 +13,6 @@ knowledge/experiments/0067-rtfm-reading-generalization-probe.md.
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
@@ -24,53 +23,12 @@ from crafter_rtfm import ManualMode, harness
 sys.path.insert(0, str(Path(__file__).parent))
 from visualize_rtfm import build_agent  # noqa: E402
 
+from world_model.envs.manual_paraphrase import (  # noqa: E402
+    reword_l1,
+    reword_l2,
+    reword_l2_heldout,
+)
 from world_model.train_rtfm import swap_follow_prefix  # noqa: E402
-
-# token → natural-language phrase (the "real tutorial" surrogate). Hand-built, local (no LLM).
-NL = {
-    "place_stone": "place a stone block",
-    "place_table": "set up a crafting table",
-    "place_furnace": "build a furnace",
-    "place_plant": "plant a sapling",
-    "make_wood_pickaxe": "craft a wooden pickaxe",
-    "make_stone_pickaxe": "craft a stone pickaxe",
-    "make_iron_pickaxe": "craft an iron pickaxe",
-    "make_wood_sword": "craft a wooden sword",
-    "make_stone_sword": "craft a stone sword",
-    "make_iron_sword": "forge an iron sword",
-    "wood": "wood",
-    "stone": "stone",
-    "coal": "coal",
-    "iron": "iron",
-    "diamond": "a diamond",
-    "sapling": "a sapling",
-}
-
-
-def reword_l1(m: str) -> str:
-    """Surface reword: change preamble + connectives, KEEP the backtick tokens (tests robustness to
-    sentence structure, which the env already varies a little)."""
-    m = m.replace(
-        "The smith's manual. Hold the listed inputs, then perform the steps in order.",
-        "Field notes for the apprentice. First gather the items listed, "
-        "then carry out each step in order.",
-    )
-    m = m.replace(
-        "Forge-lore of this land. Each recipe is scrambled today — read it exactly.",
-        "Apprentice notes. The order is shuffled today, so follow it exactly.",
-    )
-    m = re.sub(r"Recipe for offering:", "Your task:", m)
-    m = re.sub(r"To prove the recipe for offering,", "Your task:", m)
-    m = m.replace("then perform", "then carry out").replace("and perform", "then carry out")
-    m = re.sub(r"hold (\d+)x", r"gather \1", m)
-    return m
-
-
-def reword_l2(m: str) -> str:
-    """Full natural language: L1 framing + replace each backtick env-token with its NL phrase
-    (backticks gone). This is what a REAL tutorial looks like — the north-star test."""
-    m = reword_l1(m)
-    return re.sub(r"`([^`]+)`", lambda mo: NL.get(mo.group(1), mo.group(1).replace("_", " ")), m)
 
 
 class RewordEnv:
@@ -111,6 +69,7 @@ def main() -> None:
         ("L0 original", lambda m: m),
         ("L1 surface", reword_l1),
         ("L2 natural-lang", reword_l2),
+        ("L2b held-out", reword_l2_heldout),
     ]
 
     # show the actual paraphrases (seed 0) so the rewording quality is auditable
