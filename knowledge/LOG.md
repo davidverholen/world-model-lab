@@ -2396,3 +2396,14 @@ token->NL swap) -> reading not fully abstract -> paraphrase-augment the manual d
 small noisy numbers (per-checkpoint weak, cross-checkpoint direction is the signal); and the cross-domain
 WM axis (unseen game) is still untested (the bigger far gap). Strategic: don't over-grind crafter
 execution; NL-augment manuals + start testing transfer up the ladder. scripts/paraphrase_probe.py added.
+
+## 2026-06-18 — exp0067 held-out-NL follow-up + exp0068 dispatched (paraphrase-aug)
+
+60-seed baseline probe with a held-out NL level (L2b, different dict+framing): L0 0.200 / L1 0.183 (0.92)
+/ L2 0.183 (0.92) / L2b 0.150 (0.75). GRADED penalty (~8% near-paraphrase, ~25% held-out), NOT a collapse
+(the earlier 12-seed L2b~0 was noise) — strengthens "reads meaning". exp0068 implemented + committed
+(436d84f): --paraphrase-aug trains the binding on a L0/L1/L2 mix (module world_model.envs.manual_paraphrase),
+held-out L2b reserved for eval only. Dispatched exp0068off vs exp0068on (60 rounds, 4+4). At harvest:
+paraphrase_probe both -> does aug-ON lift held-out L2b clearly above aug-OFF (open-vocab generalisation)
+without wrecking L0? Strategic: this is axis (a) robust reading; axis (b) cross-domain WM transfer remains
+the far untested gap.

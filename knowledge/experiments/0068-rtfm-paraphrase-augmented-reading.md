@@ -15,14 +15,11 @@ tokens. Crucially evaluated on a **held-out** NL style (never seen in training),
 
 ## Why (exp0067 + a sharpening)
 
-[[0067-rtfm-reading-generalization-probe]] found swap-following survives natural-language rewording
-(~0.79–0.83) — encouraging. **But a held-out-NL check sharpens it:** the baseline survives the L2 dict
-(`make_iron_sword`→"forge an iron sword") yet an *early 12-seed probe collapsed (~0) on a DIFFERENT NL
-dict* (`make_iron_sword`→"create an iron blade", `place_furnace`→"construct a furnace"). So the baseline
-reads *some* paraphrases (those MiniLM places near the token) but maybe not arbitrary phrasings — i.e. it
-is *partly* meaning-based, partly phrase-bound. (60-seed baseline number pending; if it confirms, exp0067's
-"reads meaning" softens to "reads MiniLM-near paraphrases".) The fix to test: expose the binding to
-surface variation in training.
+[[0067-rtfm-reading-generalization-probe]] found swap-following survives natural-language rewording with a
+**graded** penalty (60-seed baseline, s3): in-dist NL retains ~0.92, **held-out NL (L2b, a different
+dict/framing) retains ~0.75** — meaning-based, but the further the phrasing sits from the env tokens the
+bigger the penalty. exp0068 asks whether **training** on surface-varied manuals closes that held-out gap.
+(An earlier 12-seed probe showed L2b ~0 — that was noise; the 60-seed baseline is 0.75.)
 
 ## Probe levels (eval) — note L2b is HELD OUT of training
 

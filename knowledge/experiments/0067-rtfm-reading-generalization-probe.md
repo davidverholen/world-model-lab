@@ -33,6 +33,14 @@ binding is **meaning-based**: MiniLM places the token near its paraphrase and th
 generalises across that gap. This directly answers the maintainer's dead-end worry on the **reading axis:
 we are not building a lookup table.**
 
+**Held-out-NL follow-up (60 seeds, s3) — strengthens it.** Added an L2b level with a *different* NL dict
++ framing ("create an iron blade", "construct a furnace") never used anywhere else: L0 0.200 → L1 0.183
+(0.92) → L2 0.183 (0.92) → **L2b held-out 0.150 (0.75)**. A *graded* penalty — ~8% for near-paraphrases,
+~25% for totally unseen phrasings — but **no collapse**. (An earlier 12-seed probe showed ~0 on L2b; that
+was noise.) So the binding reads meaning even for phrasings it has never seen, just with a larger penalty
+the further the surface form sits from the env tokens — exactly what [[0068-rtfm-paraphrase-augmented-reading]]
+tries to close.
+
 **Honest caveats (where the real work is):**
 1. **A real ~20% NL penalty.** Both checkpoints L2 < L0, and in s2 it's specifically the token→NL swap
    (L1 0.267 → L2 0.183), so reading isn't *fully* abstract — there's residual surface/token dependence.
