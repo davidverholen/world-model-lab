@@ -25,6 +25,8 @@ target — the prefix-done pool was well-supplied, so this is NOT the §3a buffe
 are **bimodal**: s0/s1 = 0.128/0.132 (*above* OFF), s2/s3 = 0.054/0.034 (*collapsed*). The curriculum
 **helped some seeds and broke others** — it increases variance.
 
+![exp0066 v1 swap_follow (full 2-step), OFF vs ON per seed — ON (curriculum) is bimodal: two seeds above OFF, two collapsed; OFF is tighter](../../assets/exp-0066v1/swap-follow.png)
+
 **Read → premature, not refuted (the §3a co-evolution caveat biting).** At 30 rounds the WM is immature:
 imagination is only trustworthy one step past the frontier, which requires the WM to have learned step-2
 dynamics from *real* data first — but [[0065-rtfm-per-step-plateau-large-budget]] showed the conditional

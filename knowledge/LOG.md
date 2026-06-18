@@ -2359,3 +2359,16 @@ ACCEPTABLE competent ceiling (meets all exp0063 criteria: step1>=0.35, cond>=0.3
 variance/stable) with genuine residual composition difficulty. Reframes exp0066: at length-2 the
 exploration lottery self-resolves given budget (curriculum value = sample-efficiency + lifting the
 plateau); the curriculum's NECESSITY is at depth>=3 (p^(k-1)). Plots embedded. Motivates exp0066 (next).
+
+## 2026-06-18 — exp0066 v1 (30r): backward curriculum doesn't help (premature); 80r control dispatched
+
+ON vs OFF, length-2, 30 rounds, 4+4 seeds. OFF full 0.106 (sd 0.019) vs ON 0.087 (sd 0.044); cond 0.26
+vs 0.23; step1 ~equal. bc_realized_frac 0.58 (>target 0.50) → NOT starvation. ON bimodal: 2 seeds above
+OFF (0.13), 2 collapsed (0.04) → curriculum helps some, breaks others (increases variance). Read:
+PREMATURE not refuted — §3a WM-fidelity caveat: at 30 rounds the WM is too immature for imagination-
+from-frontier (exp0065: conditional develops over ~50-80 rounds); seeds the frontier before the
+WM/reward-head can model the completion → hallucinated dynamics for unlucky seeds. Plus length-2
+self-resolves anyway, and a length-1-contamination caveat (curriculum-round gp==1 = length-1-complete,
+not the length-2 frontier). Committed e0a079c. Dispatched the disambiguation: exp0066off80 vs on80
+(80 rounds, mature WM) — does the curriculum help once the WM has learned step-2 (lift/accelerate the
+~0.20 plateau, resolve the bimodality)? If ON<OFF even at 80r → curriculum's value is at depth≥3.
