@@ -8,10 +8,42 @@ last_reviewed: 2026-06-17
 
 # 0066: imagination backward curriculum — does seeding the actor from prefix-done states crack the step-2 conditional (and shrink seed variance)?
 
-**Status: PRE-REGISTERED — code committed (32a2fe0), reviewer-gated; awaiting the exp0065 GPU to
-dispatch.** First test of the §3a lever. Default-off `--backward-curriculum`; an opus reviewer caught
-and fixed a load-bearing off-by-one (imagination-start offset is `burn_in-2`, not `burn_in-1`) before any
-run, so the curriculum seeds the true step-1-done frontier.
+**Status: v1 RUN (30 rounds, 4+4 seeds) — NO help, slightly HURTS + DESTABILIZES; supply healthy, so it's
+PREMATURITY not starvation. Decisive longer-budget control dispatched ([[#follow-up]]).** Not a refutation
+of the lever — a "too early" result consistent with the §3a WM-fidelity caveat. Code committed 32a2fe0,
+reviewer-gated (off-by-one `burn_in-2` caught + fixed before any run).
+
+## Result — v1 (length-2, 30 rounds, last-5)
+
+| arm | step-1 | full (swap_follow) | conditional | bc_realized_frac |
+|---|---|---|---|---|
+| OFF (baseline) | 0.403 | **0.106** (sd 0.019) | 0.26 | — |
+| ON (`--bc-frac 0.5`) | 0.384 | **0.087** (sd **0.044**) | 0.23 | **0.58** (target 0.50) |
+
+ON is slightly LOWER and **2.3× more variable** than OFF. **Supply is healthy** (`bc_realized_frac` 0.58 >
+target — the prefix-done pool was well-supplied, so this is NOT the §3a buffer-supply risk). The ON seeds
+are **bimodal**: s0/s1 = 0.128/0.132 (*above* OFF), s2/s3 = 0.054/0.034 (*collapsed*). The curriculum
+**helped some seeds and broke others** — it increases variance.
+
+**Read → premature, not refuted (the §3a co-evolution caveat biting).** At 30 rounds the WM is immature:
+imagination is only trustworthy one step past the frontier, which requires the WM to have learned step-2
+dynamics from *real* data first — but [[0065-rtfm-per-step-plateau-large-budget]] showed the conditional
+only develops over ~50–80 rounds. So the curriculum seeded the frontier *before* the WM/reward-head could
+model the completion, training the actor on hallucinated dynamics for the unlucky seeds (the bimodality =
+seed-dependent WM quality at the frontier). And at length-2 the wall **self-resolves** given budget
+(exp0065), so here the curriculum competes with an already-working process while the WM is too raw to add
+value. Two suspected contributors, to disambiguate next: (a) **WM immaturity at 30 rounds** (primary), and
+(b) the **length-1 contamination** caveat — during the length-1 curriculum rounds the pool's `gp==1` states
+are length-1-COMPLETE, not the length-2 frontier, so early curriculum updates seed the wrong states.
+
+## Follow-up (dispatched) — the prematurity control
+
+`exp0066off80` vs `exp0066on80`: same config at **80 rounds** (OFF should reproduce exp0065's ~0.20
+plateau on a *mature* WM). Question: once the WM has learned step-2 (~r50+), does the curriculum help —
+reach the plateau **faster** and/or **lift it** — and does the bimodal destabilization resolve to
+consistent gain? If ON ≥ OFF at 80 rounds → the v1 hurt was prematurity, the lever works once the WM is
+ready (→ add a curriculum **warmup** + fix the length-1 contamination). If ON < OFF even at 80 rounds →
+the curriculum genuinely doesn't help length-2 (its value is at depth ≥3, where self-resolution fails).
 
 ## Why
 
