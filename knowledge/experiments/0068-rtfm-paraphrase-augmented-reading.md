@@ -8,10 +8,42 @@ last_reviewed: 2026-06-18
 
 # 0068: paraphrase-augmented training — does it make reading robust to UNSEEN natural language?
 
-**Status: PRE-REGISTERED — code committed, default-off `--paraphrase-aug`.** The cheap robustness fix
-exp0067 pointed to: train the binding on surface-varied manuals so it reads MEANING, not the exact env
-tokens. Crucially evaluated on a **held-out** NL style (never seen in training), so this tests
-*generalisation*, not memorisation.
+**Status: DONE (aug-ON vs aug-OFF, 60 rounds, 4+4 seeds) — augmentation TEACHES the trained NL forms but
+does NOT generalise to held-out NL, at a base-task cost. "Memorisation-leaning."** A small fixed
+paraphrase set is not enough for real-tutorial robustness → the path is language DIVERSITY at scale
+(LLM-paraphrase / the read→LLM seam), not hand-written templates.
+
+## Result (60 eval seeds × 4 model seeds per arm)
+
+| level | aug-OFF | aug-ON | ON/OFF |
+|---|---|---|---|
+| L0 base | 0.233 | 0.192 | 0.82 |
+| L1 surface | 0.188 | 0.221 | 1.18 |
+| **L2 in-dist NL** (trained-on forms) | 0.121 | **0.204** | **1.69** |
+| **L2b held-out NL** (never trained) | 0.025 | 0.050 | 2.01 |
+
+- **In-distribution NL (L2): a real ~1.7× gain.** Training on the L2 reword forms made the agent read
+  *those* forms — augmentation does what it claims on the trained distribution.
+- **Held-out NL (L2b): does NOT robustly generalise.** The 2× is on tiny numbers (0.025→0.050, both
+  within ~1 sd; per-seed ON [0.067, 0.05, 0.067, 0.017] vs OFF [0.0, 0.05, 0.017, 0.033] overlap
+  heavily) and the absolute retention is ~0.26 of L0. So the binding mostly **memorised the specific
+  paraphrase set**, with only weak transfer to genuinely unseen phrasings.
+- **Base-task cost:** L0 0.233 → 0.192 (~18%, partly a noisy weak seed) — training on harder, varied
+  manuals at fixed budget slightly hurts the core recipe.
+
+**Caveats:** all numbers are small and the 60-round models are *under-trained* (exp0065 needed ~120
+rounds for the 0.20 plateau) — held-out NL sits near the floor for both arms, so the L2b comparison is
+weakly powered; a longer-trained aug model might transfer more. The robust signal is **L2 (in-dist):
+augmentation clearly works for forms it sees.** The honest conclusion stands at the qualitative level: a
+3-template paraphrase set generalises only as far as its own diversity.
+
+**Strategic takeaway:** robust open-vocabulary reading needs **language diversity at scale** — many
+diverse paraphrases (e.g. LLM-generated, the [[hierarchical-imagination-agent]] §4 read→LLM seam), not a
+handful of rules. The reading axis is *fixable*, but with breadth of language, not template count. This
+also re-surfaces the bigger untested axis: **cross-domain world-model transfer** (a game it didn't train
+on), which no rung-4 experiment touches.
+
+## Original pre-registration
 
 ## Why (exp0067 + a sharpening)
 

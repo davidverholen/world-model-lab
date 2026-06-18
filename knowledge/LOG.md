@@ -2407,3 +2407,13 @@ held-out L2b reserved for eval only. Dispatched exp0068off vs exp0068on (60 roun
 paraphrase_probe both -> does aug-ON lift held-out L2b clearly above aug-OFF (open-vocab generalisation)
 without wrecking L0? Strategic: this is axis (a) robust reading; axis (b) cross-domain WM transfer remains
 the far untested gap.
+
+## 2026-06-18 — exp0068 DONE: small-set paraphrase aug teaches trained forms, doesn't generalise to unseen NL
+
+aug-ON vs aug-OFF, 60 rounds, 4+4 seeds, probed L0/L1/L2(in-dist NL)/L2b(held-out NL). L2 in-dist:
+0.121->0.204 (1.69x, real — trained on those forms). L2b held-out: 0.025->0.050 (2x but tiny/within
+noise, ~0.26 of L0) — does NOT robustly generalise to unseen phrasings. Base L0: 0.233->0.192 (~18%
+cost, partly a weak seed). Verdict: a 3-template paraphrase set = memorisation of those forms, weak
+transfer; generalises only as far as its own diversity. Caveat: 60-round models under-trained (exp0065
+needed 120), L2b near floor for both. STRATEGIC: robust open-vocab reading needs language DIVERSITY at
+scale (LLM-paraphrase / read->LLM seam), not template count; cross-domain WM transfer = bigger untested axis.
