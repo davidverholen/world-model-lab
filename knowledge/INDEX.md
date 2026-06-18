@@ -40,6 +40,7 @@ calls these elaborate).
 - [hierarchical-imagination-agent](design/hierarchical-imagination-agent.md) — dual-process planning: System-1 reactive default / System-2 deliberate (recursive read-grounded decomposition + imagination/MPC) / compilation / confidence-gated arbitration; the next major capability for the multi-step-execution wall (draft)
 - [validated-reading-reward](design/validated-reading-reward.md) — intrinsic reward to TEST what you read: pay the agent for the manual's marginal next-state predictive value, validated against the real transition (reality as un-fakeable judge; marginal framing dodges dark-room/noisy-TV). Targets the [[0040]] objective/identifiability gap; motivates exp0048 (draft, proposal)
 - [mentored-learning-loop](design/mentored-learning-loop.md) — NORTH STAR: teach an agent by talking to it — instruct → instant in-context memory → act+validate against reality → consolidate by dreaming (imagination) / practice → skill. Key insight: validation GATES dreaming (don't consolidate hallucinations). Why rung-4 matters (draft, vision)
+- [non-text-mentoring](design/non-text-mentoring.md) — the NON-TEXT branch of the north star: mentor grounded goal-reaching by SHOWING (demonstration/goal-state), not telling; language is a naming layer attached LAST. Env finding: crafter-rtfm goal-states are non-distinctive (~4.5px) → DEMONSTRATION is the fit; text/reading shelved as interface. Staged plan from exp0069 (draft, direction)
 
 ## Papers
 

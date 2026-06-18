@@ -2417,3 +2417,18 @@ cost, partly a weak seed). Verdict: a 3-template paraphrase set = memorisation o
 transfer; generalises only as far as its own diversity. Caveat: 60-round models under-trained (exp0065
 needed 120), L2b near floor for both. STRATEGIC: robust open-vocab reading needs language DIVERSITY at
 scale (LLM-paraphrase / read->LLM seam), not template count; cross-domain WM transfer = bigger untested axis.
+
+## 2026-06-18 — strategic pivot: non-text mentoring (demonstration), text/reading shelved as interface
+
+Maintainer challenged the LLM/text framing (LLMs simulate understanding via distribution prediction).
+Reframed: the grounded WM + goal-reaching is the understanding substrate; language is an optional naming
+layer. New design/non-text-mentoring.md — mentor by SHOWING not telling. Env feasibility check on
+crafter_rtfm: a scripted oracle emitting the displayed gesture COMPLETES the recipe (triggers
+tutorial_newly), BUT goal-STATES are barely distinctive (cross-recipe end-state pixel diff ~4.5/255) —
+crafter-rtfm tasks are action-sequences-to-emit, not states-to-reach. So DEMONSTRATION (the gesture
+trajectory carries the recipe), not goal-state, is the right non-text channel here; goal-state mentoring
+belongs in a state-goal env (base Crafter/MiniGrid). Proposed rung: demonstration-conditioned agent +
+DEMONSTRATION-FOLLOWING grounding test (swapped-demo: follow what's shown vs habit), compared to the
+text-conditioned rung-4. Staged plan exp0069 (length-1 demo-following) -> length-2 -> attach language
+last. Text/reading line shelved as interface, revisit later. Build is substantial (demo-conditioned
+agent) + reviewer-gated — pending maintainer go-ahead.
